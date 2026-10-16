@@ -535,7 +535,7 @@ test("the connect site is rooted at docs and hands the code to the extension", a
   assert.match(read("../docs/_redirects"), /\/\s+\/index\.html\s+200/);
   assert.match(read("../_redirects"), /\/\s+\/docs\/index\.html\s+200/);
   assert.match(read("../docs/_redirects"), /\/connect\s+\/connect\.html\s+200/);
-  assert.match(read("../extension/manifest.json"), /"version": "1\.2\.5"/);
+  assert.match(read("../extension/manifest.json"), /"version": "1\.2\.6"/);
   assert.match(read("../extension/options.html"), /id="more"/);
   assert.match(read("../extension/options.html"), /More options/);
   assert.match(read("../extension/options.html"), /id="cc"/);

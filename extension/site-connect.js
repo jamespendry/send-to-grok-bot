@@ -27,7 +27,24 @@
 
   if (globalThis.addEventListener) globalThis.addEventListener('message', onMessage);
 
+  function hide(el) {
+    if (!el) return;
+    el.hidden = true;
+    el.style.setProperty('display', 'none', 'important');
+  }
+
+  function shorten() {
+    hide(document.querySelector('nav'));
+    hide(document.querySelector('h1'));
+    hide(document.getElementById('step-install'));
+    document.querySelectorAll('[data-stgb-extra]').forEach(hide);
+    const heading = document.querySelector('#step-paste h2');
+    if (heading) heading.textContent = 'Paste the webhook URL and the Authorization header.';
+    hide(document.querySelector('label[for="paste"]'));
+  }
+
   function mount() {
+    shorten();
     if (!document.body || !document.createElement || !document.getElementById) return;
     const box = document.getElementById('paste');
     if (!box || document.getElementById('stgb-grant')) return;

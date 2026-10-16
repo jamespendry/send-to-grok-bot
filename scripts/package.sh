@@ -21,6 +21,8 @@ files=(
   prompts.js
   relay.js
   site-connect.js
+  grant.html
+  grant.js
   destinations/grokbot.js
   destinations/claude.js
   destinations/chatgpt.js
