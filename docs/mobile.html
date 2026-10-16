@@ -29,22 +29,26 @@
 
 <main class="narrow page">
   <h1>On iPhone</h1>
-  <p class="intro" style="margin-top:12px">Share a post from the X app, pick where it goes, and you're done. You install the Shortcut once and paste one code. You never copy a webhook address.</p>
+  <p class="intro" style="margin-top:12px">Tap one link. Paste one code. Then share a post from the X app.</p>
 
   <ol class="steps num">
     <li>
-      <h2>Copy your relay code</h2>
+      <h2>Copy the code</h2>
       <ol>
         <li>On a computer, open <a href="https://relay.sendtogrokbot.com">relay.sendtogrokbot.com</a>.</li>
-        <li>Copy the code. It starts with <span class="mono">stgbr1.</span></li>
+        <li>Copy the code. It starts with <span class="mono">stgbr1.</span> This is the only code. Do not copy a webhook address.</li>
         <li>For Grok Bot or Claude, save that destination on the same page. ChatGPT and Codex need nothing saved.</li>
       </ol>
     </li>
     <li>
       <h2>Add the Shortcut</h2>
-      <p id="install-link" class="muted">The iCloud install link is not published yet.</p>
-      <p class="muted" style="margin-top:8px">Open the link on your iPhone. Shortcuts asks for the relay code. Paste the code from step 1. You paste it once.</p>
-      <div class="note">If iOS says the Shortcut is untrusted, open <b>Settings</b>, tap <b>Shortcuts</b>, and turn on <b>Allow Untrusted Shortcuts</b>. Then open the link again.</div>
+      <div class="actions" style="margin:4px 0 12px" id="install-link"><a class="btn" href="https://sendtogrokbot.com/send-to-grok-bot.shortcut">Install Send to Grok Bot</a></div>
+      <ol>
+        <li>On the iPhone, tap <span class="ui">Install Send to Grok Bot</span>.</li>
+        <li>Tap the downloaded file, then tap <span class="ui">Add Shortcut</span>.</li>
+        <li>When Shortcuts asks, paste the code. You paste it once.</li>
+      </ol>
+      <div class="note">If iOS says the Shortcut is untrusted, open <b>Settings</b>, tap <b>Shortcuts</b>, and turn on <b>Allow Untrusted Shortcuts</b>. Tap the link again. If Settings has no such switch, open the downloaded file from the Files app and tap <b>Add Shortcut</b>.</div>
       <figure>
         <div class="slot">
           <b>Screenshot slot</b>
@@ -76,7 +80,7 @@
 
   <details class="fallback">
     <summary>Build the Shortcut yourself</summary>
-    <p class="muted">Only if the install link above is still missing. In the Shortcuts app, create a shortcut named <b>Send to Grok Bot</b>, turn on <b>Show in Share Sheet</b>, and add these actions in order.</p>
+    <p class="muted">Only if the install link above doesn't work. In the Shortcuts app, create a shortcut named <b>Send to Grok Bot</b>, turn on <b>Show in Share Sheet</b>, and add these actions in order.</p>
     <ol>
       <li><strong>Text.</strong> Paste the relay code. This stays the first action.</li>
       <li><strong>Set Variable</strong> named Relay Code.</li>

@@ -30,7 +30,7 @@
 <main class="narrow page prose">
 <h1>Privacy policy</h1>
 <p class="meta"><strong>Effective date:</strong> 16 October 2026<br><strong>Publisher:</strong> James Pendry<br><strong>Applies to:</strong> the Send to Grok Bot Chrome extension</p>
-<p>Send to Grok Bot adds a button on an X post. When you click it and pick a destination, it sends that post to the destination you set up. This policy says what that handles, where it goes, and what the extension does not do.</p>
+<p>Send to Grok Bot adds a button on an X post. When you click it, it sends that post to the destination you have turned on. If more than one is on, you pick one. This policy says what that handles, where it goes, and what the extension does not do.</p>
 <h2>What is handled</h2>
 <p>The extension handles the post you choose to send. On that post's own page it also reads the author's thread and the post being replied to, because those are already on the page. The payload can include:</p>
 <ul>
@@ -43,7 +43,7 @@
 <li>a plain-text digest of those fields</li>
 <li>the reply preset you picked (General, Research, Job hunt, Buy or skip, Learn later, Content ideas, or Custom) and the prompt text for that preset</li>
 </ul>
-<p>That data is sent only to a destination you configured and then picked in the menu. The preset and prompt travel with the post so the destination follows them. Destinations are:</p>
+<p>That data is sent only to a destination you configured. If one destination is on, the click sends it there. If more than one is on, it goes to the one you pick. The preset and prompt travel with the post so the destination follows them. Destinations are:</p>
 <ul>
 <li><strong>Grok Bot, or any other webhook you enter.</strong> The extension POSTs the post as JSON to the https URL you saved. If you saved a key, it is sent on that request as <code>Authorization: Bearer</code> and <code>X-Sender-Key</code>.</li>
 <li><strong>Claude.</strong> If you leave the routine fields blank, the extension opens a claude.ai tab with the post in the address. If you save a routine URL and token, it POSTs the post to <code>api.anthropic.com</code> and sends the token as the credential for that request.</li>

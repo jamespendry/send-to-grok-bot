@@ -1,74 +1,67 @@
-// Runs on sendtogrokbot.com/connect. A paste writes the box into this browser.
-// The page itself never receives the saved settings back.
-// chrome.permissions is not available in a content script, so the request goes to
-// the service worker in this same turn, before any await.
+// Runs on sendtogrokbot.com/connect. The visible paste box is an extension
+// page, so Allow can be asked during the paste. This page only shows the result.
 (function () {
   'use strict';
   document.documentElement.dataset.stgbReady = '1';
 
-  function report(text, ok) {
+  function report(text, ok, pending) {
     const el = document.getElementById('msg');
     if (el) {
       el.textContent = text || '';
-      el.className = text ? (ok ? 'ok' : 'err') : '';
+      el.className = text ? (pending ? 'pending' : (ok ? 'ok' : 'err')) : '';
     }
-    document.dispatchEvent(new CustomEvent('stgb-connect-result', {detail: {ok: !!ok, message: text || ''}}));
+    if (typeof CustomEvent === 'function') {
+      document.dispatchEvent(new CustomEvent('stgb-connect-result', {detail: {ok: !!ok, pending: !!pending, message: text || ''}}));
+    }
   }
 
-  function clearBox(box) {
-    const wipe = function () { if (box) box.value = ''; };
-    wipe();
-    setTimeout(wipe, 0);
+  let frame = null;
+
+  function onMessage(event) {
+    const data = event.data;
+    if (!data || data.stgb !== 'result') return;
+    const id = chrome.runtime && chrome.runtime.id;
+    if (id && event.origin && event.origin !== 'chrome-extension://' + id) return;
+    report(data.message || '', !!data.ok, !!data.pending);
   }
 
-  document.addEventListener('paste', function (event) {
-    try {
-      const box = document.getElementById('paste');
-      if (!box || event.target !== box) return;
-      const data = event.clipboardData;
-      const raw = data ? data.getData('text') : '';
-      const parsed = globalThis.STGB_CONNECT.parseSetupPaste(raw);
-      if (!parsed.ok) {
-        report(parsed.error, false);
-        return;
-      }
-      const draft = globalThis.STGB_CONNECT.planConnect({enabled: []}, parsed);
-      if (!draft.ok) {
-        report(draft.error, false);
-        return;
-      }
-      const origins = draft.origins || [];
-      const save = function () {
-        chrome.storage.local.get(null, function (current) {
-          const plan = globalThis.STGB_CONNECT.planConnect(current, parsed);
-          if (!plan.ok) {
-            report(plan.error, false);
-            return;
-          }
-          chrome.storage.local.set(plan.settings, function () {
-            const finish = function () {
-              clearBox(box);
-              report(globalThis.STGB_CONNECT.finishMessage(parsed, plan), true);
-            };
-            if (plan.removeKeys && plan.removeKeys.length) chrome.storage.local.remove(plan.removeKeys, finish);
-            else finish();
-          });
-        });
-      };
-      if (!origins.length) {
-        save();
-        return;
-      }
-      chrome.runtime.sendMessage({stgbAction: 'request-origins', origins: origins}, function (res) {
-        const err = chrome.runtime.lastError && chrome.runtime.lastError.message;
-        if (err || !res || !res.ok) {
-          report('Choose Allow to finish.', false);
-          return;
-        }
-        save();
-      });
-    } catch (err) {
-      report((err && err.message) || 'Could not save that paste.', false);
-    }
-  }, true);
+  if (globalThis.addEventListener) globalThis.addEventListener('message', onMessage);
+
+  function hide(el) {
+    if (!el) return;
+    el.hidden = true;
+    el.style.setProperty('display', 'none', 'important');
+  }
+
+  function shorten() {
+    hide(document.querySelector('nav'));
+    hide(document.querySelector('h1'));
+    hide(document.getElementById('step-install'));
+    document.querySelectorAll('[data-stgb-extra]').forEach(hide);
+    const heading = document.querySelector('#step-paste h2');
+    if (heading) heading.textContent = 'Paste the webhook URL and the Authorization header.';
+    hide(document.querySelector('label[for="paste"]'));
+  }
+
+  function mount() {
+    shorten();
+    if (!document.body || !document.createElement || !document.getElementById) return;
+    const box = document.getElementById('paste');
+    if (!box || document.getElementById('stgb-grant')) return;
+    if (!chrome.runtime || !chrome.runtime.getURL) return;
+    frame = document.createElement('iframe');
+    frame.id = 'stgb-grant';
+    frame.title = 'Paste here';
+    frame.src = chrome.runtime.getURL('grant.html');
+    frame.style.cssText = 'display:block;width:100%;height:160px;border:0;border-radius:8px;background:#fff';
+    box.hidden = true;
+    box.disabled = true;
+    box.setAttribute('aria-hidden', 'true');
+    const label = document.querySelector('label[for="paste"]');
+    if (label) label.htmlFor = '';
+    box.insertAdjacentElement('afterend', frame);
+  }
+
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', mount);
+  else mount();
 })();

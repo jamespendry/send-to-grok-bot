@@ -11,3 +11,7 @@
   Cache-Control: no-store
 /connect.html
   Cache-Control: no-store
+
+/send-to-grok-bot.shortcut
+  Content-Type: application/octet-stream
+  Content-Disposition: attachment; filename="Send to Grok Bot.shortcut"

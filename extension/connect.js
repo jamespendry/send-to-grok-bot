@@ -392,7 +392,7 @@
     }
 
     if (headerKey || leftovers.length) return {ok: false, error: 'Paste the address as well as the secret.'};
-    return {ok: false, error: 'Paste a connect link, a Grok Bot address and header, or a Claude address and secret.'};
+    return {ok: false, error: 'Paste the webhook URL and the Authorization header.'};
   }
 
   function planConnect(current, parsed) {
@@ -418,7 +418,7 @@
       message = 'Saved the relay on this computer.';
     } else if (parsed.kind === 'code') {
       if (parsed.destination === 'grokbot' && !(parsed.fields && String(parsed.fields.senderKey || '').trim())) {
-        return {ok: false, error: 'Paste the webhook URL and the Authorization header together.'};
+        return {ok: false, error: 'Paste the webhook URL and the Authorization header.'};
       }
       enable(parsed.destination);
       const fields = parsed.fields || {};
@@ -444,7 +444,7 @@
       else if (!haveUrl) message += ' Paste the routine address as well.';
       else message += ' Paste the secret as well.';
     } else {
-      return {ok: false, error: 'Paste a connect link, a Grok Bot address and header, or a Claude address and secret.'};
+      return {ok: false, error: 'Paste the webhook URL and the Authorization header.'};
     }
 
     next.enabled = enabled;

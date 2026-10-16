@@ -5,7 +5,7 @@
 **Applies to:** the Send to Grok Bot Chrome extension
 **This page:** https://sendtogrokbot.com/privacy
 
-Send to Grok Bot adds a button on an X post. When you click it and pick a destination, it sends that post to the destination you set up. This policy says what that handles, where it goes, and what the extension does not do.
+Send to Grok Bot adds a button on an X post. When you click it, it sends that post to the destination you have turned on. If more than one is on, you pick one. This policy says what that handles, where it goes, and what the extension does not do.
 
 ## What is handled
 
@@ -20,7 +20,7 @@ The extension handles the post you choose to send. On that post's own page it al
 - a plain-text digest of those fields
 - the reply preset you picked (General, Research, Job hunt, Buy or skip, Learn later, Content ideas, or Custom) and the prompt text for that preset
 
-That data is sent only to a destination you configured and then picked in the menu. The preset and prompt travel with the post so the destination follows them. Destinations are:
+That data is sent only to a destination you configured. If one destination is on, the click sends it there. If more than one is on, it goes to the one you pick. The preset and prompt travel with the post so the destination follows them. Destinations are:
 
 - **Grok Bot, or any other webhook you enter.** The extension POSTs the post as JSON to the https URL you saved. If you saved a key, it is sent on that request as `Authorization: Bearer` and `X-Sender-Key`.
 - **Claude.** If you leave the routine fields blank, the extension opens a claude.ai tab with the post in the address. If you save a routine URL and token, it POSTs the post to `api.anthropic.com` and sends the token as the credential for that request.
@@ -78,7 +78,7 @@ Do not publish this section on sendtogrokbot.com. Paste it into the Privacy prac
 
 Paste this into **Single purpose description**:
 
-> Adds one button on an X post. When you click it and choose a destination you have set up, it sends that post to Grok Bot, Claude, ChatGPT, or Codex. That is its only purpose.
+> Adds one button on an X post. When you click it, it sends that post to the destination you have turned on. If more than one is on, you pick one. The destinations are Grok Bot, Claude, ChatGPT, and Codex. That is its only purpose.
 
 ## Permission justifications
 
@@ -86,11 +86,11 @@ The dashboard lists one box per permission it finds in the manifest. Paste the m
 
 **storage**
 
-> Stores, on this device only, the destinations you check, your webhook URL, optional prompts, and any webhook key or API token you paste. chrome.storage.local is used so these values are not synced to a Google account. If an older install still has a webhook URL or key in chrome.storage.sync, that pair is copied to local storage once and then deleted. The publisher has no server and never receives these values.
+> Stores, on this device only, the destinations you check, your webhook URL, optional prompts, and any webhook key or API token you paste. chrome.storage.local is used so these values are not synced to a Google account. If an older install still has a webhook URL or key in chrome.storage.sync, that pair is copied to local storage once and then deleted. With Relay off, the publisher does not receive these values. With Relay on, the post goes to the relay in your connect code, and the webhook key stays on the relay.
 
 **https://x.com/\*** (content script)
 
-> The button is added to posts on x.com. The script does not run on other sites. It reads a post only after you click Send on that post, including text, link, author, and the thread, quote, links, and media the page already shows. On a post's own page it also reads the author's thread and the reply parent. It sends that only to the destination you then pick.
+> The button is added to posts on x.com. The script does not run on other sites. It reads a post only after you click Send on that post, including text, link, author, and the thread, quote, links, and media the page already shows. On a post's own page it also reads the author's thread and the reply parent. If one destination is on, the click sends it there. If more than one is on, it goes to the one you pick.
 
 **https://twitter.com/\*** (content script)
 
@@ -98,7 +98,7 @@ The dashboard lists one box per permission it finds in the manifest. Paste the m
 
 **https://\*/\*** (optional host permission)
 
-> The extension does not read all websites. This pattern is optional. Chrome requires it so an extension can ask, at runtime, for a host the user types. The code never requests https://*/* itself. When you click Save, it asks only for the origins that destination needs: the origin of the https webhook you entered; https://api.anthropic.com/* if a Claude routine URL or token is saved; https://api.chatgpt.com/* if a ChatGPT agent trigger or token is saved; or the relay host if Relay is on. With Relay on, the webhook host and api.anthropic.com are not requested, because those calls are made by the relay. Opening Claude, ChatGPT, or Codex in a tab does not use a host permission. Clearing a destination and clicking Save removes that host. x.com and twitter.com come from the content script, not from this permission.
+> The extension does not read all websites. This pattern is optional. Chrome requires it so an extension can ask, at runtime, for a host the user types. The code never requests https://*/* itself. When you paste a webhook on sendtogrokbot.com/connect, or when you click Save, it asks only for the origins that destination needs: the origin of the https webhook you entered; https://api.anthropic.com/* if a Claude routine URL or token is saved; https://api.chatgpt.com/* if a ChatGPT agent trigger or token is saved; or the relay host if Relay is on. With Relay on, the webhook host and api.anthropic.com are not requested, because those calls are made by the relay. Opening Claude, ChatGPT, or Codex in a tab does not use a host permission. Clearing a destination and clicking Save removes that host. x.com and twitter.com come from the content script, not from this permission.
 
 ## Remote code
 
@@ -112,7 +112,7 @@ If a text box is shown anyway, paste:
 
 Check these:
 
-- **Website content.** The text, URL, author, thread, quote, links, and media addresses of the post you choose to send. On a post's own page this includes the author's thread and the reply parent shown there. It is transmitted only to the destination you configured and picked.
+- **Website content.** The text, URL, author, thread, quote, links, and media addresses of the post you choose to send. On a post's own page this includes the author's thread and the reply parent shown there. It is transmitted only to the destination you configured. If one destination is on, the click sends it there. If more than one is on, it goes to the one you pick.
 - **Authentication information.** The webhook key or API token you paste. It is stored in chrome.storage.local and sent only as the credential on the request to that destination. The publisher does not receive it.
 
 Leave these unchecked:
@@ -127,7 +127,7 @@ Leave these unchecked:
 
 Check all three certification boxes. They match the extension:
 
-- I do not sell or transfer user data to third parties, outside of the approved use cases. The only transfer is the post you chose, to the destination you configured. That transfer is the feature. Nothing is sold, and the publisher receives nothing.
+- I do not sell or transfer user data to third parties, outside of the approved use cases. The only transfer is the post you chose, to the destination you configured. That transfer is the feature. Nothing is sold. With Relay off, the publisher receives nothing. With Relay on, the relay receives the post in order to forward it and does not keep the post text.
 - I do not use or transfer user data for purposes that are unrelated to my item's single purpose.
 - I do not use or transfer user data to determine creditworthiness or for lending purposes.
 

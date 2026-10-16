@@ -145,6 +145,43 @@ function alreadySent(url, brand) {
   return false;
 }
 
+async function deliver(brand, msg, s) {
+  const name = BRAND_NAME[brand];
+  const items = menuItems(s);
+  const item = items.find(row => row.brand === brand);
+  if (!item) {
+    await showSetup(SETUP_NOTICE.none);
+    return {ok: false, error: SETUP_NOTICE.none, needsSetup: true, brand, title: 'Choose a destination'};
+  }
+  if (item.needsSetup) {
+    await showSetup(SETUP_NOTICE.grokbot);
+    return {ok: false, error: SETUP_NOTICE.grokbot, needsSetup: true, brand, title: 'Set up Grok Bot'};
+  }
+  if (alreadySent(msg.url, brand)) return {ok: true, duplicate: true, brand};
+  const viaRelay = relayOn(s) && (brand === 'grokbot' || brand === 'claude');
+  const dest = viaRelay ? self.STGB_RELAY : pickDest(brand, s);
+  if (!dest) {
+    await showSetup(SETUP_NOTICE.grokbot);
+    return {ok: false, error: SETUP_NOTICE.grokbot, needsSetup: true, brand, title: 'Set up ' + name};
+  }
+  // Version 2 object, including media and thumbnails. Every destination receives it.
+  const post = {source: 'x', ...msg, version: 2, sentAt: new Date().toISOString()};
+  delete post.stgbDestination;
+  delete post.stgbAction;
+  try { post.digest = digest(post); } catch (_) { post.digest = ''; }
+  const chosen = chosenPrompt(s, brand);
+  post.preset = chosen.id;
+  post.prompt = String(chosen.text || '').slice(0, 8000);
+  try {
+    const r = viaRelay ? await dest.send(post, s, brand) : await dest.send(post, s);
+    if (r.needsSetup) await showSetup(r.error || SETUP_NOTICE.grokbot);
+    const ok = !!r.ok;
+    return {ok, error: ok ? '' : (r.error || 'failed'), needsSetup: !!r.needsSetup, brand, title: (ok ? 'Sent to ' : "Couldn't send to ") + name};
+  } catch (e) {
+    return {ok: false, error: brand === 'grokbot' ? 'The webhook did not answer.' : 'Network', brand, title: "Couldn't send to " + name};
+  }
+}
+
 chrome.runtime.onMessage.addListener((msg, _s, reply) => {
   if (!msg || typeof msg !== 'object') { reply({ok: false, error: 'Bad message'}); return; }
   if (msg.stgbAction === 'request-origins') {
@@ -170,6 +207,24 @@ chrome.runtime.onMessage.addListener((msg, _s, reply) => {
     })();
     return true;
   }
+  // One click. A single ready destination is sent in this turn. Two or more come back as a menu.
+  if (msg.stgbAction === 'send') {
+    (async () => {
+      const s = await loadSettings();
+      const items = menuItems(s);
+      if (!items.length) {
+        await showSetup(SETUP_NOTICE.none);
+        reply({ok: false, error: SETUP_NOTICE.none, needsSetup: true, brand: 'grokbot', title: 'Choose a destination'});
+        return;
+      }
+      if (items.length !== 1) {
+        reply({ok: true, items});
+        return;
+      }
+      reply(await deliver(items[0].brand, msg, s));
+    })();
+    return true;
+  }
   const brand = msg.stgbDestination;
   if (!brand || !BRAND_NAME[brand]) {
     showSetup(SETUP_NOTICE.none);
@@ -177,44 +232,7 @@ chrome.runtime.onMessage.addListener((msg, _s, reply) => {
     return;
   }
   (async () => {
-    const s = await loadSettings();
-    const name = BRAND_NAME[brand];
-    const items = menuItems(s);
-    const item = items.find(row => row.brand === brand);
-    if (!item) {
-      await showSetup(SETUP_NOTICE.none);
-      reply({ok: false, error: SETUP_NOTICE.none, needsSetup: true, brand, title: 'Choose a destination'});
-      return;
-    }
-    if (item.needsSetup) {
-      await showSetup(SETUP_NOTICE.grokbot);
-      reply({ok: false, error: SETUP_NOTICE.grokbot, needsSetup: true, brand, title: 'Set up Grok Bot'});
-      return;
-    }
-    if (alreadySent(msg.url, brand)) { reply({ok: true, duplicate: true}); return; }
-    const viaRelay = relayOn(s) && (brand === 'grokbot' || brand === 'claude');
-    const dest = viaRelay ? self.STGB_RELAY : pickDest(brand, s);
-    if (!dest) {
-      await showSetup(SETUP_NOTICE.grokbot);
-      reply({ok: false, error: SETUP_NOTICE.grokbot, needsSetup: true, brand, title: 'Set up ' + name});
-      return;
-    }
-    // Version 2 object, including media and thumbnails. Every destination receives it.
-    const post = {source: 'x', ...msg, version: 2, sentAt: new Date().toISOString()};
-    delete post.stgbDestination;
-    delete post.stgbAction;
-    try { post.digest = digest(post); } catch (_) { post.digest = ''; }
-    const chosen = chosenPrompt(s, brand);
-    post.preset = chosen.id;
-    post.prompt = String(chosen.text || '').slice(0, 8000);
-    try {
-      const r = viaRelay ? await dest.send(post, s, brand) : await dest.send(post, s);
-      if (r.needsSetup) await showSetup(r.error || SETUP_NOTICE.grokbot);
-      const ok = !!r.ok;
-      reply({ok, error: ok ? '' : (r.error || 'failed'), needsSetup: !!r.needsSetup, brand, title: (ok ? 'Sent to ' : "Couldn't send to ") + name});
-    } catch (e) {
-      reply({ok: false, error: 'Network', brand, title: "Couldn't send to " + name});
-    }
+    reply(await deliver(brand, msg, await loadSettings()));
   })();
   return true;
 });

@@ -108,24 +108,7 @@
       row.appendChild(label);
       row.addEventListener('click', e => {
         e.preventDefault(); e.stopPropagation(); e.stopImmediatePropagation();
-        let post;
-        try { post = extract(article); } catch (_) { post = readPost(article); }
-        closeMenu();
-        if (btn.classList.contains('stgb-busy') || tooSoon(post.url, item.brand)) return;
-        setState(btn, 'busy', 'Sending…');
-        chrome.runtime.sendMessage({stgbDestination: item.brand, ...post}, r => {
-          if (r && r.duplicate) { setState(btn, 'send', 'Send'); return; }
-          if (r && r.ok) {
-            setState(btn, 'ok', r.title || item.label);
-            showToast(item.brand, r.title || ('Sent to ' + item.label.replace(/^Send to /, '')), '');
-          } else {
-            const reason = (r && r.error) || 'failed';
-            const title = (r && r.title) || ("Couldn't send to " + item.label.replace(/^Send to /, ''));
-            setState(btn, 'err', title);
-            showToast(item.brand, title, reason);
-            setTimeout(() => setState(btn, 'send', 'Send'), 5000);
-          }
-        });
+        sendTo(btn, item, article);
       }, true);
       menu.appendChild(row);
     });
@@ -155,16 +138,65 @@
       window.removeEventListener('scroll', onScroll, true);
     };
   }
-  // Direct child of the action bar that holds Share. Its classes are what space the row out.
-  function shareWrap(bar) {
-    const share = bar.querySelector('[data-testid="share"]');
-    let node = share || bar.lastElementChild;
-    if (!node || node === bar) return null;
-    while (node.parentElement && node.parentElement !== bar) node = node.parentElement;
-    return node.parentElement === bar ? node : null;
+  // Checked against the public x.com status page on 2026-10-16.
+  // Logged-in pages still use article[data-testid="tweet"], [data-testid="share"], and role="group".
+  // The public page uses a plain article, aria-label "Share", and class x-engagement-button.
+  function isShare(el) {
+    const id = el.getAttribute('data-testid') || '';
+    const label = el.getAttribute('aria-label') || '';
+    return id === 'share' || /^share\b/i.test(label);
+  }
+  function isEngagement(el) {
+    const id = el.getAttribute('data-testid') || '';
+    const label = el.getAttribute('aria-label') || '';
+    return /^(reply|retweet|repost|like|bookmark|share)$/i.test(id) || /^(reply|repost|retweet|like|bookmark|share|views)\b/i.test(label);
+  }
+  function shareControl(article) {
+    return [...article.querySelectorAll('button, a, [role="button"]')].find(el => el.closest('article') === article && isShare(el)) || null;
   }
   function actionBar(article) {
-    return [...article.querySelectorAll('[role="group"]')].find(g => g.closest('article') === article) || null;
+    const group = [...article.querySelectorAll('[role="group"]')].find(g => g.closest('article') === article);
+    if (group) return group;
+    const share = shareControl(article);
+    if (!share) return null;
+    let node = share;
+    while (node.parentElement && node.parentElement.closest('article') === article) {
+      const parent = node.parentElement;
+      const controls = [...parent.querySelectorAll('button, a, [role="button"]')].filter(el => el.closest('article') === article && isEngagement(el));
+      if (controls.length >= 3 && parent.children.length >= 3) return parent;
+      node = parent;
+    }
+    return share.parentElement;
+  }
+  // Clone Share only when its slot is Share alone. The 2026 bar groups Bookmark and Share.
+  function shareSlot(bar, article) {
+    const share = [...bar.querySelectorAll('button, a, [role="button"]')].find(el => el.closest('article') === article && isShare(el));
+    if (!share) return null;
+    let node = share;
+    while (node.parentElement && node.parentElement !== bar) node = node.parentElement;
+    if (node.parentElement !== bar) return null;
+    const controls = [...node.querySelectorAll('button, a, [role="button"]')].filter(isEngagement);
+    if (controls.length === 1) return node;
+    if (!controls.length && isShare(node)) return node;
+    return null;
+  }
+  function postArticles() {
+    const found = new Set();
+    document.querySelectorAll('article[data-testid="tweet"], article').forEach(a => {
+      if (a.getAttribute('data-testid') === 'tweet' || shareControl(a)) found.add(a);
+    });
+    return [...found].filter(a => !(a.parentElement && a.parentElement.closest('article')));
+  }
+  function drawButton() {
+    const btn = document.createElement('button');
+    btn.type = 'button';
+    btn.className = 'stgb-btn stgb-own';
+    const svg = document.createElementNS(NS, 'svg');
+    svg.setAttribute('viewBox', '0 0 24 24');
+    svg.setAttribute('aria-hidden', 'true');
+    btn.appendChild(svg);
+    setState(btn, 'send', 'Send');
+    return btn;
   }
   // --- Post extraction. Everything is best-effort: X's DOM changes often, so each field degrades to empty. ---
   const MAX_TEXT = 20000, MAX_THREAD = 25;
@@ -174,13 +206,21 @@
   const quoteBox = article => own(article, 'div[role="link"]', article).find(n => n.querySelector('[data-testid="User-Name"]')) || null;
   const outsideQuote = (nodes, q) => nodes.filter(n => !q || !q.contains(n));
   function postLink(article, q) {
-    return outsideQuote(own(article, 'a[href*="/status/"]', article), q).find(l => l.querySelector('time')) || null;
+    const links = outsideQuote(own(article, 'a[href*="/status/"]', article), q);
+    return links.find(l => l.querySelector('time'))
+      || links.find(l => /\/status\/\d+$/.test((l.getAttribute('href') || '').split('?')[0]))
+      || null;
   }
   function userName(root) {
     const n = root.querySelector('[data-testid="User-Name"]');
-    if (!n) return {name: '', handle: ''};
-    const t = n.textContent, m = t.match(/@([A-Za-z0-9_]{1,15})/);
-    return {name: (m ? t.slice(0, m.index) : t.split('·')[0]).trim(), handle: m ? m[1] : ''};
+    if (n) {
+      const t = n.textContent, m = t.match(/@([A-Za-z0-9_]{1,15})/);
+      return {name: (m ? t.slice(0, m.index) : t.split('·')[0]).trim(), handle: m ? m[1] : ''};
+    }
+    const handleLink = [...root.querySelectorAll('a[href]')].find(a => /^\/[A-Za-z0-9_]{1,15}$/.test(a.getAttribute('href') || ''));
+    if (handleLink) return {name: (handleLink.textContent || '').trim().replace(/^@/, ''), handle: handleLink.getAttribute('href').slice(1)};
+    const m = (root.innerText || '').match(/@([A-Za-z0-9_]{1,15})/);
+    return {name: '', handle: m ? m[1] : ''};
   }
   // X puts a truncated label in aria-hidden spans and the full URL in another span, so
   // textContent is "github.com/foo…https://github.com/foo/bar". Read each piece on its own.
@@ -331,11 +371,25 @@
     const lines = c.innerText.split('\n').map(s => s.trim()).filter(Boolean);
     return {href: a ? a.href : '', text: clip(lines.join(' | '), 1000)};
   }
+  // Old X puts the post in [data-testid="tweetText"]. The 2026 public page uses a
+  // whitespace-pre body block and no test id.
+  function textElOf(article, q) {
+    const old = outsideQuote(own(article, '[data-testid="tweetText"]', article), q)[0];
+    if (old) return old;
+    return [...article.querySelectorAll('div')].find(el => {
+      if (q && q.contains(el)) return false;
+      if (el.closest('article') !== article) return false;
+      const cls = typeof el.className === 'string' ? el.className : '';
+      if (!/whitespace-pre/.test(cls)) return false;
+      if (el.closest('button, a, [role="button"]')) return false;
+      return (el.innerText || el.textContent || '').trim().length > 0;
+    }) || null;
+  }
   function basic(article) {
     const q = quoteBox(article);
     const link = postLink(article, q);
     const url = link ? link.href.replace(/\/(analytics|photo\/\d+|video\/\d+)$/, '') : '';
-    const textEl = outsideQuote(own(article, '[data-testid="tweetText"]', article), q)[0];
+    const textEl = textElOf(article, q);
     const {name, handle} = userName(article);
     return {url, author: handle || (url.split('/')[3] || ''), authorName: name, text: textOf(textEl), postedAt: link?.querySelector('time')?.getAttribute('datetime') || '', textEl, q};
   }
@@ -355,7 +409,7 @@
     }
     // On a post's own page, X renders ancestors above it and replies below. Collect the author's contiguous run as the thread.
     if (/\/status\/\d+/.test(location.pathname)) {
-      const all = [...document.querySelectorAll('article[data-testid="tweet"]')];
+      const all = postArticles();
       const i = all.indexOf(article);
       if (i >= 0) {
         let s = i, e = i;
@@ -377,47 +431,84 @@
     }
     return post;
   }
+  function readArticle(article) {
+    try { return extract(article); } catch (_) { return readPost(article); }
+  }
+  function applyResult(btn, item, r) {
+    if (r && r.duplicate) { setState(btn, 'send', 'Send'); return; }
+    const brand = (r && r.brand) || (item && item.brand) || 'grokbot';
+    if (r && r.ok) {
+      const title = r.title || (item && item.label) || 'Sent';
+      showToast(brand, title, '');
+      setState(btn, 'ok', title);
+      return;
+    }
+    const reason = (r && r.error) || 'failed';
+    const title = (r && r.title) || ("Couldn't send to " + ((item && item.label) || 'Grok Bot').replace(/^Send to /, ''));
+    showToast(brand, title, reason);
+    setState(btn, 'err', title);
+    setTimeout(() => setState(btn, 'send', 'Send'), 5000);
+  }
+  function sendTo(btn, item, article) {
+    const post = readArticle(article);
+    closeMenu();
+    if (btn.classList.contains('stgb-busy') || tooSoon(post.url, item.brand)) return;
+    setState(btn, 'busy', 'Sending…');
+    chrome.runtime.sendMessage({stgbDestination: item.brand, ...post}, r => applyResult(btn, item, r));
+  }
+  function bindSend(btn, article) {
+    btn.dataset.stgbBound = '1';
+    btn.dataset.stgbId = String(Date.now()) + Math.random().toString(36).slice(2);
+    btn.classList.add('stgb-btn');
+    btn.removeAttribute('aria-expanded');
+    btn.removeAttribute('aria-describedby');
+    btn.setAttribute('aria-haspopup', 'menu');
+    if (btn.tagName === 'BUTTON') btn.type = 'button';
+    btn.addEventListener('click', e => {
+      e.preventDefault(); e.stopPropagation(); e.stopImmediatePropagation();
+      if (menuEl && menuEl.dataset.for === btn.dataset.stgbId) { closeMenu(); return; }
+      if (btn.classList.contains('stgb-busy')) return;
+      const post = readArticle(article);
+      setState(btn, 'busy', 'Sending…');
+      chrome.runtime.sendMessage({stgbAction: 'send', ...post}, r => {
+        if (chrome.runtime.lastError || !r) {
+          setState(btn, 'send', 'Send');
+          showToast('grokbot', 'Send to Grok Bot', 'Reload the extension, then click the post again.');
+          return;
+        }
+        if (r.items && r.items.length > 1) {
+          setState(btn, 'send', 'Send');
+          openMenu(btn, r.items, article);
+          return;
+        }
+        applyResult(btn, (r.items && r.items[0]) || null, r);
+      });
+    }, true);
+  }
   function addButtons() {
-    document.querySelectorAll('article[data-testid="tweet"]').forEach(a => {
-      if (a.querySelector('.stgb-btn')) return;
+    postArticles().forEach(a => {
+      if ([...a.querySelectorAll('.stgb-btn')].some(b => b.closest('article') === a)) return;
       const bar = actionBar(a);
-      const proto = bar && shareWrap(bar);
-      if (!proto) return;
-      // Deep-clone Share so flex slot, 34.75px hit circle, and icon box match exactly.
-      const wrap = proto.cloneNode(true);
-      wrap.removeAttribute('id');
-      wrap.querySelectorAll('[id]').forEach(n => n.removeAttribute('id'));
-      wrap.querySelectorAll('[data-testid]').forEach(n => n.removeAttribute('data-testid'));
-      const btn = wrap.querySelector('button, [role="button"]');
-      if (!btn || btn.dataset.stgbBound) return;
-      btn.dataset.stgbBound = '1';
-      btn.dataset.stgbId = String(Date.now()) + Math.random().toString(36).slice(2);
-      btn.classList.add('stgb-btn');
-      btn.removeAttribute('aria-expanded');
-      btn.removeAttribute('aria-describedby');
-      btn.setAttribute('aria-haspopup', 'menu');
-      if (btn.tagName === 'BUTTON') btn.type = 'button';
-      btn.querySelectorAll('[style]').forEach(n => n.style.removeProperty('color'));
-      const svg = btn.querySelector('svg');
-      if (svg && svg.previousElementSibling) svg.previousElementSibling.classList.add('stgb-circle');
-      setState(btn, 'send', 'Send');
-      btn.addEventListener('click', e => {
-        e.preventDefault(); e.stopPropagation(); e.stopImmediatePropagation();
-        if (menuEl && menuEl.dataset.for === btn.dataset.stgbId) { closeMenu(); return; }
-        chrome.runtime.sendMessage({stgbAction: 'list'}, r => {
-          if (chrome.runtime.lastError || !r) {
-            showToast('grokbot', 'Send to Grok Bot', 'Reload the extension, then click the post again.');
-            return;
-          }
-          const items = r.items || [];
-          if (!items.length) {
-            showToast('grokbot', 'Choose a destination', r.message || 'Check a destination in settings.');
-            return;
-          }
-          openMenu(btn, items, a);
-        });
-      }, true);
-      bar.appendChild(wrap);
+      const proto = bar && shareSlot(bar, a);
+      if (proto) {
+        const wrap = proto.cloneNode(true);
+        wrap.removeAttribute('id');
+        wrap.querySelectorAll('[id]').forEach(n => n.removeAttribute('id'));
+        wrap.querySelectorAll('[data-testid]').forEach(n => n.removeAttribute('data-testid'));
+        const btn = wrap.querySelector('button, [role="button"]');
+        if (btn && !btn.dataset.stgbBound) {
+          btn.querySelectorAll('[style]').forEach(n => n.style.removeProperty('color'));
+          const svg = btn.querySelector('svg');
+          if (svg && svg.previousElementSibling) svg.previousElementSibling.classList.add('stgb-circle');
+          setState(btn, 'send', 'Send');
+          bindSend(btn, a);
+          bar.appendChild(wrap);
+          return;
+        }
+      }
+      const btn = drawButton();
+      bindSend(btn, a);
+      (bar || a).appendChild(btn);
     });
   }
   function arm() {

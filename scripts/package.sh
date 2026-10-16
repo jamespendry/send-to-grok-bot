@@ -22,6 +22,8 @@ files=(
   prompts.js
   relay.js
   site-connect.js
+  grant.html
+  grant.js
   destinations/grokbot.js
   destinations/claude.js
   destinations/chatgpt.js
@@ -100,3 +102,76 @@ rm -f "$out"
 )
 echo "wrote $out"
 unzip -l "$out"
+
+python3 - "$out" "$root" <<'PY'
+import json, re, struct, sys, zipfile
+from pathlib import Path
+out, root = Path(sys.argv[1]), Path(sys.argv[2])
+fail = lambda msg: (_ for _ in ()).throw(SystemExit(msg))
+# CWS rejects packages over a few dozen megabytes in practice; this one should stay tiny.
+if out.stat().st_size > 10 * 1024 * 1024:
+    raise SystemExit(f"zip is {out.stat().st_size} bytes")
+z = zipfile.ZipFile(out)
+names = []
+uncompressed = 0
+for info in z.infolist():
+    if info.is_dir() or info.filename.endswith("/"):
+        continue
+    if info.filename.startswith("/") or ".." in info.filename.split("/"):
+        raise SystemExit("unsafe zip path " + info.filename)
+    names.append(info.filename)
+    uncompressed += info.file_size
+if uncompressed > 5 * 1024 * 1024:
+    raise SystemExit(f"uncompressed {uncompressed}")
+manifest = json.loads(z.read("manifest.json"))
+expected = [
+    "manifest.json", "background.js", "content.js", "content.css", "hosts.js", "connect.js",
+    "logos.js", "options.html", "options.js", "prompts.js", "relay.js", "site-connect.js",
+    "grant.html", "grant.js", "destinations/grokbot.js", "destinations/claude.js",
+    "destinations/chatgpt.js", "destinations/codex.js",
+    "icons/icon16.png", "icons/icon32.png", "icons/icon48.png", "icons/icon128.png",
+]
+if sorted(names) != sorted(expected):
+    raise SystemExit("zip members\n" + "\n".join(sorted(names)))
+if manifest.get("manifest_version") != 3:
+    raise SystemExit("manifest_version")
+if manifest.get("update_url"):
+    raise SystemExit("update_url")
+worker = (manifest.get("background") or {}).get("service_worker")
+if worker != "background.js" or worker not in names:
+    raise SystemExit("service worker")
+for block in manifest.get("content_scripts") or []:
+    for js in block.get("js") or []:
+        if js.startswith("http") or js not in names:
+            raise SystemExit("content script " + js)
+for size, path in (manifest.get("icons") or {}).items():
+    if path not in names:
+        raise SystemExit("missing " + path)
+raw_manifest = z.read("manifest.json").decode()
+if re.search(r"https?://(?!\*/\*)", raw_manifest) and "web_accessible_resources" not in raw_manifest:
+    pass
+remote = re.compile(r"\beval\s*\(|\bnew\s+Function\s*\(|importScripts\s*\(\s*['\"]https?:|<script[^>]+src\s*=\s*['\"]https?:", re.I)
+for name in names:
+    if not name.endswith((".js", ".html")):
+        continue
+    text = z.read(name).decode("utf-8", "replace")
+    if remote.search(text):
+        raise SystemExit("remote code in " + name)
+listing = (root / "store" / "listing.md").read_text()
+short = "Adds a native-looking button to X posts that sends the post to Grok Bot, Claude, ChatGPT, or Codex."
+if manifest.get("description") != short or short not in listing:
+    raise SystemExit("listing description")
+if "1.2.7" not in (root / "store" / "SUBMIT.md").read_text():
+    raise SystemExit("SUBMIT version")
+for policy in (root / "store" / "privacy-policy.md", root / "docs" / "privacy.html"):
+    text = policy.read_text()
+    for needle in ("chrome.storage.local", "more than one", "does not use analytics", "sendtogrokbot.com/connect"):
+        if needle not in text and not (needle == "does not use analytics" and "does not use analytics" in text.replace("\n", " ")):
+            if needle not in text:
+                raise SystemExit(f"{policy.name} missing {needle}")
+if "Privacy practices tab" in (root / "docs" / "privacy.html").read_text():
+    raise SystemExit("dashboard section published")
+if "When you paste a webhook on sendtogrokbot.com/connect" not in (root / "store" / "privacy-policy.md").read_text():
+    raise SystemExit("host justification")
+print(f"cws lint ok: {len(names)} files, zip {out.stat().st_size} bytes, uncompressed {uncompressed}")
+PY
