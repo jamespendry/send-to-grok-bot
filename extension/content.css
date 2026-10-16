@@ -1,5 +1,7 @@
 /* Layout, hit circle, and icon size come from the cloned Share action. Color only here. */
 .stgb-btn{cursor:pointer;font:inherit}
+.stgb-own{display:inline-flex;align-items:center;justify-content:center;width:34px;height:34px;margin-left:2px;padding:0;border:0;border-radius:999px;background:transparent;flex:none}
+.stgb-own svg{width:18px;height:18px}
 .stgb-btn,.stgb-btn *{color:rgb(113,118,123) !important}
 .stgb-btn svg{fill:currentColor}
 .stgb-btn:hover,.stgb-btn:hover *,.stgb-btn:focus-visible,.stgb-btn:focus-visible *{color:rgb(29,155,240) !important}
