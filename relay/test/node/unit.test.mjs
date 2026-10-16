@@ -418,6 +418,30 @@ test("service worker scripts share one scope and an empty webhook stays in the m
   assert.equal(context.menuItems({ enabled: ["chatgpt"] })[0].needsSetup, false);
 });
 
+test("the share sheet shortcut posts one relay code and names each destination", () => {
+  const file = read("../shortcuts/Send to Grok Bot.shortcut");
+  assert.match(file, /Send to Grok Bot/);
+  for (const name of ["Grok Bot", "Claude", "ChatGPT", "Codex"]) assert.ok(file.includes(name), name);
+  for (const id of ["grokbot", "claude", "chatgpt", "codex"]) assert.ok(file.includes(`<string>${id}</string>`), id);
+  assert.match(file, /https:\/\/relay\.sendtogrokbot\.com\/v1\/send/);
+  assert.match(file, /WFWorkflowImportQuestions/);
+  assert.match(file, /WFTextActionText/);
+  assert.match(file, /ActionExtension/);
+  assert.match(file, /<string>Authorization<\/string>/);
+  assert.match(file, /application\/json/);
+  assert.match(file, /<string>notice<\/string>/);
+  assert.match(file, /<string>openUrl<\/string>/);
+  assert.match(file, /<string>shortcut<\/string>/);
+  assert.match(file, /Bearer \uFFFC/);
+  assert.doesNotMatch(file, /rk_[A-Za-z0-9_-]{20}/);
+  assert.doesNotMatch(file, /icloud\.com\/shortcuts\/[0-9a-f]{8}/);
+  const steps = read("../shortcuts/BUILD.md");
+  assert.match(steps, /Copy iCloud Link/);
+  assert.match(steps, /Allow Untrusted Shortcuts/);
+  assert.match(steps, /docs\/mobile\.html/);
+  assert.match(steps, /stgbr1/);
+});
+
 test("the connect site is rooted at docs and hands the code to the extension", () => {
   const page = read("../docs/connect.html");
   assert.match(page, /src="\/connect\.js"/);
