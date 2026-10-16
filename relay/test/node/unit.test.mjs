@@ -8,6 +8,8 @@ import { fileURLToPath } from "node:url";
 import vm from "node:vm";
 import { buildClientScript } from "../../src/build-client.js";
 import { CODEC_SOURCE, PAGE_SOURCE } from "../../src/browser-sources.js";
+import { relayKeyFromToken } from "../../src/connect-code.js";
+import { prefilledOpenUrl } from "../../src/open-link.js";
 import { ConfigError, decryptSecret, encryptSecret } from "../../src/crypto.js";
 import { STATEMENTS } from "../../src/db.js";
 import { safeLog } from "../../src/log.js";
@@ -26,7 +28,29 @@ function read(rel) {
 test("browser sources match the checked function files", () => {
   assert.equal(CODEC_SOURCE, read("src/relay-codec.fn.js"));
   assert.equal(PAGE_SOURCE, read("src/setup-page.fn.js"));
+  assert.match(PAGE_SOURCE, /chatgpt: "ChatGPT"/);
   assert.ok(read("../extension/relay.js").includes(read("src/relay-codec.fn.js").trim()));
+});
+
+test("a relay code and a raw key identify the same account", () => {
+  const context = vm.createContext({
+    btoa, atob, TextEncoder, TextDecoder, URL, Uint8Array, crypto: webcrypto
+  });
+  vm.runInContext(CODEC_SOURCE + "\nglobalThis.codec = relayCodec();", context);
+  const key = context.codec.newRelayKey();
+  const code = context.codec.encodeConnectCode("https://relay.sendtogrokbot.com/", key);
+  assert.equal(relayKeyFromToken(key), key);
+  assert.equal(relayKeyFromToken(code), key);
+  assert.equal(relayKeyFromToken("stgbr1.not-a-code"), "");
+  assert.equal(relayKeyFromToken("rk_short"), "");
+  const chat = prefilledOpenUrl("chatgpt", "https://x.com/a/status/1");
+  assert.match(chat, /^https:\/\/chatgpt\.com\/\?q=/);
+  assert.match(decodeURIComponent(chat), /https:\/\/x\.com\/a\/status\/1/);
+  assert.match(decodeURIComponent(chat), /one-line takeaway/);
+  assert.ok(chat.length < 6000);
+  const codex = prefilledOpenUrl("codex", "https://x.com/a/status/1");
+  assert.match(codex, /^https:\/\/chatgpt\.com\/codex\?prompt=/);
+  assert.equal(prefilledOpenUrl("grokbot", "https://x.com/a/status/1"), "");
 });
 
 test("schema.sql contains the worker statements", () => {
@@ -35,7 +59,7 @@ test("schema.sql contains the worker statements", () => {
 });
 
 test("only the log helper writes to the console", () => {
-  const files = ["src/index.js", "src/crypto.js", "src/validate.js", "src/db.js", "src/rate.js", "src/page.js", "src/client.js", "src/setup-page.fn.js", "src/relay-codec.fn.js"];
+  const files = ["src/index.js", "src/crypto.js", "src/validate.js", "src/db.js", "src/rate.js", "src/page.js", "src/client.js", "src/setup-page.fn.js", "src/relay-codec.fn.js", "src/connect-code.js", "src/open-link.js"];
   for (const file of files) {
     assert.equal(/\bconsole\./.test(read(file)), false, file);
   }
@@ -93,7 +117,7 @@ test("Claude text matches the extension block and stays within the limit", () =>
   const long = claudeText({ url: "https://x.com/a/status/1", author: "ada", sentAt: "t", text: "x".repeat(70000) });
   assert.equal(long.length, 65536);
   const parsed = parseSendBody({ destination: "nope" });
-  assert.match(parsed.error, /grokbot or claude/);
+  assert.match(parsed.error, /chatgpt, or codex/);
   const rich = parseSendBody({
     destination: "grokbot",
     url: "https://x.com/a/status/1",

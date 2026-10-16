@@ -98,8 +98,10 @@ function plainCopy(value, depth) {
 
 export function parseSendBody(body) {
   if (!body || typeof body !== "object" || Array.isArray(body)) return { error: "The body needs to be a JSON object." };
-  const destination = body.destination === "grokbot" || body.destination === "claude" ? body.destination : "";
-  if (!destination) return { error: "Choose a destination: grokbot or claude." };
+  const destination = body.destination === "grokbot" || body.destination === "claude" || body.destination === "chatgpt" || body.destination === "codex"
+    ? body.destination
+    : "";
+  if (!destination) return { error: "Choose a destination: grokbot, claude, chatgpt, or codex." };
   const url = typeof body.url === "string" ? body.url.trim() : "";
   if (!/^https?:\/\/\S{1,2000}$/.test(url)) return { error: "The post needs an http or https URL." };
   const text = typeof body.text === "string" ? body.text : "";

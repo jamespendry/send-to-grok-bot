@@ -1,6 +1,8 @@
+import { relayKeyFromToken } from "./connect-code.js";
 import { encryptSecret, decryptSecret, sha256Hex } from "./crypto.js";
 import { ensureSchema, findAccount, insertAccount, updateAccount, addSend, recentSends } from "./db.js";
 import { safeLog } from "./log.js";
+import { prefilledOpenUrl } from "./open-link.js";
 import { renderPage, setupJavaScript } from "./page.js";
 import { LIMITS, takeToken } from "./rate.js";
 import { claudeFireUrl, claudeText, parseSendBody, pointsAtRelay, publicError, webhookProblem } from "./validate.js";
@@ -11,6 +13,18 @@ const SECURITY = {
   "cache-control": "no-store",
   "content-security-policy": "default-src 'none'; style-src 'unsafe-inline'; script-src 'self'; connect-src 'self'; base-uri 'none'; form-action 'none'; frame-ancestors 'none'"
 };
+
+const LABELS = {
+  grokbot: "Grok Bot",
+  claude: "Claude",
+  chatgpt: "ChatGPT",
+  codex: "Codex"
+};
+
+const SITE_ORIGINS = new Set([
+  "https://sendtogrokbot.com",
+  "https://www.sendtogrokbot.com"
+]);
 
 const CLAUDE_ERRORS = {
   400: "Bad request or routine paused",
@@ -32,7 +46,7 @@ export function normalizePath(pathname) {
 function logPath(request) {
   try {
     const path = normalizePath(new URL(request.url).pathname);
-    if (path === "/" || path === "/setup.js" || path === "/v1/config" || path === "/v1/send") return path;
+    if (path === "/" || path === "/setup.js" || path === "/v1/config" || path === "/v1/send" || path === "/v1/history") return path;
   } catch { /* ignore */ }
   return "other";
 }
@@ -44,13 +58,27 @@ function json(obj, status = 200, extra = {}) {
   });
 }
 
-function tooMany(limited) {
+function tooMany(limited, extra = {}) {
   const configured = !limited.error;
+  const headers = { ...extra };
+  if (configured && limited.retry) headers["retry-after"] = String(limited.retry);
   return json(
     { ok: false, error: limited.error || "Too many requests. Try again in a little while." },
     configured ? 429 : 500,
-    configured && limited.retry ? { "retry-after": String(limited.retry) } : {}
+    headers
   );
+}
+
+function corsHeaders(request) {
+  const origin = request.headers.get("Origin") || "";
+  if (!SITE_ORIGINS.has(origin)) return {};
+  return {
+    "access-control-allow-origin": origin,
+    vary: "Origin",
+    "access-control-allow-methods": "GET, OPTIONS",
+    "access-control-allow-headers": "Authorization, Content-Type",
+    "access-control-max-age": "86400"
+  };
 }
 
 async function readJson(request) {
@@ -68,10 +96,8 @@ async function identify(request) {
   const header = request.headers.get("Authorization") || "";
   const match = /^Bearer\s+(\S+)\s*$/i.exec(header);
   if (!match) return { error: "That relay key was not recognized.", status: 401 };
-  const key = match[1];
-  if (key.length > 300 || !/^rk_[A-Za-z0-9_-]{20,200}$/.test(key)) {
-    return { error: "That relay key was not recognized.", status: 401 };
-  }
+  const key = relayKeyFromToken(match[1]);
+  if (!key) return { error: "That relay key was not recognized.", status: 401 };
   return { keyHash: await sha256Hex(key) };
 }
 
@@ -147,6 +173,17 @@ async function applyClaude(value, next, env) {
   return "";
 }
 
+function historyView(rows) {
+  return rows.map(item => ({
+    sentAt: item.sent_at,
+    destination: item.destination,
+    url: item.post_url,
+    author: item.author,
+    ok: !!item.ok,
+    error: item.error || ""
+  }));
+}
+
 function view(row, history) {
   const webhookUrl = (row && row.grok_webhook_url) || "";
   const fireUrl = (row && row.claude_fire_url) || "";
@@ -158,14 +195,7 @@ function view(row, history) {
       grokbot: { enabled: !!webhookUrl, webhookUrl, hasKey },
       claude: { enabled: !!(fireUrl && hasToken), fireUrl, hasToken }
     },
-    history: history.map(item => ({
-      sentAt: item.sent_at,
-      destination: item.destination,
-      url: item.post_url,
-      author: item.author,
-      ok: !!item.ok,
-      error: item.error || ""
-    }))
+    history: historyView(history)
   };
 }
 
@@ -328,6 +358,10 @@ async function putConfig(request, env, who) {
   return json({ ok: true });
 }
 
+function named(destination, fields) {
+  return { destination, label: LABELS[destination] || destination, ...fields };
+}
+
 async function send(request, env, who) {
   const limited = await takeToken(env.KV, who.keyHash, "send", LIMITS.send);
   if (!limited.ok) return tooMany(limited);
@@ -336,19 +370,31 @@ async function send(request, env, who) {
   const parsed = parseSendBody(body.value);
   if (parsed.error) return json({ ok: false, error: parsed.error }, 400);
   await ensureSchema(env.DB);
-  const account = await findAccount(env.DB, who.keyHash);
-  if (!account) return json({ ok: false, error: "Nothing is saved for this code yet." }, 404);
+  const openOnly = parsed.destination === "chatgpt" || parsed.destination === "codex";
   let result;
-  try {
-    result = parsed.destination === "grokbot"
-      ? await forwardGrok(env, request, account, who.keyHash, parsed.payload)
-      : await forwardClaude(env, account, who.keyHash, parsed.payload);
-  } catch (err) {
-    if (err && (err.code === "config" || err.code === "storage")) throw err;
-    const error = err && err.code === "secret"
-      ? "The saved secret could not be read. Set it again on the setup page."
-      : "Could not reach the destination.";
-    result = { ok: false, http: 502, error };
+  if (openOnly) {
+    const openUrl = prefilledOpenUrl(parsed.destination, parsed.payload.url);
+    result = { ok: true, http: 200, error: "", openUrl };
+  } else {
+    const account = await findAccount(env.DB, who.keyHash);
+    if (!account) {
+      return json(named(parsed.destination, {
+        ok: false,
+        error: "Nothing is saved for this code yet.",
+        notice: "Nothing is saved for this code yet."
+      }), 404);
+    }
+    try {
+      result = parsed.destination === "grokbot"
+        ? await forwardGrok(env, request, account, who.keyHash, parsed.payload)
+        : await forwardClaude(env, account, who.keyHash, parsed.payload);
+    } catch (err) {
+      if (err && (err.code === "config" || err.code === "storage")) throw err;
+      const error = err && err.code === "secret"
+        ? "The saved secret could not be read. Set it again on the setup page."
+        : "Could not reach the destination.";
+      result = { ok: false, http: 502, error };
+    }
   }
   await record(env, who.keyHash, parsed, result);
   safeLog({
@@ -359,17 +405,34 @@ async function send(request, env, who) {
     error: result.ok ? "" : "forward"
   });
   if (result.ok) {
-    const payload = { ok: true, destination: parsed.destination };
+    const notice = openOnly
+      ? (parsed.destination === "chatgpt" ? "Opened ChatGPT" : "Opened Codex")
+      : (parsed.destination === "grokbot" ? "Sent to Grok Bot" : "Sent to Claude");
+    const payload = named(parsed.destination, { ok: true, notice });
     if (result.sessionUrl) payload.sessionUrl = result.sessionUrl;
+    if (result.openUrl) payload.openUrl = result.openUrl;
     return json(payload);
   }
-  return json({ ok: false, error: publicError(result.error) }, result.http || 502);
+  const error = publicError(result.error);
+  return json(named(parsed.destination, { ok: false, error, notice: error }), result.http || 502);
+}
+
+async function getHistory(request, env, who, extra) {
+  const limited = await takeToken(env.KV, who.keyHash, "configRead", LIMITS.configRead);
+  if (!limited.ok) return tooMany(limited, extra);
+  await ensureSchema(env.DB);
+  const history = await recentSends(env.DB, who.keyHash);
+  safeLog({ method: "GET", path: "/v1/history", status: 200 });
+  return json({ ok: true, history: historyView(history) }, 200, extra);
 }
 
 export async function handle(request, env) {
   const url = new URL(request.url);
   const path = normalizePath(url.pathname);
-  if (request.method === "OPTIONS") return new Response(null, { status: 204, headers: SECURITY });
+  if (request.method === "OPTIONS") {
+    const extra = path === "/v1/history" ? corsHeaders(request) : {};
+    return new Response(null, { status: 204, headers: { ...SECURITY, ...extra } });
+  }
   if (path === "/" && request.method === "GET") {
     return new Response(renderPage(url.pathname), {
       status: 200,
@@ -382,16 +445,19 @@ export async function handle(request, env) {
       headers: { ...SECURITY, "content-type": "text/javascript; charset=utf-8" }
     });
   }
-  if (path !== "/v1/config" && path !== "/v1/send") return json({ ok: false, error: "Nothing is here." }, 404);
+  if (path !== "/v1/config" && path !== "/v1/send" && path !== "/v1/history") return json({ ok: false, error: "Nothing is here." }, 404);
   requireStorage(env);
+  const cors = path === "/v1/history" ? corsHeaders(request) : {};
   const ip = await takeToken(env.KV, await clientId(request, env), "ip", 300);
-  if (!ip.ok) return tooMany(ip);
+  if (!ip.ok) return tooMany(ip, cors);
   const who = await identify(request);
-  if (who.error) return json({ ok: false, error: who.error }, who.status);
+  if (who.error) return json({ ok: false, error: who.error }, who.status, cors);
+  if (path === "/v1/history" && request.method === "GET") return getHistory(request, env, who, cors);
   if (path === "/v1/config" && request.method === "GET") return getConfig(request, env, who);
   if (path === "/v1/config" && request.method === "PUT") return putConfig(request, env, who);
   if (path === "/v1/send" && request.method === "POST") return send(request, env, who);
-  return json({ ok: false, error: "That method is not allowed." }, 405, { allow: path === "/v1/send" ? "POST" : "GET, PUT" });
+  const allow = path === "/v1/send" ? "POST" : path === "/v1/history" ? "GET" : "GET, PUT";
+  return json({ ok: false, error: "That method is not allowed." }, 405, { ...cors, allow });
 }
 
 export default {
@@ -408,7 +474,11 @@ export default {
           : "Something went wrong on the relay.";
       try { safeLog({ method: request.method, path: logPath(request), status: 500, error: missingSecret ? "config" : missingStorage ? "storage" : "internal" }); }
       catch { /* ignore */ }
-      return json({ ok: false, error }, 500);
+      let extra = {};
+      try {
+        if (normalizePath(new URL(request.url).pathname) === "/v1/history") extra = corsHeaders(request);
+      } catch { /* ignore */ }
+      return json({ ok: false, error }, 500, extra);
     }
   }
 };
