@@ -451,9 +451,10 @@ test("the share sheet shortcut posts one relay code and names each destination",
 
 test("pasting a webhook and header on /connect saves inside the paste gesture", async () => {
   assert.match(read("../extension/background.js"), /stgbAction === 'request-origins'/);
-  assert.match(read("../extension/site-connect.js"), /request-origins/);
-  const box = { value: "keep-me" };
-  const msg = { textContent: "", className: "" };
+  assert.match(read("../extension/grant.js"), /permissions\.request/);
+  assert.match(read("../extension/site-connect.js"), /stgb-grant/);
+  assert.match(read("../extension/grant.html"), /id="box"/);
+  const box = { value: "keep-me", addEventListener(type, fn) { this.listeners[type] = fn; }, listeners: {} };
   let duringPaste = false;
   let requests = 0;
   const saved = {};
@@ -468,25 +469,18 @@ test("pasting a webhook and header on /connect saves inside the paste gesture", 
     clearTimeout
   };
   context.globalThis = context;
-  context.listeners = {};
   context.document = {
     documentElement: { dataset: {} },
-    getElementById(id) {
-      if (id === "paste") return box;
-      if (id === "msg") return msg;
-      return null;
-    },
-    addEventListener(type, fn) { context.listeners[type] = fn; },
-    dispatchEvent() {}
+    getElementById(id) { return id === "box" ? box : null; }
   };
   context.chrome = {
-    runtime: {
-      lastError: null,
-      sendMessage(msg, cb) {
+    runtime: { lastError: null },
+    permissions: {
+      request(msg, cb) {
         requests += 1;
         assert.equal(duringPaste, true);
         context.requested = { origins: msg.origins };
-        queueMicrotask(() => cb(context.deny ? { ok: false } : { ok: true }));
+        queueMicrotask(() => cb(!context.deny));
       }
     },
     storage: {
@@ -497,40 +491,33 @@ test("pasting a webhook and header on /connect saves inside the paste gesture", 
       }
     }
   };
-  context.CustomEvent = class CustomEvent {
-    constructor(_type, init) { this.detail = init && init.detail; }
-  };
   vm.createContext(context);
   vm.runInContext(read("../extension/hosts.js"), context, { filename: "hosts.js" });
   vm.runInContext(read("../extension/connect.js"), context, { filename: "connect.js" });
-  vm.runInContext(read("../extension/site-connect.js"), context, { filename: "site-connect.js" });
-  assert.equal(context.document.documentElement.dataset.stgbReady, "1");
+  vm.runInContext(read("../extension/grant.js"), context, { filename: "grant.js" });
   const raw = "Authorization: Bearer whsec_real_key\nhttps://hooks.example.com/hook";
   duringPaste = true;
-  context.listeners.paste({ target: box, clipboardData: { getData() { return raw; } } });
+  box.listeners.paste({ clipboardData: { getData() { return raw; } } });
   duringPaste = false;
   assert.equal(requests, 1);
   assert.equal(JSON.stringify(context.requested), JSON.stringify({ origins: ["https://hooks.example.com/*"] }));
   await new Promise(resolve => setTimeout(resolve, 0));
   assert.equal(saved.webhookUrl, "https://hooks.example.com/hook");
   assert.equal(saved.senderKey, "whsec_real_key");
-  assert.equal(msg.textContent, "Now open x.com and click the arrow.");
-  assert.equal(msg.className, "ok");
+  assert.equal(context.document.documentElement.dataset.stgbMessage, "Now open x.com and click the arrow.");
+  assert.equal(context.document.documentElement.dataset.stgbOk, "1");
   assert.equal(box.value, "");
-  context.listeners.paste({
-    target: box,
-    clipboardData: { getData() { return "https://hooks.example.com/only"; } }
-  });
+  box.listeners.paste({ clipboardData: { getData() { return "https://hooks.example.com/only"; } } });
   assert.equal(requests, 1);
-  assert.equal(msg.className, "err");
-  assert.match(msg.textContent, /Authorization header/);
+  assert.match(context.document.documentElement.dataset.stgbMessage, /Authorization header/);
+  assert.equal(context.document.documentElement.dataset.stgbOk, "");
   context.deny = true;
   duringPaste = true;
-  context.listeners.paste({ target: box, clipboardData: { getData() { return raw; } } });
+  box.listeners.paste({ clipboardData: { getData() { return raw; } } });
   duringPaste = false;
   await new Promise(resolve => setTimeout(resolve, 0));
-  assert.equal(msg.textContent, "Choose Allow to finish.");
-  assert.equal(msg.className, "err");
+  assert.equal(context.document.documentElement.dataset.stgbMessage, "Choose Allow to finish.");
+  assert.equal(context.document.documentElement.dataset.stgbOk, "");
 });
 
 test("the connect site is rooted at docs and hands the code to the extension", async () => {
@@ -548,13 +535,13 @@ test("the connect site is rooted at docs and hands the code to the extension", a
   assert.match(read("../docs/_redirects"), /\/\s+\/index\.html\s+200/);
   assert.match(read("../_redirects"), /\/\s+\/docs\/index\.html\s+200/);
   assert.match(read("../docs/_redirects"), /\/connect\s+\/connect\.html\s+200/);
-  assert.match(read("../extension/manifest.json"), /"version": "1\.2\.2"/);
+  assert.match(read("../extension/manifest.json"), /"version": "1\.2\.3"/);
   assert.match(read("../extension/options.html"), /id="more"/);
   assert.match(read("../extension/options.html"), /More options/);
   assert.match(read("../extension/options.html"), /id="cc"/);
   assert.doesNotMatch(read("../extension/options.html"), /id="connect"/);
-  assert.match(read("../extension/site-connect.js"), /addEventListener\('paste'/);
-  assert.match(read("../extension/site-connect.js"), /Choose Allow to finish/);
+  assert.match(read("../extension/site-connect.js"), /id = 'stgb-grant'/);
+  assert.match(read("../extension/grant.js"), /Choose Allow to finish/);
   assert.match(read("../AGENTS.md"), /send one message and stop/);
   assert.match(read("../AGENTS.md"), /Now open x.com and click the arrow/);
   assert.doesNotMatch(read("../plugin/skills/send-to-grok-bot/SKILL.md"), /stgb1/);

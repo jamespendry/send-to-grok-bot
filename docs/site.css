@@ -25,6 +25,7 @@ button.secondary{background:#eff3f4;color:#0f1419}
 .hero-step h2{font-size:24px;margin:0 0 8px}
 #installed{font-weight:700}
 #msg.ok{color:#00ba7c;font-size:18px;font-weight:700}
+#msg.pending{color:#0f1419;font-weight:700}
 #msg.err{color:#f4212e}
 #msg{display:block;margin-top:12px}
 .history p{margin:0 0 8px;overflow-wrap:anywhere}
