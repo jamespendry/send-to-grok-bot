@@ -182,27 +182,145 @@
     const t = n.textContent, m = t.match(/@([A-Za-z0-9_]{1,15})/);
     return {name: (m ? t.slice(0, m.index) : t.split('·')[0]).trim(), handle: m ? m[1] : ''};
   }
-  // X hides the full URL in invisible spans inside each link, so textContent recovers it while innerText shows "github.com/foo…".
+  // X puts a truncated label in aria-hidden spans and the full URL in another span, so
+  // textContent is "github.com/foo…https://github.com/foo/bar". Read each piece on its own.
+  function linkPieces(a) {
+    const pieces = [];
+    const walk = (n, hidden) => {
+      if (n.nodeType === 3) {
+        const t = (n.textContent || '').trim();
+        if (t) pieces.push({t, hidden});
+        return;
+      }
+      if (n.nodeType !== 1 || n.tagName === 'IMG') return;
+      const h = hidden || n.getAttribute('aria-hidden') === 'true';
+      [...n.childNodes].forEach(c => walk(c, h));
+    };
+    [...a.childNodes].forEach(c => walk(c, false));
+    return pieces;
+  }
+  function urlsIn(text) {
+    const urls = [];
+    String(text || '').split('…').forEach(part => {
+      const s = part.trim().replace(/[)\].,;:]+$/g, '');
+      if (/^https?:\/\/\S+$/i.test(s)) urls.push(s);
+    });
+    return urls;
+  }
+  function linkParts(a) {
+    const pieces = linkPieces(a);
+    const urls = pieces.flatMap(p => urlsIn(p.t));
+    const url = urls.slice().sort((x, y) => y.length - x.length)[0] || '';
+    const hidden = pieces.filter(p => p.hidden).map(p => p.t).join('');
+    const visible = pieces.filter(p => !p.hidden).map(p => p.t).join('');
+    let label = (hidden || visible).replace(/…+$/g, '').trim();
+    if (url && label.includes('…')) label = label.split('…')[0].trim();
+    const href = /^https?:\/\//i.test(a.href || '') ? a.href : '';
+    return {text: label || url, href, url};
+  }
   function links(textEl) {
     if (!textEl) return [];
-    return [...textEl.querySelectorAll('a[href]')].map(l => {
-      const shown = l.textContent.replace(/…$/, '').trim();
-      return {text: shown, href: l.href, url: /^https?:\/\//.test(shown) ? shown : ''};
-    }).filter(l => !/^[@#$]/.test(l.text));
+    return [...textEl.querySelectorAll('a[href]')].map(linkParts).filter(l => l.text && !/^[@#$]/.test(l.text) && (l.url || l.href));
   }
   function textOf(textEl) {
     if (!textEl) return '';
     const c = textEl.cloneNode(true);
-    c.querySelectorAll('a[href]').forEach(l => { const t = l.textContent.replace(/…$/, '').trim(); if (/^https?:\/\//.test(t)) l.replaceWith(t); });
+    c.querySelectorAll('br').forEach(br => br.replaceWith('\n'));
+    c.querySelectorAll('a[href]').forEach(a => { const parts = linkParts(a); a.replaceWith(parts.url || parts.text); });
     c.querySelectorAll('img[alt]').forEach(i => i.replaceWith(i.alt)); // emoji
     return clip(c.textContent);
   }
+  // pbs.twimg.com serves the same asset at several sizes; name=large is the useful one.
+  const THUMB_RE = /pbs\.twimg\.com\/(?:ext_tw_video_thumb|amplify_video_thumb|tweet_video_thumb)\//i;
+  function preferLarge(raw) {
+    if (!raw || !/^https?:\/\//i.test(raw)) return '';
+    let u;
+    try { u = new URL(raw); } catch (_) { return ''; }
+    u.username = '';
+    u.password = '';
+    const twimg = /(^|\.)twimg\.com$/i.test(u.hostname);
+    if (u.protocol === 'http:' && twimg) u.protocol = 'https:';
+    if (u.protocol !== 'https:') return '';
+    // Posters are sometimes hosted off twimg. Keep those URLs; only rewrite twimg sizes.
+    if (!twimg) return u.href;
+    u.pathname = u.pathname.replace(/:(?:small|medium|thumb|orig|large|\d+x\d+)$/i, '');
+    if (u.searchParams.has('name') || /\/(?:media|ext_tw_video_thumb|amplify_video_thumb|tweet_video_thumb)\//i.test(u.pathname)) {
+      u.searchParams.set('name', 'large');
+    }
+    return u.href;
+  }
+  function imageUrl(img) {
+    const urls = [img.currentSrc, img.getAttribute('src'), img.src];
+    (img.getAttribute('srcset') || '').split(',').forEach(part => urls.push(part.trim().split(/\s+/)[0]));
+    const media = urls.find(v => v && /pbs\.twimg\.com\/media\//i.test(v));
+    return media ? preferLarge(media) : '';
+  }
+  function thumbnail(player, video) {
+    const urls = [];
+    const add = (v) => { if (v && /^https?:\/\//i.test(v)) urls.push(v); };
+    if (video) { add(video.poster); add(video.getAttribute('poster')); }
+    player.querySelectorAll('img').forEach(img => {
+      add(img.currentSrc); add(img.getAttribute('src'));
+      (img.getAttribute('srcset') || '').split(',').forEach(part => add(part.trim().split(/\s+/)[0]));
+    });
+    const readStyle = (el) => {
+      const re = /url\(\s*["']?(https?:\/\/[^"')]+)["']?\s*\)/gi;
+      const style = el.getAttribute('style') || '';
+      let m;
+      while ((m = re.exec(style))) add(m[1]);
+    };
+    readStyle(player);
+    player.querySelectorAll('[style]').forEach(readStyle);
+    const hit = urls.find(v => THUMB_RE.test(v)) || urls.find(v => video && v === video.poster);
+    return hit ? preferLarge(hit) : '';
+  }
+  function captionsOf(player, video) {
+    const bits = [];
+    const push = (s) => {
+      const t = String(s || '').replace(/\s*\n\s*/g, '\n').trim();
+      if (!t || bits.includes(t)) return;
+      if (/^(cc|captions?|subtitles?|play|pause|mute|unmute|gif|video|replay)$/i.test(t)) return;
+      bits.push(t);
+    };
+    try {
+      const tracks = video && video.textTracks;
+      if (tracks) {
+        for (let i = 0; i < tracks.length; i++) {
+          const track = tracks[i];
+          if (!track || track.mode === 'disabled' || !track.activeCues) continue;
+          for (let j = 0; j < track.activeCues.length; j++) push(track.activeCues[j] && track.activeCues[j].text);
+        }
+      }
+    } catch (_) {}
+    try {
+      const scope = player.closest('[data-testid="videoComponent"]') || player;
+      scope.querySelectorAll('[data-testid]').forEach(el => {
+        const id = el.getAttribute('data-testid') || '';
+        if (!/caption|subtitle/i.test(id)) return;
+        if (el.closest('button, [role="button"]')) return;
+        push(el.innerText || el.textContent);
+      });
+    } catch (_) {}
+    return clip(bits.join('\n'), 2000);
+  }
   function media(article, q) {
     const out = [];
-    outsideQuote(own(article, '[data-testid="tweetPhoto"] img', article), q).forEach(i => out.push({type: 'image', alt: i.alt && i.alt !== 'Image' ? i.alt : ''}));
+    outsideQuote(own(article, '[data-testid="tweetPhoto"] img', article), q).forEach(i => {
+      out.push({type: 'image', alt: i.alt && i.alt !== 'Image' ? i.alt : '', url: imageUrl(i)});
+    });
     outsideQuote(own(article, '[data-testid="videoPlayer"]', article), q).forEach(v => {
       const el = v.querySelector('video');
-      out.push({type: el && /gif/i.test(el.src || el.poster || '') ? 'gif' : 'video', duration: el && isFinite(el.duration) ? Math.round(el.duration) : null});
+      const thumb = thumbnail(v, el);
+      const poster = (el && (el.poster || el.getAttribute('poster') || '')) || '';
+      const gif = /gif/i.test((el && el.getAttribute('src')) || poster) || /tweet_video_thumb/i.test(thumb);
+      let captions = '';
+      try { captions = captionsOf(v, el); } catch (_) {}
+      out.push({
+        type: gif ? 'gif' : 'video',
+        duration: el && isFinite(el.duration) ? Math.round(el.duration) : null,
+        thumbnail: thumb,
+        captions
+      });
     });
     return out;
   }
@@ -226,7 +344,7 @@
     const bar = actionBar(article);
     const post = {
       url: b.url || location.href, author: b.author, authorName: b.authorName, text: b.text, postedAt: b.postedAt,
-      truncated: !!own(article, '[data-testid="tweet-text-show-more-link"]', article).length,
+      truncated: outsideQuote(own(article, '[data-testid="tweet-text-show-more-link"]', article), b.q).length > 0,
       links: links(b.textEl), media: media(article, b.q), card: card(article, b.q),
       metrics: bar?.getAttribute('aria-label') || '', quoted: null, inReplyTo: null, thread: []
     };
@@ -244,7 +362,16 @@
         const same = n => basic(n).author.toLowerCase() === post.author.toLowerCase();
         while (s > 0 && same(all[s - 1])) s--;
         while (e < all.length - 1 && same(all[e + 1])) e++;
-        if (e > s) post.thread = all.slice(s, e + 1).slice(0, MAX_THREAD).map(n => { const x = basic(n); return {url: x.url, text: x.text, postedAt: x.postedAt}; });
+        if (e > s) {
+          // Keep the clicked post inside the cap. A prefix-only slice would drop it from the digest.
+          let run = all.slice(s, e + 1);
+          if (run.length > MAX_THREAD) {
+            const at = run.indexOf(article);
+            const from = at < 0 ? 0 : Math.min(Math.max(0, at - MAX_THREAD + 1), run.length - MAX_THREAD);
+            run = run.slice(from, from + MAX_THREAD);
+          }
+          post.thread = run.map(n => { const x = basic(n); return {url: x.url, text: x.text, postedAt: x.postedAt}; });
+        }
         if (s > 0) { const p = basic(all[s - 1]); post.inReplyTo = {url: p.url, author: p.author, text: p.text}; }
       }
     }
