@@ -279,3 +279,77 @@ test("the extension posts the payload and the relay key only in the header", asy
   assert.equal(body.relayCode, undefined);
   assert.equal(JSON.stringify(body).includes(key), false);
 });
+
+test("preset files match the extension prompt text", () => {
+  const prompts = require("../../../extension/prompts.js");
+  assert.deepEqual(prompts.ORDER, ["general", "research", "job-hunt", "buy-or-skip", "learn-later", "content-ideas"]);
+  for (const id of prompts.ORDER) {
+    const file = read(`../prompts/${id}.md`);
+    const body = file.split("\n---\n")[1].trim();
+    assert.equal(body, prompts.text(id), id);
+  }
+  assert.equal(read("../prompts/default-routine-prompt.md").split("\n---\n")[1].trim(), prompts.text("general"));
+  const general = prompts.text("general");
+  for (const phrase of [
+    "one-line takeaway",
+    "worth installing",
+    "how to try it",
+    "3-line summary",
+    "why it matters",
+    "what to watch",
+    "Do not claim you watched it",
+    "one actionable step",
+    "who to follow",
+    "worth buying or not",
+    "one line of context"
+  ]) {
+    assert.ok(general.includes(phrase), phrase);
+  }
+  assert.equal(prompts.resolve({}).id, "general");
+  assert.equal(prompts.resolve({ promptPreset: "job-hunt" }).text, prompts.text("job-hunt"));
+  assert.equal(prompts.resolve({ promptPreset: "general", promptText: "My own words" }).id, "custom");
+  const claudePage = read("../docs/setup/claude.html");
+  for (const host of prompts.ALLOWED_SITES.split("\n")) assert.ok(claudePage.includes(host), host);
+  assert.equal(prompts.ALLOWED_SITES.split("\n").length, 10);
+});
+
+test("a pasted connect link, header, or Fire URL is recognized in any order", () => {
+  const { encodeConnectionCode, parseSetupPaste, planConnect } = require("../../../extension/connect.js");
+  const code = encodeConnectionCode({
+    destination: "grokbot",
+    mode: "webhook",
+    url: "https://api2.cursor.sh/automations/webhook/abc",
+    key: "whsec_real_key"
+  });
+  const fromLink = parseSetupPaste("https://sendtogrokbot.com/connect#" + code);
+  assert.equal(fromLink.ok, true);
+  assert.equal(fromLink.destination, "grokbot");
+  assert.equal(fromLink.fields.senderKey, "whsec_real_key");
+  const headerFirst = parseSetupPaste("Authorization: Bearer whsec_real_key\nhttps://hooks.example.com/hook");
+  assert.equal(headerFirst.fields.webhookUrl, "https://hooks.example.com/hook");
+  assert.equal(headerFirst.fields.senderKey, "whsec_real_key");
+  const tokenFirst = parseSetupPaste("sk-ant-oat01-abcdefghijklmnop\nhttps://api.anthropic.com/v1/claude_code/routines/trig_abc/fire");
+  assert.equal(tokenFirst.destination, "claude");
+  assert.equal(tokenFirst.fields.claudeToken, "sk-ant-oat01-abcdefghijklmnop");
+  const trigFirst = parseSetupPaste("https://claude.ai/code/routines/trig_abc\nsk-ant-oat01-abcdefghijklmnop");
+  assert.equal(trigFirst.fields.claudeFireUrl, "https://claude.ai/code/routines/trig_abc");
+  const urlOnly = parseSetupPaste("trig_abc");
+  assert.equal(urlOnly.kind, "claude");
+  assert.equal(urlOnly.token, "");
+  const plan = planConnect({ enabled: ["chatgpt"], promptPreset: "research" }, fromLink);
+  assert.deepEqual(plan.settings.enabled, ["chatgpt", "grokbot"]);
+  assert.equal(plan.settings.promptPreset, "research");
+  assert.match(plan.message, /Saved Send to Grok Bot/);
+});
+
+test("Claude text keeps the old shape and prefixes a preset prompt", () => {
+  const { claudeRoutineText } = require("../../../extension/destinations/claude.js");
+  const bare = { url: "https://x.com/a/status/1", author: "ada", sentAt: "t", text: "hello" };
+  assert.equal(claudeText(bare), claudeRoutineText(bare));
+  const withPrompt = { ...bare, prompt: "Job hunt lens." };
+  const text = claudeText(withPrompt);
+  assert.equal(text, claudeRoutineText(withPrompt));
+  assert.ok(text.startsWith("Prompt:\nJob hunt lens.\n\nX post to research"));
+  const long = claudeText({ ...bare, prompt: "p".repeat(1000), text: "x".repeat(70000) });
+  assert.equal(long.length, 65536);
+});

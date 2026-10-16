@@ -61,6 +61,8 @@ export function claudeText(post) {
   const text = digest || (typeof post.text === "string" ? post.text : "");
   const author = post.author || "unknown";
   let body = `X post to research\nURL: ${post.url}\nAuthor: @${author}\nSent at: ${post.sentAt}\n\n"""\n${text}\n"""`;
+  const prompt = typeof post.prompt === "string" ? post.prompt.trim() : "";
+  if (prompt) body = `Prompt:\n${prompt}\n\n${body}`;
   if (body.length > 65536) body = body.slice(0, 65536);
   return body;
 }

@@ -1,7 +1,7 @@
 <!doctype html><html><head><meta charset="utf-8"><title>Send to Grok Bot</title>
 <style>
-body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;max-width:520px;margin:40px auto;padding:0 20px;color:#0f1419;font-size:14px}
-h1{font-size:20px;margin:0 0 4px}p{color:#536471;margin:0 0 8px;line-height:1.4}
+body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;max-width:560px;margin:40px auto;padding:0 20px;color:#0f1419;font-size:14px}
+h1{font-size:20px;margin:0 0 4px}h2{font-size:16px;margin:0 0 8px}p{color:#536471;margin:0 0 8px;line-height:1.4}
 .connect{padding:0 0 16px;margin:0 0 4px;border-bottom:1px solid #eff3f4}
 .dest{padding:14px 0;border-top:1px solid #eff3f4}
 .dest:first-of-type{border-top:0}
@@ -11,76 +11,100 @@ h1{font-size:20px;margin:0 0 4px}p{color:#536471;margin:0 0 8px;line-height:1.4}
 .fields[hidden]{display:none}
 label.field{display:block;font-weight:600;margin:12px 0 6px}
 label.field:first-child{margin-top:0}
-input[type="url"],input[type="password"],input[type="text"],textarea{width:100%;box-sizing:border-box;padding:10px;border:1px solid #cfd9de;border-radius:6px;font:inherit}
+input[type="url"],input[type="password"],input[type="text"],textarea,select{width:100%;box-sizing:border-box;padding:10px;border:1px solid #cfd9de;border-radius:6px;font:inherit;background:#fff;color:inherit}
 textarea{height:140px;resize:vertical}
-textarea.code{height:72px;overflow-wrap:anywhere}
-input:focus,textarea:focus{outline:none;border-color:#1d9bf0}
+textarea.code{height:88px;overflow-wrap:anywhere}
+textarea.short{height:72px}
+input:focus,textarea:focus,select:focus{outline:none;border-color:#1d9bf0}
 .hint{font-weight:400;color:#536471;font-size:13px;margin-top:4px;line-height:1.4}
 .notice{background:#f7f9f9;border:1px solid #eff3f4;border-radius:12px;padding:12px 14px;margin:16px 0 4px}
 .notice p{margin:0;color:#0f1419}
 .notice .policy{margin-top:8px}
-.notice a{color:#1d9bf0}
+.notice a,a{color:#1d9bf0}
 button{margin-top:8px;padding:9px 18px;border:0;border-radius:9999px;background:#0f1419;color:#fff;font:inherit;font-weight:600;cursor:pointer}
+button.secondary{background:#eff3f4;color:#0f1419}
+.row{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+.row button{margin-top:0}
+details{margin-top:12px}
+summary{cursor:pointer;font-weight:600}
 #m{margin-left:12px;color:#00ba7c}
 #m.bad{color:#f4212e}
-#cm{display:block;margin-top:8px;line-height:1.4}
-#cm.ok{color:#00ba7c}
-#cm.err{color:#f4212e}
+#cm,#claudeHint{display:block;margin-top:8px;line-height:1.4}
+#cm.ok,#claudeHint.ok{color:#00ba7c}
+#cm.err,#claudeHint.err{color:#f4212e}
 #relayCode{height:72px}
 </style></head><body>
 <h1>Send to Grok Bot</h1>
-<p>Check a destination to list it when you click a post. The menu sends to the one you pick.</p>
+<p>Check a destination to list it when you click a post. The menu sends to the one you pick. Free. Nothing to buy.</p>
 <div class="notice">
-  <p>Clicking Send on a post reads that post and, on its own page, the author's thread and the post it replies to. That includes the text, link, author, quoted post, links, and media addresses the page already shows. It is sent only to the destination you pick. Keys and tokens stay on this device and are sent only to sign in to that destination. No analytics. Nothing is sold. Click Save to store these settings on this device.</p>
+  <p>Clicking Send on a post reads that post and, on its own page, the author's thread and the post it replies to. That includes the text, link, author, quoted post, links, and media addresses the page already shows, plus the reply preset you pick below. It is sent only to the destination you pick. Keys and tokens stay on this device and are sent only to sign in to that destination. No analytics. Nothing is sold. Click Save to store these settings on this device.</p>
   <p class="policy"><a href="https://sendtogrokbot.com/privacy" target="_blank" rel="noopener">Privacy policy</a></p>
 </div>
 
 <div class="connect">
-  <label class="field" for="cc">Connection code</label>
-  <textarea id="cc" class="code" placeholder="stgb1...." spellcheck="false" autocomplete="off"></textarea>
-  <p class="hint">Paste the one code you were given, then click Connect. It fills in that destination and saves it on this computer. Another code later adds another destination. Paste the code only here, not into a chat.</p>
+  <label class="field" for="cc">Connect link</label>
+  <textarea id="cc" class="code" placeholder="Paste a sendtogrokbot.com/connect link, or the address and the secret" spellcheck="false" autocomplete="off"></textarea>
+  <p class="hint">Paste the link you were given and click Connect. A Grok Bot address plus its Authorization header works here too, in any order. So does a Claude Fire URL plus its secret. Paste it only here, not into a chat.</p>
   <button id="connect" type="button">Connect</button>
   <span id="cm" role="status"></span>
+</div>
+
+<div class="connect">
+  <h2>Replies</h2>
+  <label class="field" for="preset">Preset</label>
+  <select id="preset"></select>
+  <label class="field" for="promptText">Prompt</label>
+  <textarea id="promptText" spellcheck="true"></textarea>
+  <p class="hint">General is the default. It classifies the post and starts with a one-line takeaway. Pick another preset, or edit the text and it becomes Custom. The choice is sent with the post. Paste General into a Grok Bot routine or a Claude task once, and this page can switch the reply later.</p>
 </div>
 
 <div class="dest">
   <label class="check"><input type="checkbox" data-dest="grokbot"> Send to Grok Bot</label>
   <div class="fields" data-for="grokbot" hidden>
-    <label class="field" for="u">Webhook URL</label><input id="u" type="url" placeholder="https://...">
-    <label class="field" for="k">Webhook key (optional)</label><input id="k" type="password" placeholder="Sent as a Bearer token" autocomplete="off">
+    <p class="hint">A connect link fills this in. To copy it yourself: in Grok Bot, open the bot's sidebar, open the Routines tab, and open the routine. At the bottom, When to run is Webhook and Method is POST. Copy the URL here, and copy the Authorization header into the key.</p>
+    <label class="field" for="u">Webhook URL</label><input id="u" type="url" placeholder="https://..." autocomplete="off">
+    <label class="field" for="k">Webhook key<div class="hint">You can paste the whole Authorization header. The word Bearer is removed.</div></label><input id="k" type="password" placeholder="Authorization header" autocomplete="off">
   </div>
 </div>
 
 <div class="dest">
   <label class="check"><input type="checkbox" data-dest="claude"> Send to Claude</label>
   <div class="fields" data-for="claude" hidden>
-    <label class="field" for="cu">Routine URL (optional)<div class="hint">Leave blank to open Claude with the prompt. For an automatic routine, paste the Fire URL from the task. A routines page link or a trig_ id also works.</div></label>
-    <input id="cu" type="text" placeholder="Fire URL" autocomplete="off">
-    <label class="field" for="ct">Routine token (optional)</label><input id="ct" type="password" placeholder="sk-ant-oat01-..." autocomplete="off">
-    <label class="field" for="cp">Prompt<div class="hint">Leave blank for the default. It classifies the post, leads with a one-line takeaway, and does not post or message anyone. Open in Claude uses it as the message. A routine prepends it to the post; the routine's saved prompt does the work.</div></label>
-    <textarea id="cp" data-prompt="claudePrompt"></textarea>
+    <p class="hint">Leave the box empty to open Claude with the post filled in. You press Send. No secret.</p>
+    <p class="hint">For a routine that runs on its own, create the task, then paste the Fire URL and the secret below, together or one at a time, in any order.</p>
+    <div class="row">
+      <button id="copyPrompt" class="secondary" type="button">Copy task prompt</button>
+      <button id="copySites" class="secondary" type="button">Copy allowed websites</button>
+    </div>
+    <label class="field" for="claudePaste">Fire URL and token</label>
+    <textarea id="claudePaste" class="short" placeholder="Paste both, in any order" spellcheck="false" autocomplete="off"></textarea>
+    <span id="claudeHint" role="status"></span>
   </div>
 </div>
 
 <div class="dest">
   <label class="check"><input type="checkbox" data-dest="chatgpt"> Send to ChatGPT</label>
   <div class="fields" data-for="chatgpt" hidden>
-    <label class="field" for="ti">API trigger ID (optional)<div class="hint">Leave the agent fields blank to open ChatGPT with the prompt filled in. For a Business or Enterprise workspace agent, paste the agtch_ trigger ID and token.</div></label>
-    <input id="ti" type="text" placeholder="agtch_..." autocomplete="off">
-    <label class="field" for="tt">Workspace Agent access token (optional)</label><input id="tt" type="password" placeholder="Sent as a Bearer token to api.chatgpt.com" autocomplete="off">
-    <label class="field" for="gp">Prompt<div class="hint">Leave blank for the default. It classifies the post and leads with a one-line takeaway. The post link and text are added after it.</div></label>
-    <textarea id="gp" data-prompt="chatgptPrompt"></textarea>
+    <p class="hint">No setup. Clicking a post opens ChatGPT with the reply prompt and the post filled in. You press Send.</p>
+    <details>
+      <summary>Workspace agent, if you already have one</summary>
+      <label class="field" for="ti">API trigger ID<div class="hint">Business or Enterprise only. Leave this blank and ChatGPT opens in a tab.</div></label>
+      <input id="ti" type="text" placeholder="agtch_..." autocomplete="off">
+      <label class="field" for="tt">Workspace Agent access token</label><input id="tt" type="password" placeholder="Sent as a Bearer token to api.chatgpt.com" autocomplete="off">
+    </details>
   </div>
 </div>
 
 <div class="dest">
   <label class="check"><input type="checkbox" data-dest="codex"> Send to Codex</label>
   <div class="fields" data-for="codex" hidden>
-    <label class="field" for="ce">Environment ID (optional)<div class="hint">Codex Cloud has no public POST for regular accounts. Send to Codex opens chatgpt.com/codex with the prompt filled in, and you press Send. The environment id is the hex id in the Codex environment URL.</div></label>
-    <input id="ce" type="text" placeholder="environment id" autocomplete="off">
-    <label class="field" for="cb">Branch (optional)</label><input id="cb" type="text" placeholder="branch name" autocomplete="off">
-    <label class="field" for="cpx">Prompt<div class="hint">Leave blank for the default. It classifies the post and leads with a one-line takeaway. Long posts are shortened so the link stays under about 6,000 characters.</div></label>
-    <textarea id="cpx" data-prompt="codexPrompt"></textarea>
+    <p class="hint">No setup. Clicking a post opens Codex with the reply prompt and the post filled in. You press Send.</p>
+    <details>
+      <summary>Environment and branch, if you already have them</summary>
+      <label class="field" for="ce">Environment ID<div class="hint">The hex id in the Codex environment URL. Leave it blank and Codex still opens.</div></label>
+      <input id="ce" type="text" placeholder="environment id" autocomplete="off">
+      <label class="field" for="cb">Branch</label><input id="cb" type="text" placeholder="branch name" autocomplete="off">
+    </details>
   </div>
 </div>
 
@@ -95,5 +119,6 @@ button{margin-top:8px;padding:9px 18px;border:0;border-radius:9999px;background:
 <button id="s">Save</button><span id="m"></span>
 <script src="hosts.js"></script>
 <script src="connect.js"></script>
+<script src="prompts.js"></script>
 <script src="relay.js"></script>
 <script src="options.js"></script></body></html>

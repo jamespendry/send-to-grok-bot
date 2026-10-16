@@ -1,4 +1,4 @@
-importScripts('hosts.js', 'destinations/grokbot.js', 'destinations/claude.js', 'destinations/chatgpt.js', 'destinations/codex.js', 'relay.js');
+importScripts('hosts.js', 'prompts.js', 'destinations/grokbot.js', 'destinations/claude.js', 'destinations/chatgpt.js', 'destinations/codex.js', 'relay.js');
 
 function mediaLine(m) {
   if (!m || typeof m !== 'object') return '';
@@ -82,6 +82,17 @@ function enabledBrands(s) {
   return set;
 }
 
+// A saved preset wins. Older installs stored a prompt on one destination; keep that until they pick a preset.
+function chosenPrompt(s, brand) {
+  s = s || {};
+  const prompts = self.STGB_PROMPTS;
+  if (!prompts) return {id: 'general', text: ''};
+  if (s && (s.promptPreset || String(s.promptText || '').trim())) return prompts.resolve(s);
+  const legacy = brand === 'claude' ? s.claudePrompt : brand === 'chatgpt' ? s.chatgptPrompt : brand === 'codex' ? s.codexPrompt : '';
+  if (legacy && String(legacy).trim()) return {id: 'custom', text: String(legacy).trim()};
+  return prompts.resolve(s);
+}
+
 function relayOn(s) {
   return !!(s && s.useRelay && String(s.relayCode || '').trim());
 }
@@ -154,6 +165,9 @@ chrome.runtime.onMessage.addListener((msg, _s, reply) => {
     delete post.stgbDestination;
     delete post.stgbAction;
     try { post.digest = digest(post); } catch (_) { post.digest = ''; }
+    const chosen = chosenPrompt(s, brand);
+    post.preset = chosen.id;
+    post.prompt = String(chosen.text || '').slice(0, 8000);
     try {
       const r = viaRelay ? await dest.send(post, s, brand) : await dest.send(post, s);
       if (r.needsSetup) chrome.runtime.openOptionsPage();

@@ -18,15 +18,16 @@ The extension handles the post you choose to send. On that post's own page it al
 - image addresses and alt text, and video or GIF thumbnails and any caption visible in the player
 - a quoted post, the reply parent, and the author's thread on that page
 - a plain-text digest of those fields
+- the reply preset you picked (General, Research, Job hunt, Buy or skip, Learn later, Content ideas, or Custom) and the prompt text for that preset
 
-That data is sent only to a destination you configured and then picked in the menu. Destinations are:
+That data is sent only to a destination you configured and then picked in the menu. The preset and prompt travel with the post so the destination follows them. Destinations are:
 
 - **Grok Bot, or any other webhook you enter.** The extension POSTs the post as JSON to the https URL you saved. If you saved a key, it is sent on that request as `Authorization: Bearer` and `X-Sender-Key`.
 - **Claude.** If you leave the routine fields blank, the extension opens a claude.ai tab with the post in the address. If you save a routine URL and token, it POSTs the post to `api.anthropic.com` and sends the token as the credential for that request.
 - **ChatGPT.** If you leave the agent fields blank, the extension opens a chatgpt.com tab with the post in the address. If you save a Workspace Agent trigger and token, it POSTs the post to `api.chatgpt.com` and sends the token as the credential for that request.
 - **Codex.** The extension opens a chatgpt.com/codex tab with the post in the address. You press Send there.
 
-The extension does not read your direct messages or pages outside X. It reads a post when you click Send on it, and on a post's own page it also reads the author's thread and the reply parent shown there.
+It reads a post when you click Send on it, and on a post's own page it also reads the author's thread and the reply parent shown there. It does not read direct messages. On sendtogrokbot.com/connect, a click on Connect reads the text in that page's box and saves it in the extension. It does not read other pages on that site.
 
 ## Tokens and keys
 
@@ -50,7 +51,7 @@ Sites you send to (your webhook, Anthropic, OpenAI, or X) keep data under their 
 
 ## How long data stays
 
-The post is held in memory only long enough to send it or to open the tab. Tokens, the webhook URL, optional prompts, and which destinations are checked stay in local storage until you change them, clear them and click Save, or remove the extension. Removing the extension deletes its local storage. Clicking Save after you clear a destination also drops Chrome's permission for that site.
+The post is held in memory only long enough to send it or to open the tab. Tokens, the webhook URL, the reply preset and prompt, and which destinations are checked stay in local storage until you change them, clear them and click Save, or remove the extension. Removing the extension deletes its local storage. Clicking Save after you clear a destination also drops Chrome's permission for that site.
 
 ## Limited use
 

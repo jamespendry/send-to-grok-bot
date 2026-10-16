@@ -1,7 +1,7 @@
 {
   "manifest_version": 3,
   "name": "Send to Grok Bot",
-  "version": "1.1.0",
+  "version": "1.2.0",
   "description": "Adds a native-looking button to X posts that sends the post to Grok Bot, Claude, ChatGPT, or Codex.",
   "permissions": ["storage"],
   "optional_host_permissions": ["https://*/*"],
@@ -13,6 +13,16 @@
       "matches": ["https://x.com/*", "https://twitter.com/*"],
       "js": ["logos.js", "content.js"],
       "css": ["content.css"],
+      "all_frames": false
+    },
+    {
+      "matches": [
+        "https://sendtogrokbot.com/connect*",
+        "https://www.sendtogrokbot.com/connect*",
+        "https://sendtogrokbot.com/docs/connect*"
+      ],
+      "js": ["hosts.js", "connect.js", "relay.js", "site-connect.js"],
+      "run_at": "document_start",
       "all_frames": false
     }
   ],

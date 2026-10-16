@@ -1,7 +1,9 @@
 const $ = id => document.getElementById(id);
-const FIELDS = {webhookUrl: 'u', senderKey: 'k', claudeFireUrl: 'cu', claudeToken: 'ct', chatgptTriggerId: 'ti', chatgptToken: 'tt', codexEnvironment: 'ce', codexBranch: 'cb'};
-const PROMPTS = ['claudePrompt', 'chatgptPrompt', 'codexPrompt'];
+const FIELDS = {webhookUrl: 'u', senderKey: 'k', chatgptTriggerId: 'ti', chatgptToken: 'tt', codexEnvironment: 'ce', codexBranch: 'cb'};
 const CONTENT_HOSTS = new Set(['x.com', 'twitter.com']);
+const LEGACY_PROMPTS = ['claudePrompt', 'chatgptPrompt', 'codexPrompt'];
+let claudeUrl = '';
+let claudeToken = '';
 
 function hostOf(pattern) {
   try { return new URL(String(pattern).replace(/\*$/, 'x')).host; }
@@ -29,6 +31,10 @@ function removeStore(area, keys) {
   return new Promise(resolve => chrome.storage[area].remove(keys, resolve));
 }
 
+function cleanKey(v) {
+  return String(v || '').replace(/^authorization\s*:\s*/i, '').replace(/^bearer\s+/i, '').trim();
+}
+
 function show() {
   document.querySelectorAll('.fields').forEach(el => {
     if (!el.dataset.for) return;
@@ -40,13 +46,65 @@ function show() {
   if (relayFields && relayOn) relayFields.hidden = !relayOn.checked;
 }
 
+function claudeLine() {
+  const el = $('claudeHint');
+  const bits = [];
+  if (claudeUrl) bits.push('Routine address saved');
+  if (claudeToken) bits.push('secret saved');
+  el.className = '';
+  if (!bits.length) el.textContent = '';
+  else if (claudeUrl && claudeToken) el.textContent = 'Routine address and secret saved.';
+  else el.textContent = bits.join('. ') + '. Paste the other one too.';
+}
+
+function applyClaudePaste(raw, quiet) {
+  const text = String(raw || '').trim();
+  if (!text) {
+    claudeLine();
+    return;
+  }
+  const parsed = globalThis.STGB_CONNECT.parseSetupPaste(text);
+  const el = $('claudeHint');
+  if (!parsed.ok) {
+    if (!quiet) {
+      el.textContent = parsed.error;
+      el.className = 'err';
+    }
+    return;
+  }
+  if (parsed.kind === 'code' && parsed.destination === 'claude') {
+    if (parsed.fields.claudeFireUrl) claudeUrl = parsed.fields.claudeFireUrl;
+    if (parsed.fields.claudeToken) claudeToken = parsed.fields.claudeToken;
+    if (parsed.mode === 'link') { claudeUrl = ''; claudeToken = ''; }
+  } else if (parsed.kind === 'claude') {
+    if (parsed.url) claudeUrl = parsed.url;
+    if (parsed.token) claudeToken = parsed.token;
+  } else {
+    el.textContent = 'Paste the Claude routine address and secret in this box.';
+    el.className = 'err';
+    return;
+  }
+  el.className = 'ok';
+  claudeLine();
+  if (claudeUrl && claudeToken) el.className = 'ok';
+}
+
+function promptState() {
+  const preset = $('preset').value || 'general';
+  const written = $('promptText').value.trim();
+  if (preset === 'custom') return {promptPreset: 'custom', promptText: written};
+  const builtin = globalThis.STGB_PROMPTS.text(preset).trim();
+  if (!written || written === builtin) return {promptPreset: preset, promptText: ''};
+  return {promptPreset: 'custom', promptText: written};
+}
+
 function formState() {
   const o = {enabled: [...document.querySelectorAll('input[data-dest]:checked')].map(el => el.dataset.dest)};
   for (const [key, id] of Object.entries(FIELDS)) o[key] = $(id).value.trim();
-  for (const key of PROMPTS) {
-    const el = document.querySelector(`[data-prompt="${key}"]`);
-    o[key] = el ? el.value.trim() : '';
-  }
+  o.senderKey = cleanKey(o.senderKey);
+  o.claudeFireUrl = claudeUrl;
+  o.claudeToken = claudeToken;
+  Object.assign(o, promptState());
   const relayBox = document.getElementById('relayOn');
   const relayCode = document.getElementById('relayCode');
   o.useRelay = !!(relayBox && relayBox.checked);
@@ -60,14 +118,42 @@ function connectMessage(text, ok) {
   el.className = text ? (ok ? 'ok' : 'err') : '';
 }
 
-function applyDecoded(decoded) {
-  const box = document.querySelector(`input[data-dest="${decoded.destination}"]`);
-  if (box) box.checked = true;
-  for (const [key, value] of Object.entries(decoded.fields)) {
-    if (FIELDS[key]) $(FIELDS[key]).value = value;
-    const prompt = document.querySelector(`[data-prompt="${key}"]`);
-    if (prompt) prompt.value = value;
+function fillPresetSelect() {
+  const sel = $('preset');
+  sel.replaceChildren();
+  for (const id of globalThis.STGB_PROMPTS.ORDER) {
+    const opt = document.createElement('option');
+    opt.value = id;
+    opt.textContent = globalThis.STGB_PROMPTS.label(id);
+    sel.appendChild(opt);
   }
+  const custom = document.createElement('option');
+  custom.value = 'custom';
+  custom.textContent = 'Custom';
+  sel.appendChild(custom);
+}
+
+function showPrompt(preset, text) {
+  const id = preset === 'custom' || globalThis.STGB_PROMPTS.ORDER.indexOf(preset) !== -1 ? preset : 'general';
+  $('preset').value = id;
+  $('promptText').value = text || (id === 'custom' ? '' : globalThis.STGB_PROMPTS.text(id));
+}
+
+function fill(local) {
+  const enabled = brandSet(local.enabled, local.webhookUrl);
+  document.querySelectorAll('input[data-dest]').forEach(el => { el.checked = enabled.has(el.dataset.dest); });
+  for (const [key, id] of Object.entries(FIELDS)) $(id).value = local[key] || '';
+  claudeUrl = local.claudeFireUrl || '';
+  claudeToken = local.claudeToken || '';
+  $('claudePaste').value = '';
+  claudeLine();
+  if (local.promptPreset || local.promptText) showPrompt(local.promptPreset || 'general', local.promptText || '');
+  else if (local.claudePrompt || local.chatgptPrompt || local.codexPrompt) showPrompt('custom', local.claudePrompt || local.chatgptPrompt || local.codexPrompt || '');
+  else showPrompt('general', '');
+  const relayOn = document.getElementById('relayOn');
+  const relayCode = document.getElementById('relayCode');
+  if (relayOn) relayOn.checked = !!local.useRelay;
+  if (relayCode) relayCode.value = local.relayCode || '';
   show();
 }
 
@@ -77,8 +163,10 @@ function persist(o, done) {
   const origins = stgbNeededOrigins(o);
   const write = () => {
     chrome.storage.local.set(o, () => {
-      dropUnusedOrigins(stgbNeededOrigins(o));
-      done(chrome.runtime.lastError || null);
+      chrome.storage.local.remove(LEGACY_PROMPTS, () => {
+        dropUnusedOrigins(stgbNeededOrigins(o));
+        done(chrome.runtime.lastError || null);
+      });
     });
   };
   // permissions.request has to run in the click that started this, before any await.
@@ -89,36 +177,28 @@ function persist(o, done) {
   });
 }
 
-function useCode(raw, fromClick) {
-  const decoded = globalThis.STGB_CONNECT.decodeConnectionCode(raw);
-  if (!decoded.ok) {
-    if (!$('cc').value.trim()) $('cc').value = String(raw).replace(/^#connect=/i, '');
-    connectMessage(decoded.error, false);
+function usePaste(raw, fromClick) {
+  const parsed = globalThis.STGB_CONNECT.parseSetupPaste(raw);
+  if (!parsed.ok) {
+    if (!$('cc').value.trim()) $('cc').value = String(raw).replace(/^#/, '');
+    connectMessage(parsed.error, false);
     return;
   }
-  applyDecoded(decoded);
+  const plan = globalThis.STGB_CONNECT.planConnect(formState(), parsed);
+  if (!plan.ok) { connectMessage(plan.error, false); return; }
+  fill(plan.settings);
   $('cc').value = '';
   const o = formState();
   if (!fromClick) {
     chrome.storage.local.set(o, () => {
-      const needsAllow = stgbNeededOrigins(o).length > 0;
-      connectMessage(needsAllow ? decoded.message + ' Click Save and choose Allow.' : decoded.message, true);
+      chrome.storage.local.remove(LEGACY_PROMPTS, () => {
+        const needsAllow = stgbNeededOrigins(o).length > 0;
+        connectMessage(needsAllow ? plan.message + ' Click Save and choose Allow.' : plan.message, true);
+      });
     });
     return;
   }
-  persist(o, err => connectMessage(err ? (typeof err === 'string' ? err : 'Could not save. Click Save.') : decoded.message, !err));
-}
-
-function fill(local) {
-  const enabled = brandSet(local.enabled, local.webhookUrl);
-  document.querySelectorAll('input[data-dest]').forEach(el => { el.checked = enabled.has(el.dataset.dest); });
-  for (const [key, id] of Object.entries(FIELDS)) $(id).value = local[key] || '';
-  document.querySelectorAll('[data-prompt]').forEach(el => { el.value = local[el.dataset.prompt] || ''; });
-  const relayOn = document.getElementById('relayOn');
-  const relayCode = document.getElementById('relayCode');
-  if (relayOn) relayOn.checked = !!local.useRelay;
-  if (relayCode) relayCode.value = local.relayCode || '';
-  show();
+  persist(o, err => connectMessage(err ? (typeof err === 'string' ? err : 'Could not save. Click Save.') : plan.message, !err));
 }
 
 function settingsProblem(o) {
@@ -136,6 +216,14 @@ function say(text, bad) {
   $('m').classList.toggle('bad', !!bad);
   clearTimeout(say.t);
   if (!bad && text) say.t = setTimeout(() => { $('m').textContent = ''; $('m').classList.remove('bad'); }, 2000);
+}
+
+function copyText(text, button) {
+  const original = button.textContent;
+  navigator.clipboard.writeText(text).then(() => {
+    button.textContent = 'Copied';
+    setTimeout(() => { button.textContent = original; }, 1500);
+  }, () => say('Select the text and copy it', true));
 }
 
 function dropUnusedOrigins(keep) {
@@ -163,23 +251,44 @@ async function load() {
   fill(local);
 }
 
+fillPresetSelect();
 document.querySelectorAll('input[data-dest]').forEach(el => el.addEventListener('change', show));
 const relayOn = document.getElementById('relayOn');
 if (relayOn) relayOn.addEventListener('change', show);
 $('cc').addEventListener('input', () => connectMessage('', true));
+$('preset').addEventListener('change', () => {
+  const id = $('preset').value;
+  if (id !== 'custom') $('promptText').value = globalThis.STGB_PROMPTS.text(id);
+});
+$('promptText').addEventListener('input', () => {
+  const id = $('preset').value;
+  if (id !== 'custom' && $('promptText').value.trim() !== globalThis.STGB_PROMPTS.text(id).trim()) $('preset').value = 'custom';
+});
+$('claudePaste').addEventListener('input', () => {
+  const value = $('claudePaste').value;
+  const quiet = !/\n/.test(value) && !/sk-ant-/.test(value) && !/trig_/.test(value) && !/stgb1\./i.test(value);
+  applyClaudePaste(value, quiet);
+});
+$('claudePaste').addEventListener('blur', () => applyClaudePaste($('claudePaste').value, false));
+$('copyPrompt').onclick = () => copyText(globalThis.STGB_PROMPTS.text('general'), $('copyPrompt'));
+$('copySites').onclick = () => copyText(globalThis.STGB_PROMPTS.ALLOWED_SITES, $('copySites'));
 const ready = load();
-$('connect').onclick = () => ready.then(() => useCode($('cc').value, true));
+$('connect').onclick = () => ready.then(() => usePaste($('cc').value, true));
 $('s').onclick = () => ready.then(() => {
   persist(formState(), err => {
     if (err) say(typeof err === 'string' ? err : 'Could not save', true);
-    else say('Saved', false);
+    else {
+      $('claudePaste').value = '';
+      claudeLine();
+      say('Saved', false);
+    }
   });
 });
 
 ready.then(() => {
   const hash = location.hash || '';
-  if (!/^#connect=/i.test(hash)) return;
+  if (!/(?:^|[/#])stgb1\./i.test(hash) && !/^#connect=/i.test(hash)) return;
   try { history.replaceState(null, '', location.pathname + location.search); }
   catch (_) {}
-  useCode(hash, false);
+  usePaste(hash, false);
 });
