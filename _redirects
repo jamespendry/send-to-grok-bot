@@ -12,4 +12,6 @@
 /privacy            /docs/privacy.html         200
 /privacy.html       /docs/privacy.html         200
 /site.css           /docs/site.css             200
+/connect.js         /extension/connect.js      200
+/prompts.js         /extension/prompts.js      200
 /img/*              /docs/img/:splat           200

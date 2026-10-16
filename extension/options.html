@@ -30,12 +30,15 @@ summary{cursor:pointer;font-weight:600}
 #m{margin-left:12px;color:#00ba7c}
 #m.bad{color:#f4212e}
 #cm,#claudeHint{display:block;margin-top:8px;line-height:1.4}
+#notice{background:#f7f9f9;border:1px solid #cfd9de;border-radius:12px;padding:12px 14px;margin:0 0 16px;line-height:1.4}
+#notice[hidden]{display:none}
 #cm.ok,#claudeHint.ok{color:#00ba7c}
 #cm.err,#claudeHint.err{color:#f4212e}
 #relayCode{height:72px}
 </style></head><body>
 <h1>Send to Grok Bot</h1>
-<p>Check a destination to list it when you click a post. The menu sends to the one you pick. Free. Nothing to buy.</p>
+<p id="notice" role="status" hidden></p>
+<p>Check a destination to list it when you click a post. The menu sends to the one you pick. The button on X stays on each post even when nothing is filled in. Free. Nothing to buy.</p>
 <div class="notice">
   <p>Clicking Send on a post reads that post and, on its own page, the author's thread and the post it replies to. That includes the text, link, author, quoted post, links, and media addresses the page already shows, plus the reply preset you pick below. It is sent only to the destination you pick. Keys and tokens stay on this device and are sent only to sign in to that destination. No analytics. Nothing is sold. Click Save to store these settings on this device.</p>
   <p class="policy"><a href="https://sendtogrokbot.com/privacy" target="_blank" rel="noopener">Privacy policy</a></p>

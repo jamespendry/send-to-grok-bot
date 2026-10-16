@@ -6,7 +6,7 @@
 // Fallback: open the cloud task composer with the post prefilled.
 // https://chatgpt.com/codex?environment=<id>&branch=<name>&prompt=<text>
 // The prompt is applied when the composer opens; the user presses Send.
-const root = typeof globalThis !== 'undefined' ? globalThis : self;
+var root = typeof globalThis !== 'undefined' ? globalThis : self;
 root.STGB_DESTINATIONS = root.STGB_DESTINATIONS || {};
 
 const CODEX_DEFAULT_PROMPT = (root.STGB_PROMPTS && root.STGB_PROMPTS.text)

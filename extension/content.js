@@ -1,8 +1,8 @@
 // Send to Grok Bot: adds an icon-only action to each post's action bar on x.com.
 (() => {
-  if (globalThis.__STGB_BOOTED || document.documentElement.dataset.stgbBoot) return;
+  if (globalThis.__STGB_BOOTED || (document.documentElement && document.documentElement.dataset.stgbBoot)) return;
   globalThis.__STGB_BOOTED = true;
-  document.documentElement.dataset.stgbBoot = '1';
+  if (document.documentElement) document.documentElement.dataset.stgbBoot = '1';
 
   const NS = 'http://www.w3.org/2000/svg';
   const ICONS = {
@@ -405,14 +405,28 @@
         e.preventDefault(); e.stopPropagation(); e.stopImmediatePropagation();
         if (menuEl && menuEl.dataset.for === btn.dataset.stgbId) { closeMenu(); return; }
         chrome.runtime.sendMessage({stgbAction: 'list'}, r => {
-          const items = r && r.items;
-          if (!items || !items.length) return;
+          if (chrome.runtime.lastError || !r) {
+            showToast('grokbot', 'Send to Grok Bot', 'Reload the extension, then click the post again.');
+            return;
+          }
+          const items = r.items || [];
+          if (!items.length) {
+            showToast('grokbot', 'Choose a destination', r.message || 'Check a destination in settings.');
+            return;
+          }
           openMenu(btn, items, a);
         });
       }, true);
       bar.appendChild(wrap);
     });
   }
-  new MutationObserver(addButtons).observe(document.body, {childList: true, subtree: true});
-  addButtons();
+  function arm() {
+    if (!document.body) {
+      document.addEventListener('DOMContentLoaded', arm, {once: true});
+      return;
+    }
+    new MutationObserver(addButtons).observe(document.body, {childList: true, subtree: true});
+    addButtons();
+  }
+  arm();
 })();

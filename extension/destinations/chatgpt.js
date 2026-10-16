@@ -2,7 +2,7 @@
 //  - chatgpt_link: opens chatgpt.com/?q=<prompt> in a new tab (prefill only; user presses Send). Any plan.
 //  - chatgpt_workspace_agent: POSTs to a Workspace Agent API trigger (Business/Enterprise). Fully automatic.
 // Docs: https://developers.openai.com/workspace-agents/trigger-runs
-const root = typeof globalThis !== 'undefined' ? globalThis : self;
+var root = typeof globalThis !== 'undefined' ? globalThis : self;
 root.STGB_DESTINATIONS = root.STGB_DESTINATIONS || {};
 
 const CHATGPT_DEFAULT_PROMPT = (root.STGB_PROMPTS && root.STGB_PROMPTS.text)

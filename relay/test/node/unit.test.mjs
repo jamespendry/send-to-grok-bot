@@ -342,6 +342,70 @@ test("a pasted connect link, header, or Fire URL is recognized in any order", ()
   assert.match(plan.message, /Saved Send to Grok Bot/);
 });
 
+test("1.1.0 settings survive an update and a blank local webhook does not win", () => {
+  const { stgbMigrateSettings } = require("../../../extension/hosts.js");
+  const fromSync = stgbMigrateSettings(
+    { enabled: ["grokbot"], webhookUrl: "", senderKey: "" },
+    { webhookUrl: "https://hooks.example/hook", senderKey: "whsec_old" }
+  );
+  assert.equal(fromSync.settings.webhookUrl, "https://hooks.example/hook");
+  assert.equal(fromSync.settings.senderKey, "whsec_old");
+  assert.deepEqual(fromSync.settings.enabled, ["grokbot"]);
+  assert.deepEqual(fromSync.removeSync.sort(), ["senderKey", "webhookUrl"]);
+  const keepLocal = stgbMigrateSettings(
+    { enabled: ["grokbot"], webhookUrl: "https://hooks.example/local", senderKey: "local-key", claudePrompt: "old lens" },
+    { webhookUrl: "https://hooks.example/sync", senderKey: "sync-key" }
+  );
+  assert.equal(keepLocal.settings.webhookUrl, "https://hooks.example/local");
+  assert.equal(keepLocal.settings.senderKey, "local-key");
+  assert.equal(keepLocal.settings.promptPreset, "custom");
+  assert.equal(keepLocal.settings.promptText, "old lens");
+  const already = stgbMigrateSettings(
+    { promptPreset: "research", promptText: "", claudePrompt: "do not replace" },
+    {}
+  );
+  assert.equal(already.patch.promptText, undefined);
+  assert.equal(already.settings.promptPreset, "research");
+});
+
+test("service worker scripts share one scope and an empty webhook stays in the menu", () => {
+  const context = vm.createContext({ console });
+  context.globalThis = context;
+  context.self = context;
+  context.importScripts = () => {};
+  context.chrome = {
+    runtime: { onMessage: { addListener() {} }, onInstalled: { addListener() {} }, openOptionsPage() {} },
+    action: { onClicked: { addListener() {} } },
+    storage: { session: { set() {} } }
+  };
+  for (const file of ["hosts.js", "prompts.js", "destinations/grokbot.js", "destinations/claude.js", "destinations/chatgpt.js", "destinations/codex.js", "relay.js", "background.js"]) {
+    vm.runInContext(read("../extension/" + file), context, { filename: file });
+  }
+  assert.equal(typeof context.STGB_DESTINATIONS.grokbot.send, "function");
+  assert.equal(typeof context.STGB_DESTINATIONS.claude_routine.send, "function");
+  assert.equal(typeof context.STGB_DESTINATIONS.chatgpt_link.send, "function");
+  assert.equal(typeof context.STGB_DESTINATIONS.codex.send, "function");
+  const empty = context.menuItems({ enabled: ["grokbot"], webhookUrl: "" });
+  assert.equal(empty.length, 1);
+  assert.equal(empty[0].needsSetup, true);
+  const ready = context.menuItems({ enabled: ["grokbot"], webhookUrl: "https://hooks.example/hook" });
+  assert.equal(ready[0].needsSetup, false);
+  assert.equal(context.menuItems({}).length, 0);
+  assert.equal(context.menuItems({ enabled: ["chatgpt"] })[0].needsSetup, false);
+});
+
+test("the connect site is rooted at docs and hands the code to the extension", () => {
+  const page = read("../docs/connect.html");
+  assert.match(page, /src="\/connect\.js"/);
+  assert.match(page, /id="paste"/);
+  assert.match(page, /id="connect"/);
+  assert.match(read("../docs/_redirects"), /\/connect\s+\/connect\.html\s+200/);
+  assert.match(read("../extension/manifest.json"), /"version": "1\.2\.1"/);
+  assert.match(read("../extension/manifest.json"), /https:\/\/sendtogrokbot\.com\/connect\*/);
+  assert.match(read("../site/wrangler.toml"), /directory = "\.\.\/dist\/site"/);
+  assert.match(read("../README.md"), /npx wrangler deploy --config site\/wrangler\.toml/);
+});
+
 test("Claude text keeps the old shape and prefixes a preset prompt", () => {
   const { claudeRoutineText } = require("../../../extension/destinations/claude.js");
   const bare = { url: "https://x.com/a/status/1", author: "ada", sentAt: "t", text: "hello" };

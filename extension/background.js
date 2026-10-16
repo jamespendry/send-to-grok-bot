@@ -55,18 +55,17 @@ function removeStore(area, keys) {
   return new Promise(resolve => chrome.storage[area].remove(keys, resolve));
 }
 
-// Tokens and keys live in local storage. Older installs kept the webhook in sync.
+// Tokens and keys live in local storage. 1.1.0 used the same local keys.
+// Older installs kept the webhook in sync. An update copies those across and does not blank a saved webhook.
 async function loadSettings() {
-  const local = await getStore('local', null);
-  const sync = await getStore('sync', ['webhookUrl', 'senderKey']);
-  if ((sync.webhookUrl || sync.senderKey) && local.webhookUrl == null && local.senderKey == null) {
-    const patch = {webhookUrl: sync.webhookUrl || '', senderKey: sync.senderKey || ''};
-    if (!Array.isArray(local.enabled)) patch.enabled = ['grokbot'];
-    await setStore('local', patch);
-    await removeStore('sync', ['webhookUrl', 'senderKey']);
-    Object.assign(local, patch);
-  }
-  return local;
+  const local = await getStore('local', null) || {};
+  let sync = {};
+  try { sync = await getStore('sync', null) || {}; }
+  catch (_) { sync = {}; }
+  const migrated = stgbMigrateSettings(local, sync);
+  if (migrated.patch && Object.keys(migrated.patch).length) await setStore('local', migrated.patch);
+  if (migrated.removeSync && migrated.removeSync.length) await removeStore('sync', migrated.removeSync);
+  return migrated.settings;
 }
 
 const BRAND_NAME = {grokbot: 'Grok Bot', claude: 'Claude', chatgpt: 'ChatGPT', codex: 'Codex'};
@@ -97,15 +96,30 @@ function relayOn(s) {
   return !!(s && s.useRelay && String(s.relayCode || '').trim());
 }
 
+function grokReady(s) {
+  return relayOn(s) || !!(s && String(s.webhookUrl || '').trim());
+}
+
+const SETUP_NOTICE = {
+  none: 'Check a destination, then click Save. ChatGPT and Codex need no webhook. The button on X stays on each post either way.',
+  grokbot: 'Grok Bot is checked, but the webhook is empty. Paste a connect link and click Connect. The button on X stays on each post either way.'
+};
+
 function menuItems(s) {
   const on = enabledBrands(s);
-  const relay = relayOn(s);
   const items = [];
-  if (on.has('grokbot') && (relay || (s.webhookUrl || '').trim())) items.push({brand: 'grokbot', label: 'Send to Grok Bot'});
-  if (on.has('claude')) items.push({brand: 'claude', label: 'Send to Claude'});
-  if (on.has('chatgpt')) items.push({brand: 'chatgpt', label: 'Send to ChatGPT'});
-  if (on.has('codex')) items.push({brand: 'codex', label: 'Send to Codex'});
+  if (on.has('grokbot')) items.push({brand: 'grokbot', label: 'Send to Grok Bot', needsSetup: !grokReady(s)});
+  if (on.has('claude')) items.push({brand: 'claude', label: 'Send to Claude', needsSetup: false});
+  if (on.has('chatgpt')) items.push({brand: 'chatgpt', label: 'Send to ChatGPT', needsSetup: false});
+  if (on.has('codex')) items.push({brand: 'codex', label: 'Send to Codex', needsSetup: false});
   return items;
+}
+
+async function showSetup(message) {
+  try { await chrome.storage.session.set({setupNotice: message}); }
+  catch (_) {}
+  try { chrome.runtime.openOptionsPage(); }
+  catch (_) {}
 }
 
 // One menu row maps to a single sender. Routine/agent wins when its fields are filled.
@@ -137,27 +151,42 @@ chrome.runtime.onMessage.addListener((msg, _s, reply) => {
     (async () => {
       const s = await loadSettings();
       const items = menuItems(s);
-      if (!items.length) chrome.runtime.openOptionsPage();
+      if (!items.length) {
+        await showSetup(SETUP_NOTICE.none);
+        reply({ok: true, items, message: SETUP_NOTICE.none});
+        return;
+      }
       reply({ok: true, items});
     })();
     return true;
   }
   const brand = msg.stgbDestination;
   if (!brand || !BRAND_NAME[brand]) {
-    chrome.runtime.openOptionsPage();
-    reply({ok: false, error: 'Set up first', needsSetup: true});
+    showSetup(SETUP_NOTICE.none);
+    reply({ok: false, error: SETUP_NOTICE.none, needsSetup: true});
     return;
   }
-  if (alreadySent(msg.url, brand)) { reply({ok: true, duplicate: true}); return; }
   (async () => {
     const s = await loadSettings();
     const name = BRAND_NAME[brand];
-    const allowed = menuItems(s).some(item => item.brand === brand);
+    const items = menuItems(s);
+    const item = items.find(row => row.brand === brand);
+    if (!item) {
+      await showSetup(SETUP_NOTICE.none);
+      reply({ok: false, error: SETUP_NOTICE.none, needsSetup: true, brand, title: 'Choose a destination'});
+      return;
+    }
+    if (item.needsSetup) {
+      await showSetup(SETUP_NOTICE.grokbot);
+      reply({ok: false, error: SETUP_NOTICE.grokbot, needsSetup: true, brand, title: 'Set up Grok Bot'});
+      return;
+    }
+    if (alreadySent(msg.url, brand)) { reply({ok: true, duplicate: true}); return; }
     const viaRelay = relayOn(s) && (brand === 'grokbot' || brand === 'claude');
-    const dest = allowed && (viaRelay ? self.STGB_RELAY : pickDest(brand, s));
+    const dest = viaRelay ? self.STGB_RELAY : pickDest(brand, s);
     if (!dest) {
-      chrome.runtime.openOptionsPage();
-      reply({ok: false, error: 'Set up first', needsSetup: true, brand, title: "Couldn't send to " + name});
+      await showSetup(SETUP_NOTICE.grokbot);
+      reply({ok: false, error: SETUP_NOTICE.grokbot, needsSetup: true, brand, title: 'Set up ' + name});
       return;
     }
     // Version 2 object, including media and thumbnails. Every destination receives it.
@@ -170,7 +199,7 @@ chrome.runtime.onMessage.addListener((msg, _s, reply) => {
     post.prompt = String(chosen.text || '').slice(0, 8000);
     try {
       const r = viaRelay ? await dest.send(post, s, brand) : await dest.send(post, s);
-      if (r.needsSetup) chrome.runtime.openOptionsPage();
+      if (r.needsSetup) await showSetup(r.error || SETUP_NOTICE.grokbot);
       const ok = !!r.ok;
       reply({ok, error: ok ? '' : (r.error || 'failed'), needsSetup: !!r.needsSetup, brand, title: (ok ? 'Sent to ' : "Couldn't send to ") + name});
     } catch (e) {
@@ -180,3 +209,7 @@ chrome.runtime.onMessage.addListener((msg, _s, reply) => {
   return true;
 });
 chrome.action.onClicked.addListener(() => chrome.runtime.openOptionsPage());
+chrome.runtime.onInstalled.addListener(details => {
+  if (!details || (details.reason !== 'update' && details.reason !== 'install')) return;
+  loadSettings().catch(() => {});
+});

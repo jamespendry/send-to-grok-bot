@@ -4,16 +4,16 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Set up Claude</title>
-<link rel="stylesheet" href="../site.css">
+<link rel="stylesheet" href="/site.css">
 </head>
 <body>
 <main>
 <nav>
-  <a href="./">Setup</a>
-  <a href="grok.html">Grok Bot</a>
-  <a href="claude.html">Claude</a>
-  <a href="../connect.html">Connect</a>
-  <a href="../privacy.html">Privacy</a>
+  <a href="/setup/">Setup</a>
+  <a href="/setup/grok">Grok Bot</a>
+  <a href="/setup/claude">Claude</a>
+  <a href="/connect">Connect</a>
+  <a href="/privacy">Privacy</a>
 </nav>
 <h1>Claude</h1>
 <p>Two ways. The first needs no setup.</p>
@@ -48,11 +48,11 @@
 <p>In the extension, open Send to Claude and paste both into the one box, in any order. Click Save. If Chrome asks to allow api.anthropic.com, choose Allow.</p>
 
 <figure>
-  <img src="../img/claude-routine-overview.png" alt="The task page. History is on the left. The Active toggle and the three-dots button are at the top right.">
+  <img src="/img/claude-routine-overview.png" alt="The task page. History is on the left. The Active toggle and the three-dots button are at the top right.">
   <figcaption>The task page. The three dots sit at the top right, next to Active. History is the column on the left.</figcaption>
 </figure>
 <figure>
-  <img src="../img/claude-routine-api-trigger.png" alt="Edit scheduled task. Trigger is API. The Fire URL has a copy button. Token has a Regenerate button.">
+  <img src="/img/claude-routine-api-trigger.png" alt="Edit scheduled task. Trigger is API. The Fire URL has a copy button. Token has a Regenerate button.">
   <figcaption>Edit. Trigger is API. Copy the Fire URL. Regenerate makes a new token.</figcaption>
 </figure>
 
@@ -86,7 +86,7 @@ pbs.twimg.com</pre>
 
 <p>After this, a send shows up under History on the task page. Leave the task Active. To replace a token, open the three dots, click Edit, click Regenerate, paste the new token into the extension, and click Save.</p>
 </main>
-<script src="../../extension/prompts.js"></script>
+<script src="/prompts.js"></script>
 <script>
 (function () {
   var prompt = document.getElementById('prompt');

@@ -10,7 +10,7 @@ People who use Grok Bot can paste this one line into the bot:
 Set up Send to Grok Bot for me: https://github.com/jamespendry/send-to-grok-bot
 ```
 
-The bot creates a webhook routine with the General prompt and replies with one link, `https://sendtogrokbot.com/connect#stgb1.` followed by a code. Open that link and click Connect. Guides for the site are [docs/setup/index.html](docs/setup/index.html) (`/setup`), [docs/setup/grok.html](docs/setup/grok.html) (`/setup/grok`), [docs/setup/claude.html](docs/setup/claude.html) (`/setup/claude`), and [docs/privacy.html](docs/privacy.html) (`/privacy`). With the repository as the site root, [`_redirects`](_redirects) serves those paths.
+The bot creates a webhook routine with the General prompt and replies with one link, `https://sendtogrokbot.com/connect#stgb1.` followed by a code. Open that link and click Connect. Guides for the site are [docs/setup/index.html](docs/setup/index.html) (`/setup`), [docs/setup/grok.html](docs/setup/grok.html) (`/setup/grok`), [docs/setup/claude.html](docs/setup/claude.html) (`/setup/claude`), and [docs/privacy.html](docs/privacy.html) (`/privacy`). `/connect` fills the box from that link. With the extension installed, Connect writes it into the extension.
 
 People installing by hand: the steps below are from a folder. Store listing text, promo images, and the upload steps are in [store/](store/). `scripts/package.sh` writes the zip.
 
@@ -101,7 +101,7 @@ You should see a menu with the destinations you turned on. Click one.
 - Grok Bot or a Claude routine: the icon turns green when the send is accepted.
 - ChatGPT, Codex, or Claude with the routine fields left blank: a new tab opens with the post already written in the box. You press Send.
 
-If the icon turns red, a line at the bottom of the screen says why. If nothing is set up, the settings page opens.
+If the icon turns red, a line at the bottom of the screen says why. The button is on every post even when nothing is filled in. If a destination is not set up, clicking it opens this settings page and says what to paste.
 
 ![The arrow icon in an X post's action row](docs/img/09-post-button.png)
 
@@ -140,6 +140,25 @@ The same page accepts a Grok Bot URL and Authorization header pasted together, i
 `options.html#stgb1.` and `options.html#connect=stgb1.` also fill the options page, and then the page removes the hash. Links that start with `chrome-extension://` do not open reliably from a web page.
 
 The page stores the address and the key in `chrome.storage.local` on this computer. It does not keep the link.
+
+## Website
+
+`docs/` is the site for sendtogrokbot.com. Build it, then deploy the folder as a Cloudflare Worker with static assets:
+
+```bash
+scripts/build-site.sh
+npx wrangler deploy --config site/wrangler.toml
+```
+
+`scripts/build-site.sh` writes `dist/site`. That folder is the site root: `/` opens setup, `/connect` is the connect page, `/setup`, `/setup/grok`, `/setup/claude`, and `/privacy` are the guides. The build copies `extension/connect.js` to `/connect.js` and `extension/prompts.js` to `/prompts.js` so the pages work without the rest of the repository. Attach the domain `sendtogrokbot.com` to the `sendtogrokbot` worker in the Cloudflare dashboard after the first deploy.
+
+The same folder can go to Cloudflare Pages:
+
+```bash
+npx wrangler pages deploy dist/site --project-name sendtogrokbot
+```
+
+[`docs/_redirects`](docs/_redirects) is the pretty-URL list for that root. [`_redirects`](_redirects) at the repository root is only for serving the same paths when the whole repository is the site root.
 
 ## Relay (optional)
 
