@@ -21,9 +21,12 @@ textarea:focus,input:focus{outline:none;border-color:#1d9bf0}
 button{margin-top:12px;padding:10px 18px;border:0;border-radius:9999px;background:#0f1419;color:#fff;font:inherit;font-weight:600;cursor:pointer}
 button.secondary{background:#eff3f4;color:#0f1419}
 .row{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
-#msg.ok{color:#00ba7c}
+.hero-step{margin:28px 0 0}
+.hero-step h2{font-size:24px;margin:0 0 8px}
+#installed{font-weight:700}
+#msg.ok{color:#00ba7c;font-size:18px;font-weight:700}
 #msg.err{color:#f4212e}
-#msg{display:block;margin-top:8px}
+#msg{display:block;margin-top:12px}
 .history p{margin:0 0 8px;overflow-wrap:anywhere}
 figure{margin:16px 0}
 figure img{max-width:100%;height:auto;border:1px solid #eff3f4;border-radius:8px}

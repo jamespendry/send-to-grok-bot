@@ -9,6 +9,7 @@
 <body>
 <main>
 <nav>
+  <a href="/">Home</a>
   <a href="/setup/">Setup</a>
   <a href="/setup/grok">Grok Bot</a>
   <a href="/setup/claude">Claude</a>
@@ -23,11 +24,11 @@
 <h2>Have a Grok Bot do the Grok setup</h2>
 <p>Paste this one line into Grok Bot:</p>
 <p class="line">Set up Send to Grok Bot for me: https://github.com/jamespendry/send-to-grok-bot</p>
-<p>It creates the routine and replies with one link. Open that link and click Connect. The steps are on the <a href="/setup/grok">Grok Bot</a> page.</p>
+<p>It creates the routine, then sends one message: install the extension, open the sidebar links named Webhook URL and Authorization header, copy both, and paste them at <a href="/connect">sendtogrokbot.com/connect</a>. The steps are on the <a href="/setup/grok">Grok Bot</a> page.</p>
 
 <h2>Pick where posts go</h2>
 <ul>
-  <li><a href="/setup/grok">Grok Bot</a> runs a routine for you after one connect link. If the bot cannot see the address, there is a short copy-and-paste fallback.</li>
+  <li><a href="/setup/grok">Grok Bot</a> creates the routine. You paste the webhook URL and the Authorization header together on the connect page.</li>
   <li><a href="/setup/claude">Claude</a> can open a tab with no setup, or run a task. The task cannot be created for you. The page has the clicks, in order.</li>
   <li>ChatGPT needs no setup. In the extension, check Send to ChatGPT and click Save. Clicking a post opens ChatGPT with the post filled in. You press Send.</li>
   <li>Codex needs no setup. Check Send to Codex and click Save. Clicking a post opens Codex with the post filled in. You press Send.</li>

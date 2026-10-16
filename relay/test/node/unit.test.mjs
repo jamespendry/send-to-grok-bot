@@ -364,6 +364,13 @@ test("a pasted connect link, header, or Fire URL is recognized in any order", ()
   assert.deepEqual(plan.settings.enabled, ["chatgpt", "grokbot"]);
   assert.equal(plan.settings.promptPreset, "research");
   assert.match(plan.message, /Saved Send to Grok Bot/);
+  const { finishMessage } = require("../../../extension/connect.js");
+  assert.equal(finishMessage(fromLink, plan), "Now open x.com and click the arrow.");
+  const urlOnlyGrok = parseSetupPaste("https://hooks.example.com/hook");
+  assert.equal(urlOnlyGrok.ok, true);
+  const rejected = planConnect({ enabled: [] }, urlOnlyGrok);
+  assert.equal(rejected.ok, false);
+  assert.match(rejected.error, /Authorization header/);
 });
 
 test("1.1.0 settings survive an update and a blank local webhook does not win", () => {
@@ -442,13 +449,116 @@ test("the share sheet shortcut posts one relay code and names each destination",
   assert.match(steps, /stgbr1/);
 });
 
+test("pasting a webhook and header on /connect saves inside the paste gesture", async () => {
+  assert.match(read("../extension/background.js"), /stgbAction === 'request-origins'/);
+  assert.match(read("../extension/site-connect.js"), /request-origins/);
+  const box = { value: "keep-me" };
+  const msg = { textContent: "", className: "" };
+  let duringPaste = false;
+  let requests = 0;
+  const saved = {};
+  const context = {
+    console,
+    URL,
+    TextEncoder,
+    TextDecoder,
+    btoa,
+    atob,
+    setTimeout,
+    clearTimeout
+  };
+  context.globalThis = context;
+  context.listeners = {};
+  context.document = {
+    documentElement: { dataset: {} },
+    getElementById(id) {
+      if (id === "paste") return box;
+      if (id === "msg") return msg;
+      return null;
+    },
+    addEventListener(type, fn) { context.listeners[type] = fn; },
+    dispatchEvent() {}
+  };
+  context.chrome = {
+    runtime: {
+      lastError: null,
+      sendMessage(msg, cb) {
+        requests += 1;
+        assert.equal(duringPaste, true);
+        context.requested = { origins: msg.origins };
+        queueMicrotask(() => cb(context.deny ? { ok: false } : { ok: true }));
+      }
+    },
+    storage: {
+      local: {
+        get(_keys, cb) { cb({ enabled: [] }); },
+        set(obj, cb) { Object.assign(saved, obj); cb(); },
+        remove(_keys, cb) { cb(); }
+      }
+    }
+  };
+  context.CustomEvent = class CustomEvent {
+    constructor(_type, init) { this.detail = init && init.detail; }
+  };
+  vm.createContext(context);
+  vm.runInContext(read("../extension/hosts.js"), context, { filename: "hosts.js" });
+  vm.runInContext(read("../extension/connect.js"), context, { filename: "connect.js" });
+  vm.runInContext(read("../extension/site-connect.js"), context, { filename: "site-connect.js" });
+  assert.equal(context.document.documentElement.dataset.stgbReady, "1");
+  const raw = "Authorization: Bearer whsec_real_key\nhttps://hooks.example.com/hook";
+  duringPaste = true;
+  context.listeners.paste({ target: box, clipboardData: { getData() { return raw; } } });
+  duringPaste = false;
+  assert.equal(requests, 1);
+  assert.equal(JSON.stringify(context.requested), JSON.stringify({ origins: ["https://hooks.example.com/*"] }));
+  await new Promise(resolve => setTimeout(resolve, 0));
+  assert.equal(saved.webhookUrl, "https://hooks.example.com/hook");
+  assert.equal(saved.senderKey, "whsec_real_key");
+  assert.equal(msg.textContent, "Now open x.com and click the arrow.");
+  assert.equal(msg.className, "ok");
+  assert.equal(box.value, "");
+  context.listeners.paste({
+    target: box,
+    clipboardData: { getData() { return "https://hooks.example.com/only"; } }
+  });
+  assert.equal(requests, 1);
+  assert.equal(msg.className, "err");
+  assert.match(msg.textContent, /Authorization header/);
+  context.deny = true;
+  duringPaste = true;
+  context.listeners.paste({ target: box, clipboardData: { getData() { return raw; } } });
+  duringPaste = false;
+  await new Promise(resolve => setTimeout(resolve, 0));
+  assert.equal(msg.textContent, "Choose Allow to finish.");
+  assert.equal(msg.className, "err");
+});
+
 test("the connect site is rooted at docs and hands the code to the extension", async () => {
   const page = read("../docs/connect.html");
   assert.match(page, /src="\/connect\.js"/);
   assert.match(page, /id="paste"/);
-  assert.match(page, /id="connect"/);
+  assert.match(page, /Step 1\. Install the extension/);
+  assert.match(page, /Step 2\. Paste here/);
+  assert.match(page, /Load unpacked/);
+  assert.match(page, /chrome:\/\/extensions/);
+  assert.doesNotMatch(page, /id="connect"/);
+  assert.doesNotMatch(page, /click Connect/);
+  assert.match(read("../docs/index.html"), /href="\/connect"/);
+  assert.doesNotMatch(read("../docs/index.html"), /http-equiv="refresh"/);
+  assert.match(read("../docs/_redirects"), /\/\s+\/index\.html\s+200/);
+  assert.match(read("../_redirects"), /\/\s+\/docs\/index\.html\s+200/);
   assert.match(read("../docs/_redirects"), /\/connect\s+\/connect\.html\s+200/);
-  assert.match(read("../extension/manifest.json"), /"version": "1\.2\.1"/);
+  assert.match(read("../extension/manifest.json"), /"version": "1\.2\.2"/);
+  assert.match(read("../extension/options.html"), /id="more"/);
+  assert.match(read("../extension/options.html"), /More options/);
+  assert.match(read("../extension/options.html"), /id="cc"/);
+  assert.doesNotMatch(read("../extension/options.html"), /id="connect"/);
+  assert.match(read("../extension/site-connect.js"), /addEventListener\('paste'/);
+  assert.match(read("../extension/site-connect.js"), /Choose Allow to finish/);
+  assert.match(read("../AGENTS.md"), /send one message and stop/);
+  assert.match(read("../AGENTS.md"), /Now open x.com and click the arrow/);
+  assert.doesNotMatch(read("../plugin/skills/send-to-grok-bot/SKILL.md"), /stgb1/);
+  assert.doesNotMatch(read("../plugin/skills/send-to-grok-bot/SKILL.md"), /click Connect/);
   assert.match(read("../extension/manifest.json"), /https:\/\/sendtogrokbot\.com\/connect\*/);
   assert.match(read("../site/wrangler.toml"), /directory = "\.\.\/dist\/site"/);
   assert.match(read("../README.md"), /npx wrangler deploy --config site\/wrangler\.toml/);
@@ -535,7 +645,8 @@ test("the marketplace plugin package and logo match the form", () => {
   const skill = read("../plugin/skills/send-to-grok-bot/SKILL.md");
   assert.match(skill, /^---\nname: send-to-grok-bot\n/);
   assert.match(skill, /description:/);
-  assert.match(skill, /https:\/\/sendtogrokbot\.com\/connect#/);
+  assert.match(skill, /sendtogrokbot\.com\/connect/);
+  assert.match(skill, /Authorization header/);
   assert.match(skill, /one-line takeaway/);
   assert.match(skill, /job-hunt/);
   assert.doesNotMatch(skill, /rk_[A-Za-z0-9_-]{20}/);

@@ -9,6 +9,7 @@
 <body>
 <main>
 <nav>
+  <a href="/">Home</a>
   <a href="/setup/">Setup</a>
   <a href="/setup/grok">Grok Bot</a>
   <a href="/setup/claude">Claude</a>
@@ -43,7 +44,7 @@
   <li><strong>ChatGPT.</strong> If you leave the agent fields blank, the extension opens a chatgpt.com tab with the post in the address. If you save a Workspace Agent trigger and token, it POSTs the post to <code>api.chatgpt.com</code> and sends the token as the credential for that request.</li>
   <li><strong>Codex.</strong> The extension opens a chatgpt.com/codex tab with the post in the address. You press Send there.</li>
 </ul>
-<p>It reads a post when you click Send on it, and on a post's own page it also reads the author's thread and the reply parent shown there. It does not read direct messages. On sendtogrokbot.com/connect, a click on Connect reads the text in that page's box and saves it in the extension. It does not read other pages on that site.</p>
+<p>It reads a post when you click Send on it, and on a post's own page it also reads the author's thread and the reply parent shown there. It does not read direct messages. On sendtogrokbot.com/connect, pasting into the box reads that paste and saves it in the extension. It does not read other pages on that site.</p>
 
 <h2>Tokens and keys</h2>
 <p>Webhook keys and API tokens are stored in <code>chrome.storage.local</code> on this device. They are not synced to a Google account. If an older version of the extension still has a webhook URL and key in <code>chrome.storage.sync</code>, those two values are copied to local storage once and then deleted from sync.</p>

@@ -1,5 +1,5 @@
 # Pretty URLs when this folder is the site root (sendtogrokbot.com).
-/            /setup/index.html   200
+/            /index.html         200
 /connect     /connect.html       200
 /setup       /setup/index.html   200
 /setup/      /setup/index.html   200

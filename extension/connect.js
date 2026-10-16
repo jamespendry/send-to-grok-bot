@@ -417,6 +417,9 @@
       if (!enabled.length) enabled.push('grokbot', 'claude');
       message = 'Saved the relay on this computer.';
     } else if (parsed.kind === 'code') {
+      if (parsed.destination === 'grokbot' && !(parsed.fields && String(parsed.fields.senderKey || '').trim())) {
+        return {ok: false, error: 'Paste the webhook URL and the Authorization header together.'};
+      }
       enable(parsed.destination);
       const fields = parsed.fields || {};
       for (const key of Object.keys(fields)) next[key] = fields[key];
@@ -453,12 +456,20 @@
     return {ok: true, settings: next, removeKeys: removeKeys, origins: origins, message: message, plain: parsed.plain || message};
   }
 
+  function finishMessage(parsed, plan) {
+    if (parsed && parsed.destination === 'grokbot' && parsed.fields && String(parsed.fields.senderKey || '').trim()) {
+      return 'Now open x.com and click the arrow.';
+    }
+    return (plan && plan.message) || '';
+  }
+
   const api = {
     PREFIX: PREFIX,
     encodeConnectionCode: encodeConnectionCode,
     decodeConnectionCode: decodeConnectionCode,
     parseSetupPaste: parseSetupPaste,
-    planConnect: planConnect
+    planConnect: planConnect,
+    finishMessage: finishMessage
   };
   if (typeof module !== 'undefined' && module.exports) module.exports = api;
   root.STGB_CONNECT = api;

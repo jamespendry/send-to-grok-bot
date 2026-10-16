@@ -1,7 +1,7 @@
 {
   "name": "send-to-grok-bot",
   "version": "1.0.0",
-  "description": "Creates the Send to Grok Bot webhook routine, returns one connect link, and replies to an X post using the preset sent with that post.",
+  "description": "Creates the Send to Grok Bot webhook routine, then one message to paste the Webhook URL and Authorization header at sendtogrokbot.com/connect, and replies to an X post using the preset sent with that post.",
   "author": {
     "name": "James Pendry"
   },

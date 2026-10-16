@@ -27,7 +27,7 @@ That data is sent only to a destination you configured and then picked in the me
 - **ChatGPT.** If you leave the agent fields blank, the extension opens a chatgpt.com tab with the post in the address. If you save a Workspace Agent trigger and token, it POSTs the post to `api.chatgpt.com` and sends the token as the credential for that request.
 - **Codex.** The extension opens a chatgpt.com/codex tab with the post in the address. You press Send there.
 
-It reads a post when you click Send on it, and on a post's own page it also reads the author's thread and the reply parent shown there. It does not read direct messages. On sendtogrokbot.com/connect, a click on Connect reads the text in that page's box and saves it in the extension. It does not read other pages on that site.
+It reads a post when you click Send on it, and on a post's own page it also reads the author's thread and the reply parent shown there. It does not read direct messages. On sendtogrokbot.com/connect, pasting into the box reads that paste and saves it in the extension. It does not read other pages on that site.
 
 ## Tokens and keys
 

@@ -157,7 +157,7 @@ function fill(local) {
   show();
 }
 
-function persist(o, done) {
+function persist(o, done, denyText) {
   if (!settingsLoaded) { done('Settings did not load. Reload this page before you click Save.'); return; }
   const problem = settingsProblem(o);
   if (problem) { done(problem); return; }
@@ -170,12 +170,23 @@ function persist(o, done) {
       });
     });
   };
-  // permissions.request has to run in the click that started this, before any await.
+  // permissions.request has to run in the gesture that started this, before any await.
   if (!origins.length) { write(); return; }
-  chrome.permissions.request({origins}, granted => {
-    if (!granted) { done('Click Save and choose Allow to send there'); return; }
-    write();
-  });
+  try {
+    chrome.permissions.request({origins}, granted => {
+      const err = chrome.runtime.lastError && chrome.runtime.lastError.message;
+      if (!granted || err) { done(denyText || 'Click Save and choose Allow to send there'); return; }
+      write();
+    });
+  } catch (err) {
+    done((err && err.message) || denyText || 'Click Save and choose Allow to send there');
+  }
+}
+
+function clearPasteBox() {
+  const wipe = () => { $('cc').value = ''; };
+  wipe();
+  setTimeout(wipe, 0);
 }
 
 function usePaste(raw, fromClick) {
@@ -188,18 +199,33 @@ function usePaste(raw, fromClick) {
   const plan = globalThis.STGB_CONNECT.planConnect(formState(), parsed);
   if (!plan.ok) { connectMessage(plan.error, false); return; }
   fill(plan.settings);
-  $('cc').value = '';
+  const text = globalThis.STGB_CONNECT.finishMessage(parsed, plan);
   const o = formState();
   if (!fromClick) {
+    clearPasteBox();
     chrome.storage.local.set(o, () => {
       chrome.storage.local.remove(LEGACY_PROMPTS, () => {
         const needsAllow = stgbNeededOrigins(o).length > 0;
-        connectMessage(needsAllow ? plan.message + ' Click Save and choose Allow.' : plan.message, true);
+        connectMessage(needsAllow ? text + ' Click Save and choose Allow.' : text, true);
       });
     });
     return;
   }
-  persist(o, err => connectMessage(err ? (typeof err === 'string' ? err : 'Could not save. Click Save.') : plan.message, !err));
+  persist(o, err => {
+    if (!err) clearPasteBox();
+    connectMessage(err ? (typeof err === 'string' ? err : 'Could not save. Click Save.') : text, !err);
+  }, 'Choose Allow to finish.');
+}
+
+function configured(local) {
+  const s = local || {};
+  if (String(s.webhookUrl || '').trim()) return true;
+  if (String(s.senderKey || '').trim()) return true;
+  if (String(s.claudeFireUrl || '').trim() || String(s.claudeToken || '').trim()) return true;
+  if (String(s.chatgptTriggerId || '').trim() || String(s.chatgptToken || '').trim()) return true;
+  if (String(s.relayCode || '').trim()) return true;
+  if (String(s.codexEnvironment || '').trim()) return true;
+  return false;
 }
 
 function settingsProblem(o) {
@@ -259,6 +285,8 @@ async function load() {
   local = migrated.settings;
   fill(local);
   settingsLoaded = true;
+  const more = document.getElementById('more');
+  if (more) more.open = configured(local);
   let notice = '';
   try {
     const session = await new Promise(resolve => chrome.storage.session.get('setupNotice', resolve));
@@ -267,7 +295,7 @@ async function load() {
   } catch (_) {}
   const grokOn = brandSet(local.enabled, local.webhookUrl).has('grokbot');
   const grokEmpty = !(local.webhookUrl || '').trim() && !(local.useRelay && (local.relayCode || '').trim());
-  if (!notice && grokOn && grokEmpty) notice = 'Grok Bot is checked, but the webhook is empty. Paste a connect link and click Connect. A webhook saved by version 1.1.0 is kept when it is still in this browser.';
+  if (!notice && grokOn && grokEmpty) notice = 'Grok Bot is checked, but the webhook is empty. Paste the webhook URL and the Authorization header together in the box above. A webhook saved by version 1.1.0 is kept when it is still in this browser.';
   showNotice(notice);
 }
 
@@ -293,8 +321,18 @@ $('claudePaste').addEventListener('blur', () => applyClaudePaste($('claudePaste'
 $('copyPrompt').onclick = () => copyText(globalThis.STGB_PROMPTS.text('general'), $('copyPrompt'));
 $('copySites').onclick = () => copyText(globalThis.STGB_PROMPTS.ALLOWED_SITES, $('copySites'));
 const ready = load();
-$('connect').onclick = () => ready.then(() => usePaste($('cc').value, true));
-$('s').onclick = () => ready.then(() => {
+$('cc').addEventListener('paste', event => {
+  if (!settingsLoaded) {
+    connectMessage('Reload this page, then paste again.', false);
+    return;
+  }
+  const data = event.clipboardData;
+  const raw = data ? data.getData('text') : '';
+  if (!raw) return;
+  usePaste(raw, true);
+});
+$('s').onclick = () => {
+  if (!settingsLoaded) { say('Reload this page, then click Save.', true); return; }
   persist(formState(), err => {
     if (err) say(typeof err === 'string' ? err : 'Could not save', true);
     else {
@@ -303,7 +341,7 @@ $('s').onclick = () => ready.then(() => {
       say('Saved', false);
     }
   });
-});
+};
 
 ready.then(() => {
   const hash = location.hash || '';

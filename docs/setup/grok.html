@@ -9,6 +9,7 @@
 <body>
 <main>
 <nav>
+  <a href="/">Home</a>
   <a href="/setup/">Setup</a>
   <a href="/setup/grok">Grok Bot</a>
   <a href="/setup/claude">Claude</a>
@@ -18,33 +19,33 @@
   <a href="/privacy">Privacy</a>
 </nav>
 <h1>Grok Bot</h1>
-<p>Grok Bot can create the routine and hand you one link. You click Connect. You do not copy a key into a chat.</p>
+<p>Grok Bot creates the routine. It cannot read the webhook key, so it does not hand you a link. You copy two sidebar values and paste them once. You do not paste a key into a chat.</p>
 
 <h2>1. Send this line</h2>
 <p>Paste it into the Grok Bot you want to use:</p>
 <p class="line">Set up Send to Grok Bot for me: https://github.com/jamespendry/send-to-grok-bot</p>
-<p>The bot reads the project, creates a webhook routine named Send to Grok Bot, and puts the General prompt on that routine. General classifies each post and starts with a one-line takeaway.</p>
+<p>The bot reads the project, creates a webhook routine named Send to Grok Bot, and puts the General prompt on that routine. General classifies each post and starts with a one-line takeaway. If it asks you to confirm the routine, confirm it.</p>
 
-<h2>2. Open the link it sends back</h2>
-<p>The reply should be one link, shaped like this:</p>
-<p class="line">https://sendtogrokbot.com/connect#stgb1.…</p>
-<p>Open it. The box is already filled. Click Connect. If Chrome asks to allow a site, choose Allow.</p>
-<p>That saves the routine's address and secret in the extension on this computer. Open x.com, refresh, and click the arrow on a post. Choose Send to Grok Bot. The icon turns green when the run has started. The reply shows up in the bot's chat when the run finishes.</p>
+<h2>2. Follow the one message it sends</h2>
+<p>After the routine exists, the bot sends one message. It tells you how to install the extension, then this:</p>
+<p class="line">Open the sidebar links named Webhook URL and Authorization header, copy both, and paste them together at sendtogrokbot.com/connect.</p>
+<p>Open <a href="/connect">the connect page</a>. Step 1 is the install. Step 2 is the box. Paste both values together. If the extension is installed, that paste saves them. If Chrome asks to allow a site, choose Allow. The page then says: Now open x.com and click the arrow.</p>
+<p>On x.com, click the arrow on a post and choose Send to Grok Bot. The icon turns green when the run has started. The reply shows up in the bot's chat when the run finishes.</p>
 
 <figure class="missing">
-  <figcaption>Screenshot needed: docs/img/connect-page.png. The connect page with the paste box filled from a link and the Connect button visible. No real secret in the shot.</figcaption>
+  <figcaption>Screenshot needed: docs/img/connect-page.png. The connect page with Step 1, the paste box, and no real secret in the shot.</figcaption>
 </figure>
 
-<h2>If the bot cannot see the address</h2>
-<p>Do this on a computer, in Grok Bot. The phone app does not show these fields.</p>
+<h2>Where those two values are</h2>
+<p>Do this on a computer, in Grok Bot. The phone app does not show these fields. The sidebar links are named Webhook URL and Authorization header.</p>
 <ol>
   <li>Open the bot's sidebar.</li>
   <li>Open the Routines tab.</li>
   <li>Open the routine named Send to Grok Bot.</li>
   <li>At the bottom, When to run is Webhook and Method is POST. Copy the URL and the Authorization header.</li>
-  <li>Open <a href="/connect">the connect page</a> and paste both, in any order. Click Connect.</li>
+  <li>Open <a href="/connect">the connect page</a> and paste both together.</li>
 </ol>
-<p>You can also paste the URL into Webhook URL on the extension's settings page, and paste the Authorization header into Webhook key. The word Bearer is removed for you. Click Save. If Chrome asks, choose Allow.</p>
+<p>You can also paste both into the box at the top of the extension's settings page. The word Bearer is removed for you. If Chrome asks, choose Allow.</p>
 
 <figure class="missing">
   <figcaption>Screenshot needed: docs/img/grok-routines-webhook.png. Grok Bot sidebar, Routines tab, the routine open. The bottom shows When to run set to Webhook, Method POST, the URL, and the Authorization header. Blur the URL and the header.</figcaption>
