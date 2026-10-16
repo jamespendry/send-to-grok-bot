@@ -1,0 +1,14 @@
+/* Layout, hit circle, and icon size come from the cloned Share action. Color only here. */
+.stgb-btn{cursor:pointer;font:inherit}
+.stgb-btn,.stgb-btn *{color:rgb(113,118,123) !important}
+.stgb-btn svg{fill:currentColor}
+.stgb-btn:hover,.stgb-btn:hover *,.stgb-btn:focus-visible,.stgb-btn:focus-visible *{color:rgb(29,155,240) !important}
+.stgb-btn:hover .stgb-circle,.stgb-btn:focus-visible .stgb-circle{background-color:rgba(29,155,240,.1)}
+.stgb-btn.stgb-ok,.stgb-btn.stgb-ok *{color:rgb(0,186,124) !important}
+.stgb-btn.stgb-ok .stgb-circle{background-color:rgba(0,186,124,.1)}
+.stgb-btn.stgb-err,.stgb-btn.stgb-err *{color:rgb(244,33,46) !important}
+.stgb-btn.stgb-err .stgb-circle{background-color:rgba(244,33,46,.1)}
+.stgb-btn.stgb-busy{opacity:.6;cursor:default}
+.stgb-toast{all:unset;position:fixed !important;z-index:2147483646 !important;left:50% !important;bottom:20px !important;transform:translateX(-50%);display:block;box-sizing:border-box;background:rgb(29,155,240);color:#fff !important;border-radius:4px;padding:14px;font-family:inherit;font-size:15px;line-height:20px;text-align:center;white-space:nowrap;opacity:0;pointer-events:none;transition:opacity .2s ease}
+.stgb-toast.stgb-toast-show{opacity:1 !important}
+.stgb-toast.stgb-toast-err{background:rgb(244,33,46)}

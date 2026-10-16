@@ -1,0 +1,16 @@
+<!doctype html><html><head><meta charset="utf-8"><title>Send to Grok Bot</title>
+<style>
+body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;max-width:480px;margin:40px auto;padding:0 20px;color:#0f1419;font-size:14px}
+h1{font-size:20px;margin:0 0 4px}p{color:#536471;margin:0 0 20px;line-height:1.4}
+label{display:block;font-weight:600;margin:16px 0 6px}
+input{width:100%;box-sizing:border-box;padding:10px;border:1px solid #cfd9de;border-radius:6px;font:inherit}
+input:focus{outline:none;border-color:#1d9bf0}
+button{margin-top:20px;padding:9px 18px;border:0;border-radius:9999px;background:#0f1419;color:#fff;font:inherit;font-weight:600;cursor:pointer}
+#m{margin-left:12px;color:#00ba7c}
+</style></head><body>
+<h1>Send to Grok Bot</h1>
+<p>Posts you click are sent to this webhook, such as a Grok Bot routine webhook. Nothing else is sent.</p>
+<label for="u">Webhook URL</label><input id="u" type="url" placeholder="https://...">
+<label for="k">Webhook key (optional)</label><input id="k" type="password" placeholder="Sent as a Bearer token">
+<button id="s">Save</button><span id="m"></span>
+<script src="options.js"></script></body></html>
