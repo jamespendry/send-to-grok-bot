@@ -1,0 +1,136 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Set up Claude</title>
+<meta name="description" content="Three short steps on claude.ai to send X posts to a Claude task.">
+<meta name="theme-color" content="#ffffff" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#000000" media="(prefers-color-scheme: dark)">
+<meta property="og:title" content="Set up Claude">
+<meta property="og:description" content="Three short steps on claude.ai to send X posts to a Claude task.">
+<meta property="og:image" content="https://sendtogrokbot.com/assets/promo/marquee-1400x560.png">
+<meta name="twitter:card" content="summary_large_image">
+<link rel="icon" href="/assets/icons/icon32.png">
+<link rel="apple-touch-icon" href="/assets/icons/icon128.png">
+<link rel="stylesheet" href="/assets/site.css">
+</head>
+<body>
+<header class="top"><div class="wrap">
+  <a class="brand" href="/"><img src="/assets/icons/icon48.png" alt="" width="28" height="28"><span>Send to Grok Bot</span></a>
+  <nav aria-label="Main">
+    <a href="/setup" aria-current="page">Setup</a>
+    <a href="/mobile" class="hide-sm">iPhone</a>
+    <a class="btn small" data-chrome-store href="https://github.com/jamespendry/send-to-grok-bot#readme">Add to Chrome</a>
+  </nav>
+</div></header>
+
+<main class="narrow page">
+  <a class="crumb" href="/setup">Setup</a>
+  <div class="page-head">
+    <span class="logo claude"><svg><use href="/assets/logos.svg#claude"/></svg></span>
+    <h1>Claude</h1>
+  </div>
+  <p class="intro">Three short steps on claude.ai. After that, every post you send runs as a Claude task in the background.</p>
+
+  <div class="note"><b>Before you start:</b> add the extension to Chrome, then open its settings and check <span class="ui">Send to Claude</span>. You need a paid Claude plan (Pro, Max, Team, or Enterprise).</div>
+
+  <ol class="steps">
+    <li>
+      <h3>Create the task</h3>
+      <ol>
+        <li>Go to <a href="https://claude.ai" rel="noopener">claude.ai</a> and click <span class="ui">Routines</span> in the left sidebar.</li>
+        <li>Create a task and name it <span class="ui">Send to Claude</span>.</li>
+        <li>In the extension settings, click <span class="ui">Copy task prompt</span>, then paste it into the task.</li>
+      </ol>
+      <figure>
+        <div class="slot">
+          <b>Screenshot slot</b>
+          <code>/assets/img/claude-scheduled-tasks.png</code>
+          <span>claude.ai with Routines in the left sidebar and the new task form. Blur your name, email, and other tasks.</span>
+        </div>
+      </figure>
+      <details class="fallback">
+        <summary>Can't find the extension's button?</summary>
+        <p class="muted">This is the same prompt. Copy it here instead.</p>
+        <pre class="box" id="prompt">Open the extension settings and click Copy task prompt.</pre>
+        <button class="btn small secondary" type="button" data-copy="#prompt">Copy task prompt</button>
+      </details>
+    </li>
+    <li>
+      <h3>Connect the task to the extension</h3>
+      <ol>
+        <li>On the task page, click the three dots next to the <span class="ui">Active</span> toggle, then click <span class="ui">Edit</span>.</li>
+        <li>Set <span class="ui">Trigger</span> to <span class="ui">API</span>.</li>
+        <li>Copy the <span class="ui">Fire URL</span> and the <span class="ui">Token</span>.</li>
+        <li>Paste both into the extension, under Send to Claude, in any order. Click <span class="ui">Save</span>. If Chrome asks to allow api.anthropic.com, choose <span class="ui">Allow</span>.</li>
+      </ol>
+      <figure>
+        <img src="/assets/img/claude-routine-overview.png" width="2236" height="1488" loading="lazy" alt="The Send to Claude task page. History is on the left. The Active toggle is at the top right.">
+        <figcaption>The task page. The three dots sit next to Active at the top right.</figcaption>
+      </figure>
+      <figure>
+        <img src="/assets/img/claude-routine-api-trigger.png" width="1226" height="1374" loading="lazy" alt="Edit scheduled task with Trigger set to API, showing the Fire URL and Token fields, both blurred.">
+        <figcaption>Trigger set to API. Copy the Fire URL and the Token. Keep the token private.</figcaption>
+      </figure>
+    </li>
+    <li>
+      <h3>Let the task read posts</h3>
+      <ol>
+        <li>Send one test post from x.com with <span class="ui">Send to Claude</span>.</li>
+        <li>Back on the task page, open that run from <span class="ui">History</span>.</li>
+        <li>Click the down arrow next to the task name and choose <span class="ui">Edit cloud environment</span>.</li>
+        <li>Set <span class="ui">Network access</span> to <span class="ui">Custom</span>.</li>
+        <li>In the extension, click <span class="ui">Copy allowed websites</span>, paste the list, and save.</li>
+      </ol>
+      <figure>
+        <div class="slot">
+          <b>Screenshot slot</b>
+          <code>/assets/img/claude-cloud-environment.png</code>
+          <span>A run open from History, Edit cloud environment, Network access set to Custom, and the allowed websites list. Blur everything else.</span>
+        </div>
+      </figure>
+      <details class="fallback">
+        <summary>Can't find the extension's button?</summary>
+        <p class="muted">This is the same list. Copy it here instead.</p>
+        <pre class="box" id="sites">api.fxtwitter.com
+fxtwitter.com
+api.vxtwitter.com
+vxtwitter.com
+fixupx.com
+x.com
+twitter.com
+t.co
+video.twimg.com
+pbs.twimg.com</pre>
+        <button class="btn small secondary" type="button" data-copy="#sites">Copy allowed websites</button>
+      </details>
+    </li>
+  </ol>
+
+  <div class="note done"><b>Done.</b> Every post you send shows up under History on the task page, with Claude's reply. Leave the task Active.</div>
+
+  <h2>Rather skip the setup?</h2>
+  <p>Check <span class="ui">Send to Claude</span> in the extension and leave the Fire URL box empty. Clicking a post opens Claude in a new tab with the post filled in. You press Send.</p>
+</main>
+<script src="/assets/prompts.js"></script>
+<script>
+(function () {
+  var box = document.getElementById('prompt');
+  if (globalThis.STGB_PROMPTS) box.textContent = globalThis.STGB_PROMPTS.text('general');
+  if (globalThis.STGB_PROMPTS) document.getElementById('sites').textContent = globalThis.STGB_PROMPTS.ALLOWED_SITES;
+})();
+</script>
+
+<footer><div class="wrap">
+  <span>Free and open source.</span>
+  <a href="https://github.com/jamespendry/send-to-grok-bot">GitHub</a>
+  <a href="/setup">Setup</a>
+  <a href="/mobile">iPhone</a>
+  <a href="/privacy">Privacy</a>
+  <span class="sp"></span>
+  <span>Not affiliated with X, xAI, Anthropic, or OpenAI.</span>
+</div></footer>
+<script src="/assets/site.js" defer></script>
+</body>
+</html>

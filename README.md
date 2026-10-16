@@ -10,7 +10,7 @@ People who use Grok Bot can paste this one line into the bot:
 Set up Send to Grok Bot for me: https://github.com/jamespendry/send-to-grok-bot
 ```
 
-The bot creates a webhook routine with the General prompt and replies with one link, `https://sendtogrokbot.com/connect#stgb1.` followed by a code. Open that link and click Connect. Guides for the site are [docs/setup/index.html](docs/setup/index.html) (`/setup`), [docs/setup/grok.html](docs/setup/grok.html) (`/setup/grok`), [docs/setup/claude.html](docs/setup/claude.html) (`/setup/claude`), and [docs/privacy.html](docs/privacy.html) (`/privacy`). With the repository as the site root, [`_redirects`](_redirects) serves those paths.
+The bot creates a webhook routine with the General prompt and replies with one link, `https://sendtogrokbot.com/connect#stgb1.` followed by a code. Open that link and click Connect. The website, including `/setup`, `/setup/grok`, `/setup/claude`, `/setup/chatgpt`, `/setup/codex`, `/mobile`, `/connect`, and `/privacy`, is in [site/](site/). See [site/README.md](site/README.md) to change or deploy it.
 
 People installing by hand: the steps below are from a folder. Store listing text, promo images, and the upload steps are in [store/](store/). `scripts/package.sh` writes the zip.
 

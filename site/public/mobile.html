@@ -1,0 +1,82 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Send to Grok Bot on iPhone</title>
+<meta name="description" content="Send posts from the X app on iPhone with an iOS Shortcut.">
+<meta name="theme-color" content="#ffffff" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#000000" media="(prefers-color-scheme: dark)">
+<meta property="og:title" content="Send to Grok Bot on iPhone">
+<meta property="og:description" content="Send posts from the X app on iPhone with an iOS Shortcut.">
+<meta property="og:image" content="https://sendtogrokbot.com/assets/promo/marquee-1400x560.png">
+<meta name="twitter:card" content="summary_large_image">
+<link rel="icon" href="/assets/icons/icon32.png">
+<link rel="apple-touch-icon" href="/assets/icons/icon128.png">
+<link rel="stylesheet" href="/assets/site.css">
+</head>
+<body>
+<header class="top"><div class="wrap">
+  <a class="brand" href="/"><img src="/assets/icons/icon48.png" alt="" width="28" height="28"><span>Send to Grok Bot</span></a>
+  <nav aria-label="Main">
+    <a href="/setup">Setup</a>
+    <a href="/mobile" class="hide-sm" aria-current="page">iPhone</a>
+    <a class="btn small" data-chrome-store href="https://github.com/jamespendry/send-to-grok-bot#readme">Add to Chrome</a>
+  </nav>
+</div></header>
+
+<main class="narrow page">
+  <h1>On iPhone</h1>
+  <p class="intro" style="margin-top:12px">Send posts from the X app with the share sheet. It uses an iOS Shortcut, so there is no app to install.</p>
+
+  <div class="note"><b>Before you start:</b> set up <a href="/setup/grok">Grok Bot</a> or <a href="/setup/claude">Claude</a> on your computer first, and keep your relay code handy. It is one line that starts with <span class="mono">stgbr1.</span> You get it once from <a href="https://relay.sendtogrokbot.com" rel="noopener">relay.sendtogrokbot.com</a>.</div>
+
+  <ol class="steps num">
+    <li>
+      <h3>Add the Shortcut</h3>
+      <p class="muted">Open this on your iPhone and tap <span class="ui">Add Shortcut</span>.</p>
+      <div class="actions" style="margin-top:14px">
+        <!-- PLACEHOLDER: replace href with the iCloud Shortcut link (https://www.icloud.com/shortcuts/...) -->
+        <a class="btn" href="#install" aria-disabled="true" id="install">Get the Shortcut</a>
+        <span class="tag">Link coming soon</span>
+      </div>
+    </li>
+    <li>
+      <h3>Paste your relay code</h3>
+      <p class="muted">The Shortcut asks for it once while it installs. Paste the whole code and tap <span class="ui">Done</span>. Keep it private. Anyone with it can send posts to your AI.</p>
+      <figure>
+        <div class="slot">
+          <b>Screenshot slot</b>
+          <code>/assets/img/ios-shortcut-setup.png</code>
+          <span>The Shortcut's setup question with the relay code pasted in. Blur the code.</span>
+        </div>
+      </figure>
+    </li>
+    <li>
+      <h3>Share a post</h3>
+      <p class="muted">In the X app, tap the share icon on a post, then <span class="ui">Share via</span>, and pick <span class="ui">Send to Grok Bot</span>. The first time, iOS asks to allow it. Tap <span class="ui">Always Allow</span>.</p>
+      <figure>
+        <div class="slot">
+          <b>Screenshot slot</b>
+          <code>/assets/img/ios-share-sheet.png</code>
+          <span>The X app share sheet with Send to Grok Bot in the list. Use a public post. Blur any account that is not yours.</span>
+        </div>
+      </figure>
+    </li>
+  </ol>
+
+  <p class="muted">The Shortcut sends to Grok Bot or Claude, whichever you saved with your relay code. ChatGPT and Codex work in Chrome on your computer.</p>
+</main>
+
+<footer><div class="wrap">
+  <span>Free and open source.</span>
+  <a href="https://github.com/jamespendry/send-to-grok-bot">GitHub</a>
+  <a href="/setup">Setup</a>
+  <a href="/mobile">iPhone</a>
+  <a href="/privacy">Privacy</a>
+  <span class="sp"></span>
+  <span>Not affiliated with X, xAI, Anthropic, or OpenAI.</span>
+</div></footer>
+<script src="/assets/site.js" defer></script>
+</body>
+</html>

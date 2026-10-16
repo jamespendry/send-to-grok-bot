@@ -1,0 +1,185 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Send to Grok Bot</title>
+<meta name="description" content="A free Chrome extension that adds a Send button to every post on x.com. One click sends the post to Grok Bot, Claude, ChatGPT, or Codex.">
+<meta name="theme-color" content="#ffffff" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#000000" media="(prefers-color-scheme: dark)">
+<meta property="og:title" content="Send to Grok Bot">
+<meta property="og:description" content="Send any X post to your AI in one click. Free Chrome extension.">
+<meta property="og:image" content="https://sendtogrokbot.com/assets/promo/marquee-1400x560.png">
+<meta name="twitter:card" content="summary_large_image">
+<link rel="icon" href="/assets/icons/icon32.png">
+<link rel="apple-touch-icon" href="/assets/icons/icon128.png">
+<link rel="stylesheet" href="/assets/site.css">
+</head>
+<body>
+<header class="top"><div class="wrap">
+  <a class="brand" href="/"><img src="/assets/icons/icon48.png" alt="" width="28" height="28"><span>Send to Grok Bot</span></a>
+  <nav aria-label="Main">
+    <a href="/setup">Setup</a>
+    <a href="/mobile" class="hide-sm">iPhone</a>
+    <a class="btn small" data-chrome-store href="https://github.com/jamespendry/send-to-grok-bot#readme">Add to Chrome</a>
+  </nav>
+</div></header>
+
+<main class="wrap">
+  <div class="hero">
+    <div>
+      <h1>Send any X post to your AI in one click.</h1>
+      <p class="lede">A free Chrome extension that adds a Send button to every post on x.com. Pick Grok Bot, Claude, ChatGPT, or Codex, and get a useful reply back.</p>
+      <div class="actions">
+        <a class="btn large" data-chrome-store href="https://github.com/jamespendry/send-to-grok-bot#readme">Add to Chrome</a>
+        <a class="btn large secondary" href="/setup">Set up in 2 minutes</a>
+      </div>
+      <p class="fine">Free. Open source. No account to create.</p>
+    </div>
+
+    <div class="post" aria-label="An X post with the Send menu open">
+      <div class="post-head">
+        <div class="avatar"></div>
+        <div><span class="post-name">Ada Builds</span> <span class="post-handle">@adabuilds &middot; 2h</span></div>
+      </div>
+      <p class="post-body">Just open sourced the tool we use to turn any repo into a one-page brief. Took a weekend. Link below.</p>
+      <div class="post-pad" aria-hidden="true"></div>
+      <div class="menu" aria-hidden="true">
+        <div class="grokbot"><svg><use href="/assets/logos.svg#grokbot"/></svg>Send to Grok Bot</div>
+        <div class="claude"><svg><use href="/assets/logos.svg#claude"/></svg><span style="color:var(--fg)">Send to Claude</span></div>
+        <div class="chatgpt"><svg><use href="/assets/logos.svg#chatgpt"/></svg>Send to ChatGPT</div>
+        <div class="codex"><svg><use href="/assets/logos.svg#codex"/></svg>Send to Codex</div>
+      </div>
+      <div class="post-bar" aria-hidden="true">
+        <span><svg viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round" d="M4 11a7 7 0 0 1 7-7h2a7 7 0 0 1 0 14h-1.5L7 21v-3.6A7 7 0 0 1 4 11z"/></svg>12</span>
+        <span><svg viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" d="M4 9V7h13M14 4l3 3-3 3M20 15v2H7M10 20l-3-3 3-3"/></svg>48</span>
+        <span><svg viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round" d="M12 20s-8-4.6-8-10.2A4.3 4.3 0 0 1 12 7.4a4.3 4.3 0 0 1 8 2.4C20 15.4 12 20 12 20z"/></svg>310</span>
+        <span><svg viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" d="M5 20v-7M10 20V5M15 20v-9M20 20V8"/></svg>21K</span>
+        <span class="send"><svg><use href="/assets/logos.svg#send"/></svg></span>
+      </div>
+    </div>
+  </div>
+</main>
+
+<section>
+  <div class="wrap">
+    <div class="slot video">
+      <b>Demo video slot</b>
+      <span>Put a 15 to 30 second clip at <code>/assets/demo.mp4</code> (and a poster frame at <code>/assets/demo.jpg</code>), then replace this box with:</span>
+      <code>&lt;video src="/assets/demo.mp4" poster="/assets/demo.jpg" autoplay muted loop playsinline&gt;&lt;/video&gt;</code>
+      <span>Show: click Send on a post, pick Claude, the reply appears. Light theme. Blur any handle that is not yours.</span>
+    </div>
+  </div>
+</section>
+
+<section>
+  <div class="wrap">
+    <div class="section-head">
+      <h2>Send it where you already ask questions</h2>
+      <p>Pick one or all four. Each one shows up in the Send menu on every post.</p>
+    </div>
+    <div class="cards">
+      <a class="card" href="/setup/grok">
+        <span class="logo grokbot"><svg><use href="/assets/logos.svg#grokbot"/></svg></span>
+        <h3>Grok Bot <span class="tag easy">Easiest</span></h3>
+        <p>Paste one line into Grok Bot. It sets everything up and sends you a link.</p>
+        <span class="go">Set up Grok Bot</span>
+      </a>
+      <a class="card" href="/setup/claude">
+        <span class="logo claude"><svg><use href="/assets/logos.svg#claude"/></svg></span>
+        <h3>Claude</h3>
+        <p>Runs as a Claude task in the background, or just opens Claude in a tab.</p>
+        <span class="go">Set up Claude</span>
+      </a>
+      <a class="card" href="/setup/chatgpt">
+        <span class="logo chatgpt"><svg><use href="/assets/logos.svg#chatgpt"/></svg></span>
+        <h3>ChatGPT <span class="tag">No setup</span></h3>
+        <p>Opens ChatGPT with the post and the prompt already filled in.</p>
+        <span class="go">How it works</span>
+      </a>
+      <a class="card" href="/setup/codex">
+        <span class="logo codex"><svg><use href="/assets/logos.svg#codex"/></svg></span>
+        <h3>Codex <span class="tag">No setup</span></h3>
+        <p>Opens a Codex task with the post filled in. Good for repos and tools.</p>
+        <span class="go">How it works</span>
+      </a>
+    </div>
+  </div>
+</section>
+
+<section>
+  <div class="wrap">
+    <div class="section-head">
+      <h2>Set up in 2 minutes</h2>
+    </div>
+    <div class="how">
+      <div><h3>Add to Chrome</h3><p>Install the extension. A Send button appears next to Share on every post.</p></div>
+      <div><h3>Pick your AI</h3><p>Grok Bot, Claude, ChatGPT, or Codex. ChatGPT and Codex need no setup at all.</p></div>
+      <div><h3>Click Send</h3><p>The icon turns green. Your AI replies with what the post means for you.</p></div>
+    </div>
+    <div class="actions" style="margin-top:20px"><a class="btn" href="/setup">Start setup</a></div>
+  </div>
+</section>
+
+<section>
+  <div class="wrap grid2">
+    <div>
+      <div class="section-head">
+        <h2>A reply that fits the post</h2>
+        <p>Every reply starts with a one-line takeaway. Then it answers the question you would have asked.</p>
+      </div>
+    </div>
+    <div class="rows">
+      <div class="row"><div class="text"><b>A tool or app</b><span>What it does, whether it is worth installing, and how to try it.</span></div></div>
+      <div class="row"><div class="text"><b>A thread or article</b><span>A three-line summary and the key takeaway.</span></div></div>
+      <div class="row"><div class="text"><b>A news story</b><span>What happened, why it matters, and what to watch.</span></div></div>
+      <div class="row"><div class="text"><b>A product or deal</b><span>Worth buying or not, and why.</span></div></div>
+      <div class="row"><div class="text"><b>A tip or how-to</b><span>One step you can save and use.</span></div></div>
+    </div>
+  </div>
+</section>
+
+<section>
+  <div class="wrap">
+    <div class="section-head">
+      <h2>Six reply styles</h2>
+      <p>Switch any time in the extension settings. General is the default.</p>
+    </div>
+    <div class="chips">
+      <span class="chip">General</span>
+      <span class="chip">Research</span>
+      <span class="chip">Job hunt</span>
+      <span class="chip">Buy or skip</span>
+      <span class="chip">Learn later</span>
+      <span class="chip">Content ideas</span>
+    </div>
+  </div>
+</section>
+
+<section>
+  <div class="wrap grid2">
+    <div class="section-head">
+      <h2>Private by design</h2>
+      <p>Only the post you click is sent, and only to the AI you pick. Keys stay in your browser. No analytics, no tracking, nothing sold.</p>
+      <p style="margin-top:12px"><a href="/privacy">Read the privacy policy</a></p>
+    </div>
+    <div class="section-head">
+      <h2>On iPhone too</h2>
+      <p>Send posts from the X app's share sheet with an iOS Shortcut.</p>
+      <p style="margin-top:12px"><a href="/mobile">Set up the Shortcut</a></p>
+    </div>
+  </div>
+</section>
+
+<footer><div class="wrap">
+  <span>Free and open source.</span>
+  <a href="https://github.com/jamespendry/send-to-grok-bot">GitHub</a>
+  <a href="/setup">Setup</a>
+  <a href="/mobile">iPhone</a>
+  <a href="/privacy">Privacy</a>
+  <span class="sp"></span>
+  <span>Not affiliated with X, xAI, Anthropic, or OpenAI.</span>
+</div></footer>
+<script src="/assets/site.js" defer></script>
+</body>
+</html>
