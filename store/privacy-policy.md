@@ -32,7 +32,11 @@ The extension does not read your direct messages or pages outside X. It reads a 
 
 Webhook keys and API tokens are stored in `chrome.storage.local` on this device. They are not synced to a Google account. If an older version of the extension still has a webhook URL and key in `chrome.storage.sync`, those two values are copied to local storage once and then deleted from sync.
 
-A token is sent only to the destination it belongs to, and only as the credential on that request. The publisher does not receive tokens, keys, or posts. The extension has no account system and no server of its own.
+A token is sent only to the destination it belongs to, and only as the credential on that request. With Relay left off, the publisher does not receive tokens, keys, or posts. The extension has no account system of its own.
+
+## Relay
+
+Relay is off unless you check it and paste a connect code. That code points at a relay you choose, such as https://relay.sendtogrokbot.com. The extension then sends the post to that relay, which forwards it to the Grok Bot webhook or Claude routine saved there. The webhook key and Claude token are stored encrypted on the relay and are not written to its logs. The relay keeps the time, destination, link, author, and result of recent sends. It does not keep the post text. ChatGPT and Codex still open a tab on this computer and do not go through the relay. Leave Relay off and the extension talks only to the destination you set up.
 
 ## What the extension does not do
 
@@ -55,7 +59,7 @@ The extension complies with the Chrome Web Store User Data Policy, including Lim
 - Data is used only to send the post you chose to the destination you chose.
 - Data is transferred only when that transfer is the feature you asked for: the request to your webhook, Anthropic, or OpenAI, or the tab opened on Claude, ChatGPT, or Codex. It is also transferred if the law requires it, or to protect security. There is no other transfer.
 - Data is not used or transferred for personalized, re-targeted, or interest-based ads.
-- The publisher does not have a server that receives this data, and no person at the publisher reads the posts you send.
+- With Relay left off, the publisher does not have a server that receives this data, and no person at the publisher reads the posts you send. With Relay on, the post goes to the relay address in your connect code, which forwards it and does not keep the post text.
 
 ## Contact
 
@@ -93,7 +97,7 @@ The dashboard lists one box per permission it finds in the manifest. Paste the m
 
 **https://\*/\*** (optional host permission)
 
-> The extension does not read all websites. This pattern is optional. Chrome requires it so an extension can ask, at runtime, for a host the user types. The code never requests https://*/* itself. When you click Save, it asks only for the origins that destination needs: the origin of the https webhook you entered; https://api.anthropic.com/* if a Claude routine URL or token is saved; https://api.chatgpt.com/* if a ChatGPT agent trigger or token is saved. Opening Claude, ChatGPT, or Codex in a tab does not use a host permission. Clearing a destination and clicking Save removes that host. x.com and twitter.com come from the content script, not from this permission.
+> The extension does not read all websites. This pattern is optional. Chrome requires it so an extension can ask, at runtime, for a host the user types. The code never requests https://*/* itself. When you click Save, it asks only for the origins that destination needs: the origin of the https webhook you entered; https://api.anthropic.com/* if a Claude routine URL or token is saved; https://api.chatgpt.com/* if a ChatGPT agent trigger or token is saved; or the relay host if Relay is on. With Relay on, the webhook host and api.anthropic.com are not requested, because those calls are made by the relay. Opening Claude, ChatGPT, or Codex in a tab does not use a host permission. Clearing a destination and clicking Save removes that host. x.com and twitter.com come from the content script, not from this permission.
 
 ## Remote code
 

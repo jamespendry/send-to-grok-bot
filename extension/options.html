@@ -26,6 +26,7 @@ button{margin-top:8px;padding:9px 18px;border:0;border-radius:9999px;background:
 #cm{display:block;margin-top:8px;line-height:1.4}
 #cm.ok{color:#00ba7c}
 #cm.err{color:#f4212e}
+#relayCode{height:72px}
 </style></head><body>
 <h1>Send to Grok Bot</h1>
 <p>Check a destination to list it when you click a post. The menu sends to the one you pick.</p>
@@ -83,7 +84,16 @@ button{margin-top:8px;padding:9px 18px;border:0;border-radius:9999px;background:
   </div>
 </div>
 
+<div class="dest">
+  <label class="check"><input type="checkbox" id="relayOn"> Relay</label>
+  <div class="fields" id="relayFields" hidden>
+    <label class="field" for="relayCode">Connect code<div class="hint">Optional. Paste the one code from the relay setup page. It starts with stgbr1. Grok Bot and Claude then use the destinations saved there, instead of the fields above. Leave this off to keep sending directly. ChatGPT and Codex are unchanged.</div></label>
+    <textarea id="relayCode" spellcheck="false" autocomplete="off" placeholder="stgbr1...."></textarea>
+  </div>
+</div>
+
 <button id="s">Save</button><span id="m"></span>
 <script src="hosts.js"></script>
 <script src="connect.js"></script>
+<script src="relay.js"></script>
 <script src="options.js"></script></body></html>

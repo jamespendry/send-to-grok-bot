@@ -1,0 +1,17 @@
+name = "stgb-relay"
+main = "src/index.js"
+compatibility_date = "2026-10-01"
+routes = [ { pattern = "relay.sendtogrokbot.com", custom_domain = true } ]
+
+[[d1_databases]]
+binding = "DB"
+database_name = "stgb-relay"
+database_id = "933c0063-2236-480e-a9e5-b73ec76466dc"
+
+[[kv_namespaces]]
+binding = "KV"
+id = "5c50f8ce458846739e5a1b9470ee4098"
+
+# ENCRYPTION_KEY is a secret. Set it with:
+#   npx wrangler secret put ENCRYPTION_KEY
+# Do not put the key in this file.

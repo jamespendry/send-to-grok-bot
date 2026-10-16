@@ -125,6 +125,14 @@ A link of the form `options.html#connect=` followed by the code also fills the p
 
 The page stores the address and the key in `chrome.storage.local` on this computer. It does not keep the code string.
 
+## Relay (optional)
+
+You can store the Grok Bot webhook and the Claude routine on a small relay, and paste one code into the extension instead of those secrets. Check **Relay** at the bottom of the options page and paste the code from the setup page. It starts with `stgbr1.`. Leave it off to keep sending directly. ChatGPT and Codex are unchanged, because those open a tab.
+
+The relay is a Cloudflare Worker in [`relay/`](relay/). Setup, including the exact commands, is in [relay/DEPLOY.md](relay/DEPLOY.md). A future iPhone Shortcut can POST to the same `/v1/send` endpoint. That note is in the deploy doc too.
+
+When Relay is on, Grok Bot and Claude still receive the version 2 post, including `digest` and media fields. The relay forwards that object.
+
 ## What gets sent
 
 Grok Bot, and any other webhook, receives `POST` with `Content-Type: application/json`:
@@ -165,7 +173,7 @@ For a Claude Code routine prompt that uses this payload, see [docs/routine-promp
 The menu sends this same object to the destination you pick. Grok Bot posts the JSON. Claude, ChatGPT, and Codex receive that object too, and use `digest` when the destination can only take a single text field.
 
 ## Privacy
-The extension sends only the posts you click (plus, on a post's page, the author's thread and the post it replies to), and only to the destination you pick. It does not track browsing, collect analytics, or sell data. Addresses, tokens, and keys are stored in `chrome.storage.local`. A webhook URL and key from an earlier version are copied out of `chrome.storage.sync` once, then removed there. Host access is optional and is limited to the webhook host, `api.anthropic.com`, or `api.chatgpt.com` after you save that destination. The policy to publish at sendtogrokbot.com/privacy is [store/privacy-policy.md](store/privacy-policy.md).
+The extension sends only the posts you click (plus, on a post's page, the author's thread and the post it replies to), and only to the destination you pick. It does not track browsing, collect analytics, or sell data. Addresses, tokens, and keys are stored in `chrome.storage.local`. A webhook URL and key from an earlier version are copied out of `chrome.storage.sync` once, then removed there. Host access is optional and is limited to the webhook host, `api.anthropic.com`, `api.chatgpt.com`, or the relay host after you save that destination. The policy to publish at sendtogrokbot.com/privacy is [store/privacy-policy.md](store/privacy-policy.md). In relay mode, the extension stores the one relay code in `chrome.storage.local`. The webhook key and Claude token stay on the relay, encrypted, and are not written to its logs.
 
 ## Chrome Web Store
 Listing text, promo images, and the upload steps are in [store/](store/). `scripts/package.sh` writes `dist/send-to-grok-bot-<version>.zip`. Screenshots of x.com are not in that zip. The shot list is in [store/listing.md](store/listing.md).
@@ -216,7 +224,7 @@ Leave the agent fields blank to open `chatgpt.com/?q=…` with the post filled i
 
 A Workspace Agent (ChatGPT Business or Enterprise) runs on its own when an `agtch_…` trigger id and an access token are both saved. Each send is `POST https://api.chatgpt.com/v1/workspace_agents/{id}/trigger`. ChatGPT replies `202 Accepted`.
 
-A Gmail-triggered task for Plus and Pro is not built. It would need a relay that emails the post to you.
+A Gmail-triggered task for Plus and Pro is not built. The relay in this repo does not send email. It forwards to a Grok Bot webhook or a Claude routine. That Gmail route would still need a worker that emails the post to you.
 
 ### Codex
 

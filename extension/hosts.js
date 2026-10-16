@@ -15,15 +15,25 @@ function stgbWebhookPattern(url) {
 function stgbNeededOrigins(settings) {
   const enabled = new Set(Array.isArray(settings.enabled) ? settings.enabled : []);
   const origins = [];
-  if (enabled.has('grokbot')) {
+  const relay = !!(settings.useRelay && String(settings.relayCode || '').trim());
+  if (enabled.has('grokbot') && !relay) {
     const pattern = stgbWebhookPattern(settings.webhookUrl || '');
     if (pattern) origins.push(pattern);
   }
-  if (enabled.has('claude') && ((settings.claudeFireUrl || '').trim() || (settings.claudeToken || '').trim())) {
+  if (!relay && enabled.has('claude') && ((settings.claudeFireUrl || '').trim() || (settings.claudeToken || '').trim())) {
     origins.push('https://api.anthropic.com/*');
   }
   if (enabled.has('chatgpt') && ((settings.chatgptTriggerId || '').trim() || (settings.chatgptToken || '').trim())) {
     origins.push('https://api.chatgpt.com/*');
+  }
+  if (relay && typeof STGB_RELAY !== 'undefined' && STGB_RELAY.decodeConnectCode) {
+    const parsed = STGB_RELAY.decodeConnectCode(settings.relayCode);
+    if (parsed.ok) {
+      try {
+        const url = new URL(parsed.relay);
+        if (url.protocol === 'https:') origins.push(url.origin + '/*');
+      } catch (_) {}
+    }
   }
   return [...new Set(origins)];
 }

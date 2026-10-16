@@ -1,0 +1,4 @@
+# Local only. Copy to .dev.vars and replace the value.
+# Generate a real key with: openssl rand -base64 32
+# .dev.vars is gitignored. Do not commit it.
+ENCRYPTION_KEY=replace-with-openssl-rand-base64-32
