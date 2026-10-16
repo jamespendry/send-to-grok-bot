@@ -2,7 +2,7 @@
   "manifest_version": 3,
   "name": "Send to Grok Bot",
   "version": "1.0.0",
-  "description": "Adds a native-looking button to X posts that sends the post to your Grok Bot routine webhook (or any webhook).",
+  "description": "Adds a native-looking button to X posts that sends the post to Grok Bot, Claude, or ChatGPT.",
   "permissions": ["storage"],
   "host_permissions": ["https://*/*"],
   "background": {"service_worker": "background.js"},

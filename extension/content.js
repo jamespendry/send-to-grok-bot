@@ -36,6 +36,13 @@
     clearTimeout(toastTimer);
     toastTimer = setTimeout(() => { if (toastEl) toastEl.classList.remove('stgb-toast-show'); }, 3000);
   }
+  const recentClicks = new Map();
+  function tooSoon(url) {
+    const now = Date.now();
+    for (const [k, t] of recentClicks) if (now - t >= 5000) recentClicks.delete(k);
+    const t = recentClicks.get(url);
+    return t != null && now - t < 5000;
+  }
   // Direct child of the action bar that holds Share. Its classes are what space the row out.
   function shareWrap(bar) {
     const share = bar.querySelector('[data-testid="share"]');
@@ -71,21 +78,23 @@
       setState(btn, 'send', 'Send to Grok Bot');
       btn.addEventListener('click', e => {
         e.preventDefault(); e.stopPropagation();
-        if (btn.classList.contains('stgb-busy')) return;
         const link = [...a.querySelectorAll('a[href*="/status/"]')].find(l => l.querySelector('time'));
         const url = link ? link.href : location.href;
+        if (tooSoon(url) || btn.classList.contains('stgb-busy')) return;
+        recentClicks.set(url, Date.now());
         const text = a.querySelector('[data-testid="tweetText"]')?.innerText || '';
         const author = (url.split('/')[3]) || '';
         setState(btn, 'busy', 'Sending…');
         chrome.runtime.sendMessage({url, text, author}, r => {
           if (r && r.ok) {
-            setState(btn, 'ok', 'Sent to Grok Bot');
-            showToast('Sent to Grok Bot');
+            const toast = r.toast || 'Sent';
+            setState(btn, 'ok', toast);
+            showToast(toast);
           } else {
             const err = (r && r.error) || 'failed';
             setState(btn, 'err', 'Not sent: ' + err + '. Click to retry.');
             showToast(err, true);
-            setTimeout(() => setState(btn, 'send', 'Send to Grok Bot'), 4000);
+            setTimeout(() => setState(btn, 'send', 'Send to Grok Bot'), 5000);
           }
         });
       }, true);

@@ -9,6 +9,6 @@
 .stgb-btn.stgb-err,.stgb-btn.stgb-err *{color:rgb(244,33,46) !important}
 .stgb-btn.stgb-err .stgb-circle{background-color:rgba(244,33,46,.1)}
 .stgb-btn.stgb-busy{opacity:.6;cursor:default}
-.stgb-toast{all:unset;position:fixed !important;z-index:2147483646 !important;left:50% !important;bottom:20px !important;transform:translateX(-50%);display:block;box-sizing:border-box;background:rgb(29,155,240);color:#fff !important;border-radius:4px;padding:14px;font-family:inherit;font-size:15px;line-height:20px;text-align:center;white-space:nowrap;opacity:0;pointer-events:none;transition:opacity .2s ease}
+.stgb-toast{all:unset;position:fixed !important;z-index:2147483646 !important;left:50% !important;bottom:20px !important;transform:translateX(-50%);display:block;box-sizing:border-box;background:rgb(29,155,240);color:#fff !important;border-radius:4px;padding:14px;font-family:'TwitterChirp',-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;font-size:15px;font-weight:400;line-height:20px;text-align:center;white-space:nowrap;opacity:0;pointer-events:none;transition:opacity .2s ease}
 .stgb-toast.stgb-toast-show{opacity:1 !important}
-.stgb-toast.stgb-toast-err{background:rgb(244,33,46)}
+.stgb-toast.stgb-toast-err{background:rgb(244,33,46);white-space:normal;max-width:min(90vw,420px)}
