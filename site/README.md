@@ -1,46 +1,38 @@
 # sendtogrokbot.com
 
-Static HTML, CSS, and a little JavaScript. No framework and no build step for the pages themselves. `public/` is exactly what is served.
+The pages live in `docs/`. `scripts/build-site.sh` copies them to `dist/site`, adds the shared files from the extension, and checks that `/connect` still has what the extension needs. `site/wrangler.toml` serves `dist/site` as Cloudflare Workers static assets.
+
+```bash
+bash scripts/build-site.sh
+npx wrangler deploy --config site/wrangler.toml
+```
 
 | Path | File |
 | --- | --- |
-| `/` | `public/index.html` |
-| `/setup` | `public/setup.html` |
-| `/setup/grok`, `/setup/claude`, `/setup/chatgpt`, `/setup/codex` | `public/setup/*.html` |
-| `/mobile` | `public/mobile.html` |
-| `/connect` | `public/connect.html` |
-| `/privacy` | `public/privacy.html` (the top section of `store/privacy-policy.md`) |
+| `/` | `docs/index.html` |
+| `/setup` | `docs/setup/index.html` |
+| `/setup/grok`, `/setup/claude`, `/setup/chatgpt`, `/setup/codex` | `docs/setup/*.html` |
+| `/mobile` | `docs/mobile.html` |
+| `/history` | `docs/history.html` |
+| `/connect` | `docs/connect.html` |
+| `/privacy` | `docs/privacy.html`, the part of `store/privacy-policy.md` above the `---` line |
 
-## Shared files
+Pretty URLs come from `docs/_redirects`. Security and cache headers come from `docs/_headers`.
 
-`public/assets/connect.js`, `prompts.js`, `logos.svg`, the icons, `img/`, and `promo/` are copied from the extension and `docs/img`. After changing any of those, run:
+## Look and feel
 
-```bash
-sh site/build.sh
-```
+All styles are in `docs/assets/site.css`: system fonts, X colors, light and dark mode through `prefers-color-scheme`. Every page shares the same header and footer markup, so a nav change touches every page. `docs/assets/site.js` sets the Add to Chrome link and runs the Copy buttons.
 
-`sh site/build.sh --check` fails if the copies are stale.
+The build makes `assets/logos.svg` from `extension/logos.js`, so the site and the extension menu show the same marks. Claude is #D97757. Grok Bot is a white mark on black, ChatGPT is white on #10A37F, and Codex is black on white. `/logo.svg` and `/logo.png` stay at the site root because the marketplace plugin links to them.
 
 ## /connect must keep working
 
-The extension's content script `extension/site-connect.js` runs only on `https://sendtogrokbot.com/connect*` (and `www.`). It listens for a click on `#connect`, reads `#paste`, writes to `#msg`, and sets `data-stgb-ready` on `<html>`. Keep those ids, keep the page at `/connect`, and keep the inline script that fills `#paste` from a `#stgb1.` or `#stgbr1.` hash.
+`extension/site-connect.js` runs only on `https://sendtogrokbot.com/connect*` (and `www.`). It listens for a click on `#connect`, reads `#paste`, writes to `#msg`, and sets `data-stgb-ready` on `<html>`. Keep those ids, keep the page at `/connect`, and keep the inline script that fills `#paste` from a `#stgb1.` or `#stgbr1.` hash. The build fails if one of the ids is missing.
 
 ## Placeholders to fill
 
-- Add to Chrome link: `CHROME_STORE_URL` in `public/assets/site.js` (one line). Until then it points at the GitHub README.
+- Add to Chrome link: `CHROME_STORE_URL` in `docs/assets/site.js`. Until it is set, it points at the GitHub README.
 - Demo video: the box on the home page says where to put `demo.mp4`.
-- iOS Shortcut link: `#install` in `public/mobile.html`.
-- Support email: `support@sendtogrokbot.com` in `public/privacy.html`. Confirm the mailbox exists.
-- Screenshot slots: each dashed box names the file to add under `public/assets/img/`. Blur names, emails, tokens, URLs, and anything else private before adding one.
-
-## Deploy
-
-Cloudflare Workers static assets, on the account that already holds sendtogrokbot.com:
-
-```bash
-cd site && npx wrangler deploy
-```
-
-`wrangler.jsonc` attaches `sendtogrokbot.com` and `www.sendtogrokbot.com` as custom domains. If either is already attached to another Worker or a Pages project, detach it there first.
-
-Cloudflare Pages works too: project root `site/public`, no build command. `_headers` applies on both.
+- iOS Shortcut link: the `install-link` paragraph in `docs/mobile.html` (see `shortcuts/BUILD.md`).
+- Support email: `support@sendtogrokbot.com` in `docs/privacy.html`. Confirm the mailbox exists.
+- Screenshot slots: each dashed box names the file to add under `docs/img/`. Blur names, emails, tokens, URLs, and anything else private.

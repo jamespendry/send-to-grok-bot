@@ -2,15 +2,16 @@
 
 The relay is live at https://relay.sendtogrokbot.com. `wrangler.toml` already points at that custom domain, the D1 database, and the KV namespace on the Cloudflare account that holds sendtogrokbot.com. You do not need a new account or a new domain.
 
-The worker does three things:
+The worker does four things:
 
-- The setup page at `/` creates a relay key and a one-paste connect code. You paste that code into the extension.
+- The setup page at `/` creates a relay key and a one-paste connect code. You paste that code into the extension and into the iPhone shortcut.
 - `PUT /v1/config` stores a Grok Bot webhook and a Claude routine. The webhook key and the Claude token are encrypted with AES-GCM before they are saved. They are not written to the logs.
-- `POST /v1/send` checks the relay key, then forwards the post. Grok Bot gets the post as JSON with `Authorization: Bearer` and `X-Sender-Key` when a key is saved. Claude gets `POST` to the routine fire URL with `anthropic-version: 2023-06-01` and `{"text":"..."}`.
+- `POST /v1/send` checks the code, then forwards the post. The `Authorization` header can be `Bearer` plus the raw relay key, or `Bearer` plus the whole `stgbr1.` code. Grok Bot gets the post as JSON with `Authorization: Bearer` and `X-Sender-Key` when a key is saved. Claude gets `POST` to the routine fire URL with `anthropic-version: 2023-06-01` and `{"text":"..."}`. ChatGPT and Codex are not forwarded. The response is `200` with `openUrl`, a `https://chatgpt.com` link that already contains a short note and the post URL. The phone opens that link. The person still presses Send in the app.
+- `GET /v1/history` returns the last 50 sends for that code. The site at `https://sendtogrokbot.com/history` calls it. Browsers on `https://sendtogrokbot.com` and `https://www.sendtogrokbot.com` are allowed. Other websites are not.
 
-D1 holds the account and the last 50 sends (time, destination, link, author, and whether it worked — not the post text). KV counts requests so one key cannot run away. Limits are 60 sends an hour, 30 saves an hour, 20 new codes an hour from the same network, and 300 API calls an hour from the same network.
+D1 holds the account and the last 50 sends (time, destination, link, author, and whether it worked — not the post text). KV counts requests so one key cannot run away. Limits are 60 sends an hour, 30 saves an hour, 240 reads an hour, 20 new codes an hour from the same network, and 300 API calls an hour from the same network.
 
-ChatGPT and Codex stay in the extension. They open a tab. This relay does not send email.
+This relay does not send email.
 
 ## 1. Install the tools
 
@@ -76,7 +77,7 @@ The route in `wrangler.toml` is `relay.sendtogrokbot.com`. After a deploy, the s
 3. Add the Grok Bot webhook, the Claude routine, or both. Save.
 4. In the extension options, check **Relay**, paste the code, and click **Save**. Leave Relay off to keep sending directly from the browser.
 
-The relay key shown under the code is the same secret. The extension wants the whole code. A Shortcut wants just the key.
+The relay key shown under the code is the same secret. The extension and the iPhone shortcut both want the whole code, the one that starts with `stgbr1.`. You do not copy the key into the shortcut.
 
 ## Try it locally first (optional)
 
@@ -92,29 +93,24 @@ npx wrangler dev
 
 Open the localhost address it prints. That connect code only works against your computer. For the extension you actually run, open https://relay.sendtogrokbot.com and use the code from that page.
 
-## A future iPhone Shortcut
+## iPhone shortcut
 
-The same endpoint takes a post from the Shortcuts app. No app install is required.
+The share sheet shortcut is `shortcuts/Send to Grok Bot.shortcut`. How to import it, how to rebuild it by hand, and how to publish the iCloud link are in `shortcuts/BUILD.md`. The public steps are on `https://sendtogrokbot.com/mobile` after the site is deployed.
 
-1. Open Shortcuts and make a new shortcut.
-2. Add **Get Contents of URL**.
-3. URL: `https://relay.sendtogrokbot.com/v1/send`.
-4. Method: POST.
-5. Add a header named `Authorization`. The value is `Bearer ` followed by the relay key (the `rk_...` value on the setup page).
-6. Add a header named `Content-Type` with the value `application/json`.
-7. Set the request body to JSON:
+The shortcut posts here:
+
+`POST https://relay.sendtogrokbot.com/v1/send`
+
+Header `Authorization: Bearer` plus the whole `stgbr1.` code. Header `Content-Type: application/json`. Body:
 
 ```json
 {
   "destination": "grokbot",
   "source": "shortcut",
-  "url": "https://x.com/user/status/123",
-  "text": "Post text",
-  "author": "user",
-  "sentAt": "2026-10-16T00:00:00.000Z"
+  "url": "https://x.com/user/status/123"
 }
 ```
 
-`destination` is `grokbot` or `claude`. The relay uses the webhook or the routine you saved. It does not need the webhook key or the Claude token in the shortcut. Those stay encrypted on the worker.
+`destination` is `grokbot`, `claude`, `chatgpt`, or `codex`. Grok Bot and Claude use what you saved on the setup page. The shortcut does not contain the webhook key or the Claude token. ChatGPT and Codex need nothing saved. A successful response includes `notice` (the notification text) and, for ChatGPT and Codex, `openUrl`.
 
-A 200 response with `"ok": true` means the destination accepted it. `401` means the relay key is wrong. `429` means the hourly limit was hit.
+A 200 response with `"ok": true` means it worked. `401` means the code is wrong. `404` means Grok Bot or Claude is not saved for that code yet. `429` means the hourly limit was hit.

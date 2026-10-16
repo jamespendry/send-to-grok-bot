@@ -1,0 +1,97 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Privacy policy</title>
+<meta name="description" content="What Send to Grok Bot handles, where it goes, and what it does not do.">
+<meta name="theme-color" content="#ffffff" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#000000" media="(prefers-color-scheme: dark)">
+<meta property="og:title" content="Privacy policy">
+<meta property="og:description" content="What Send to Grok Bot handles, where it goes, and what it does not do.">
+<meta property="og:image" content="https://sendtogrokbot.com/assets/promo/marquee-1400x560.png">
+<meta name="twitter:card" content="summary_large_image">
+<link rel="icon" href="/assets/icons/icon32.png" sizes="32x32">
+<link rel="icon" href="/logo.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="/assets/icons/icon128.png">
+<link rel="stylesheet" href="/assets/site.css">
+</head>
+<body>
+<header class="top"><div class="wrap">
+  <a class="brand" href="/"><img src="/assets/icons/icon48.png" alt="" width="28" height="28"><span>Send to Grok Bot</span></a>
+  <nav aria-label="Main">
+    <a href="/setup">Setup</a>
+    <a href="/mobile" class="hide-sm">iPhone</a>
+    <a class="btn small" data-chrome-store href="https://github.com/jamespendry/send-to-grok-bot#readme">Add to Chrome</a>
+  </nav>
+</div></header>
+
+<main class="narrow page prose">
+<h1>Privacy policy</h1>
+<p class="meta"><strong>Effective date:</strong> 16 October 2026<br><strong>Publisher:</strong> James Pendry<br><strong>Applies to:</strong> the Send to Grok Bot Chrome extension</p>
+<p>Send to Grok Bot adds a button on an X post. When you click it and pick a destination, it sends that post to the destination you set up. This policy says what that handles, where it goes, and what the extension does not do.</p>
+<h2>What is handled</h2>
+<p>The extension handles the post you choose to send. On that post's own page it also reads the author's thread and the post being replied to, because those are already on the page. The payload can include:</p>
+<ul>
+<li>the post text, URL, author handle, and display name</li>
+<li>the time the post was published and the time you sent it</li>
+<li>whether the timeline cut the text off with Show more</li>
+<li>expanded links, a link card, and engagement counts shown on the post</li>
+<li>image addresses and alt text, and video or GIF thumbnails and any caption visible in the player</li>
+<li>a quoted post, the reply parent, and the author's thread on that page</li>
+<li>a plain-text digest of those fields</li>
+<li>the reply preset you picked (General, Research, Job hunt, Buy or skip, Learn later, Content ideas, or Custom) and the prompt text for that preset</li>
+</ul>
+<p>That data is sent only to a destination you configured and then picked in the menu. The preset and prompt travel with the post so the destination follows them. Destinations are:</p>
+<ul>
+<li><strong>Grok Bot, or any other webhook you enter.</strong> The extension POSTs the post as JSON to the https URL you saved. If you saved a key, it is sent on that request as <code>Authorization: Bearer</code> and <code>X-Sender-Key</code>.</li>
+<li><strong>Claude.</strong> If you leave the routine fields blank, the extension opens a claude.ai tab with the post in the address. If you save a routine URL and token, it POSTs the post to <code>api.anthropic.com</code> and sends the token as the credential for that request.</li>
+<li><strong>ChatGPT.</strong> If you leave the agent fields blank, the extension opens a chatgpt.com tab with the post in the address. If you save a Workspace Agent trigger and token, it POSTs the post to <code>api.chatgpt.com</code> and sends the token as the credential for that request.</li>
+<li><strong>Codex.</strong> The extension opens a chatgpt.com/codex tab with the post in the address. You press Send there.</li>
+</ul>
+<p>It reads a post when you click Send on it, and on a post's own page it also reads the author's thread and the reply parent shown there. It does not read direct messages. On sendtogrokbot.com/connect, a click on Connect reads the text in that page's box and saves it in the extension. It does not read other pages on that site.</p>
+<h2>Tokens and keys</h2>
+<p>Webhook keys and API tokens are stored in <code>chrome.storage.local</code> on this device. They are not synced to a Google account. If an older version of the extension still has a webhook URL and key in <code>chrome.storage.sync</code>, those two values are copied to local storage once and then deleted from sync.</p>
+<p>A token is sent only to the destination it belongs to, and only as the credential on that request. With Relay left off, the publisher does not receive tokens, keys, or posts. The extension has no account system of its own.</p>
+<h2>Relay</h2>
+<p>Relay is off unless you check it and paste a connect code. That code points at a relay you choose, such as <a href="https://relay.sendtogrokbot.com">relay.sendtogrokbot.com</a>. The extension then sends the post to that relay, which forwards it to the Grok Bot webhook or Claude routine saved there. The webhook key and Claude token are stored encrypted on the relay and are not written to its logs. The relay keeps the time, destination, link, author, and result of the last 50 sends, and drops older ones. It does not keep the post text. That list is what sendtogrokbot.com/history shows when you paste the relay code. The history page sends the code only to the relay and does not store it. ChatGPT and Codex from the Chrome extension still open a tab on this computer and do not go through the relay. The iPhone shortcut sends the post link to the relay for whichever destination you pick. ChatGPT and Codex then open with that link filled in. Leave Relay off and the extension talks only to the destination you set up.</p>
+<h2>What the extension does not do</h2>
+<ul>
+<li>It does not use analytics, advertising, or tracking.</li>
+<li>It does not sell data, and it does not transfer data for advertising, profiling, credit, or lending.</li>
+<li>It does not collect your name, email, phone number, location, health information, or payment information.</li>
+<li>It does not keep a browsing history. The post URL is sent only as part of the post you chose.</li>
+<li>It does not keep a copy of the post after the request is made or the tab is opened.</li>
+</ul>
+<p>Sites you send to (your webhook, Anthropic, OpenAI, or X) keep data under their own policies. The publisher does not control that.</p>
+<h2>How long data stays</h2>
+<p>The post is held in memory only long enough to send it or to open the tab. Tokens, the webhook URL, the reply preset and prompt, and which destinations are checked stay in local storage until you change them, clear them and click Save, or remove the extension. Removing the extension deletes its local storage. Clicking Save after you clear a destination also drops Chrome's permission for that site.</p>
+<h2>Limited use</h2>
+<p>The extension complies with the Chrome Web Store User Data Policy, including Limited Use:</p>
+<ul>
+<li>Data is used only to send the post you chose to the destination you chose.</li>
+<li>Data is transferred only when that transfer is the feature you asked for: the request to your webhook, Anthropic, or OpenAI, or the tab opened on Claude, ChatGPT, or Codex. It is also transferred if the law requires it, or to protect security. There is no other transfer.</li>
+<li>Data is not used or transferred for personalized, re-targeted, or interest-based ads.</li>
+<li>With Relay left off, the publisher does not have a server that receives this data, and no person at the publisher reads the posts you send. With Relay on, the post goes to the relay address in your connect code, which forwards it and does not keep the post text.</li>
+</ul>
+<h2>Contact</h2>
+<!-- PLACEHOLDER: confirm this mailbox exists before launch, or change the address. -->
+<p>Email <a href="mailto:support@sendtogrokbot.com">support@sendtogrokbot.com</a>.</p>
+<p>James Pendry, publisher of Send to Grok Bot. Use the support contact on the Chrome Web Store listing, or the project repository at <a href="https://github.com/jamespendry/send-to-grok-bot">github.com/jamespendry/send-to-grok-bot</a>.</p>
+<p>This extension is not affiliated with X, xAI, Anthropic, or OpenAI.</p>
+</main>
+
+<footer><div class="wrap">
+  <span>Free and open source.</span>
+  <a href="https://github.com/jamespendry/send-to-grok-bot">GitHub</a>
+  <a href="/setup">Setup</a>
+  <a href="/mobile">iPhone</a>
+  <a href="/history">History</a>
+  <a href="/connect">Connect</a>
+  <a href="/privacy">Privacy</a>
+  <span class="sp"></span>
+  <span>Not affiliated with X, xAI, Anthropic, or OpenAI.</span>
+</div></footer>
+<script src="/assets/site.js" defer></script>
+</body>
+</html>

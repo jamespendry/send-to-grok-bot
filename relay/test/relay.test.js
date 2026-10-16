@@ -20,6 +20,14 @@ function relayKey() {
   return "rk_" + btoa(bin).replace(/\+/g, "-").replace(/\//g, "_").replace(/=+$/g, "");
 }
 
+function connectCode(key, relay = "https://relay.sendtogrokbot.com") {
+  const payload = JSON.stringify({ v: 1, relay, key });
+  const bytes = new TextEncoder().encode(payload);
+  let bin = "";
+  for (const b of bytes) bin += String.fromCharCode(b);
+  return "stgbr1." + btoa(bin).replace(/\+/g, "-").replace(/\//g, "_").replace(/=+$/g, "");
+}
+
 function testEnv(outbound) {
   return {
     DB: env.DB,
@@ -359,7 +367,7 @@ describe("send", () => {
     const key = relayKey();
     const ip = nextIp();
     await api("/v1/config", { method: "PUT", key, ip, body: {} });
-    const bad = await api("/v1/send", { method: "POST", key, ip, body: { destination: "codex", url: "https://x.com/a/status/1", text: "hi" } });
+    const bad = await api("/v1/send", { method: "POST", key, ip, body: { destination: "email", url: "https://x.com/a/status/1", text: "hi" } });
     expect(bad.status).toBe(400);
     const fresh = relayKey();
     const early = await api("/v1/send", { method: "POST", key: fresh, body: { destination: "grokbot", url: "https://x.com/a/status/1", text: "hi" } });
@@ -387,6 +395,94 @@ describe("send", () => {
     expect(history.json.history.some(item => item.url.endsWith("/status/5"))).toBe(false);
     expect(history.text).not.toContain("post 55");
   }, 30000);
+
+  it("accepts a relay code and opens ChatGPT or Codex without calling out", async () => {
+    const key = relayKey();
+    const code = connectCode(key);
+    const outbound = async () => { throw new Error("outbound"); };
+    const chat = await api("/v1/send", {
+      method: "POST",
+      key: code,
+      outbound,
+      body: { destination: "chatgpt", url: "https://x.com/ada/status/9", text: "SECRET_POST_TEXT", author: "ada", source: "shortcut" }
+    });
+    expect(chat.status).toBe(200);
+    expect(chat.json.ok).toBe(true);
+    expect(chat.json.label).toBe("ChatGPT");
+    expect(chat.json.notice).toBe("Opened ChatGPT");
+    expect(chat.json.openUrl).toContain("https://chatgpt.com/?q=");
+    expect(decodeURIComponent(chat.json.openUrl)).toContain("https://x.com/ada/status/9");
+    expect(chat.json.openUrl.length).toBeLessThan(6000);
+    const codex = await api("/v1/send", {
+      method: "POST",
+      key: code,
+      outbound,
+      body: { destination: "codex", url: "https://x.com/ada/status/9", text: "SECRET_POST_TEXT" }
+    });
+    expect(codex.status).toBe(200);
+    expect(codex.json.notice).toBe("Opened Codex");
+    expect(codex.json.openUrl).toContain("https://chatgpt.com/codex?prompt=");
+    expect(codex.json.openUrl).not.toBe("");
+    const history = await api("/v1/history", { key: code });
+    expect(history.status).toBe(200);
+    expect(history.json.history).toHaveLength(2);
+    expect(history.json.history[0].destination).toBe("codex");
+    expect(history.text).not.toContain("SECRET_POST_TEXT");
+    expect(history.text).not.toContain(key);
+    const same = await api("/v1/history", { key });
+    expect(same.json.history).toHaveLength(2);
+  });
+
+  it("forwards Grok Bot when the bearer is the whole relay code", async () => {
+    const key = relayKey();
+    const ip = nextIp();
+    await saveGrok(key, ip);
+    const outbound = mockFetch(200, {});
+    const res = await api("/v1/send", {
+      method: "POST",
+      key: connectCode(key),
+      ip,
+      outbound,
+      body: { destination: "grokbot", url: "https://x.com/a/status/4", text: "hi", author: "a" }
+    });
+    expect(res.status).toBe(200);
+    expect(res.json.notice).toBe("Sent to Grok Bot");
+    expect(res.json.label).toBe("Grok Bot");
+    expect(res.json.openUrl).toBeUndefined();
+    expect(outbound.calls).toHaveLength(1);
+    expect(outbound.calls[0].authorization).toBe("Bearer whsec_test_key");
+  });
+});
+
+describe("history", () => {
+  it("lists sends for the site and stays closed to other origins", async () => {
+    const key = relayKey();
+    const code = connectCode(key);
+    const empty = await api("/v1/history", { key: code, headers: { origin: "https://sendtogrokbot.com" } });
+    expect(empty.status).toBe(200);
+    expect(empty.json.history).toEqual([]);
+    expect(empty.headers.get("access-control-allow-origin")).toBe("https://sendtogrokbot.com");
+    expect(empty.text).not.toContain("webhook");
+    const preflight = await api("/v1/history", {
+      method: "OPTIONS",
+      headers: { origin: "https://www.sendtogrokbot.com", "access-control-request-method": "GET" }
+    });
+    expect(preflight.status).toBe(204);
+    expect(preflight.headers.get("access-control-allow-origin")).toBe("https://www.sendtogrokbot.com");
+    expect(preflight.headers.get("access-control-allow-headers")).toMatch(/Authorization/);
+    expect(preflight.headers.get("vary")).toBe("Origin");
+    const blocked = await api("/v1/history", { key: code, headers: { origin: "https://evil.example" } });
+    expect(blocked.status).toBe(200);
+    expect(blocked.headers.get("access-control-allow-origin")).toBeNull();
+    const sendPreflight = await api("/v1/send", { method: "OPTIONS", headers: { origin: "https://sendtogrokbot.com" } });
+    expect(sendPreflight.headers.get("access-control-allow-origin")).toBeNull();
+    const bad = await api("/v1/history", { key: "stgbr1.not-a-real-code", headers: { origin: "https://sendtogrokbot.com" } });
+    expect(bad.status).toBe(401);
+    expect(bad.headers.get("access-control-allow-origin")).toBe("https://sendtogrokbot.com");
+    expect(bad.text).not.toContain("rk_");
+    const method = await api("/v1/history", { method: "POST", key: code, body: {} });
+    expect(method.status).toBe(405);
+  });
 });
 
 describe("limits and errors", () => {

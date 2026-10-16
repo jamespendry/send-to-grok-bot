@@ -1,0 +1,10 @@
+# Static site for sendtogrokbot.com.
+# Build first: scripts/build-site.sh
+# Deploy:    npx wrangler deploy --config site/wrangler.toml
+name = "sendtogrokbot"
+compatibility_date = "2026-10-16"
+
+[assets]
+directory = "../dist/site"
+html_handling = "none"
+not_found_handling = "404-page"

@@ -10,7 +10,7 @@ People who use Grok Bot can paste this one line into the bot:
 Set up Send to Grok Bot for me: https://github.com/jamespendry/send-to-grok-bot
 ```
 
-The bot creates a webhook routine with the General prompt and replies with one link, `https://sendtogrokbot.com/connect#stgb1.` followed by a code. Open that link and click Connect. The website, including `/setup`, `/setup/grok`, `/setup/claude`, `/setup/chatgpt`, `/setup/codex`, `/mobile`, `/connect`, and `/privacy`, is in [site/](site/). See [site/README.md](site/README.md) to change or deploy it.
+The bot creates a webhook routine with the General prompt and replies with one link, `https://sendtogrokbot.com/connect#stgb1.` followed by a code. Open that link and click Connect. With the extension installed, Connect writes it into the extension. The website (`/`, `/setup`, `/setup/grok`, `/setup/claude`, `/setup/chatgpt`, `/setup/codex`, `/mobile`, `/history`, `/connect`, `/privacy`) is in [docs/](docs/). [site/README.md](site/README.md) covers how to build and deploy it.
 
 People installing by hand: the steps below are from a folder. Store listing text, promo images, and the upload steps are in [store/](store/). `scripts/package.sh` writes the zip.
 
@@ -101,7 +101,7 @@ You should see a menu with the destinations you turned on. Click one.
 - Grok Bot or a Claude routine: the icon turns green when the send is accepted.
 - ChatGPT, Codex, or Claude with the routine fields left blank: a new tab opens with the post already written in the box. You press Send.
 
-If the icon turns red, a line at the bottom of the screen says why. If nothing is set up, the settings page opens.
+If the icon turns red, a line at the bottom of the screen says why. The button is on every post even when nothing is filled in. If a destination is not set up, clicking it opens this settings page and says what to paste.
 
 ![The arrow icon in an X post's action row](docs/img/09-post-button.png)
 
@@ -141,11 +141,34 @@ The same page accepts a Grok Bot URL and Authorization header pasted together, i
 
 The page stores the address and the key in `chrome.storage.local` on this computer. It does not keep the link.
 
+## Website
+
+`docs/` is the site for sendtogrokbot.com. Build it, then deploy the folder as a Cloudflare Worker with static assets:
+
+```bash
+scripts/build-site.sh
+npx wrangler deploy --config site/wrangler.toml
+```
+
+`scripts/build-site.sh` writes `dist/site`. That folder is the site root: `/` opens setup, `/connect` is the connect page, `/setup`, `/setup/grok`, `/setup/claude`, `/mobile`, `/history`, and `/privacy` are the guides. The build copies `extension/connect.js` to `/connect.js` and `extension/prompts.js` to `/prompts.js` so the pages work without the rest of the repository. Attach the domain `sendtogrokbot.com` to the `sendtogrokbot` worker in the Cloudflare dashboard after the first deploy. `/mobile` tells an iPhone user to install the shortcut and paste one relay code. The iCloud link is not in the repository. Copy it from the Shortcuts app and paste it into `docs/mobile.html` where the page says the link is not published yet, then deploy again. The steps are in [shortcuts/BUILD.md](shortcuts/BUILD.md).
+
+The same folder can go to Cloudflare Pages:
+
+```bash
+npx wrangler pages deploy dist/site --project-name sendtogrokbot
+```
+
+[`docs/_redirects`](docs/_redirects) is the pretty-URL list for that root. [`_redirects`](_redirects) at the repository root is only for serving the same paths when the whole repository is the site root.
+
 ## Relay (optional)
 
-You can store the Grok Bot webhook and the Claude routine on a small relay, and paste one code into the extension instead of those secrets. Check **Relay** at the bottom of the options page and paste the code from the setup page. It starts with `stgbr1.`. Leave it off to keep sending directly. ChatGPT and Codex are unchanged, because those open a tab.
+You can store the Grok Bot webhook and the Claude routine on a small relay, and paste one code into the extension instead of those secrets. Check **Relay** at the bottom of the options page and paste the code from the setup page. It starts with `stgbr1.`. Leave it off to keep sending directly. From the extension, ChatGPT and Codex open a tab.
 
-The relay is a Cloudflare Worker in [`relay/`](relay/). Setup, including the exact commands, is in [relay/DEPLOY.md](relay/DEPLOY.md). A future iPhone Shortcut can POST to the same `/v1/send` endpoint. That note is in the deploy doc too.
+The relay is a Cloudflare Worker in [`relay/`](relay/). Setup, including the exact commands, is in [relay/DEPLOY.md](relay/DEPLOY.md). The iPhone shortcut posts the same `/v1/send` endpoint with the whole `stgbr1.` code. ChatGPT and Codex come back as a link the phone opens. `GET /v1/history` is the list on `/history`.
+
+## Marketplace plugin
+
+[`plugin/`](plugin/) is the Grok Bot and Cursor plugin. It creates the webhook routine and returns the connect link. The logo on the site is `/logo.svg`. The form answers are in [plugin/SUBMIT.md](plugin/SUBMIT.md). Submit them at https://x.ai/bot/marketplace/submit-a-plugin.
 
 When Relay is on, Grok Bot and Claude still receive the version 2 post, including `digest` and media fields. The relay forwards that object.
 

@@ -1,0 +1,115 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Recent sends</title>
+<meta name="description" content="The last 50 posts you sent through the relay.">
+<meta name="theme-color" content="#ffffff" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#000000" media="(prefers-color-scheme: dark)">
+<meta property="og:title" content="Recent sends">
+<meta property="og:description" content="The last 50 posts you sent through the relay.">
+<meta property="og:image" content="https://sendtogrokbot.com/assets/promo/marquee-1400x560.png">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="robots" content="noindex">
+<link rel="icon" href="/assets/icons/icon32.png" sizes="32x32">
+<meta name="robots" content="noindex">
+<link rel="icon" href="/logo.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="/assets/icons/icon128.png">
+<link rel="stylesheet" href="/assets/site.css">
+</head>
+<body>
+<header class="top"><div class="wrap">
+  <a class="brand" href="/"><img src="/assets/icons/icon48.png" alt="" width="28" height="28"><span>Send to Grok Bot</span></a>
+  <nav aria-label="Main">
+    <a href="/setup">Setup</a>
+    <a href="/mobile" class="hide-sm">iPhone</a>
+    <a class="btn small" data-chrome-store href="https://github.com/jamespendry/send-to-grok-bot#readme">Add to Chrome</a>
+  </nav>
+</div></header>
+
+<main class="narrow page">
+  <h1>Recent sends</h1>
+  <p class="intro" style="margin-top:12px">The last 50 posts you sent through the relay: the time, the destination, the author, the result, and the post link. The post text is not stored.</p>
+  <form id="form" autocomplete="off">
+    <label class="field-label" for="code">Relay code</label>
+    <textarea id="code" spellcheck="false" autocomplete="off" placeholder="stgbr1."></textarea>
+    <div class="actions" style="margin-top:14px"><button id="show" class="btn large" type="submit">Show sends</button></div>
+    <span id="msg" role="status"></span>
+  </form>
+  <div id="list" class="history"></div>
+  <p class="muted" style="margin-top:24px">Get the code from <a href="https://relay.sendtogrokbot.com">relay.sendtogrokbot.com</a>. It starts with <span class="mono">stgbr1.</span> This page sends it only to the relay and does not save it on this device.</p>
+</main>
+<script>
+(function () {
+  var input = document.getElementById('code');
+  var msg = document.getElementById('msg');
+  var list = document.getElementById('list');
+  var names = { grokbot: 'Grok Bot', claude: 'Claude', chatgpt: 'ChatGPT', codex: 'Codex' };
+
+  function say(text, bad) {
+    msg.textContent = text || '';
+    msg.className = bad ? 'err' : '';
+  }
+
+  function line(item) {
+    var when = item.sentAt || '';
+    var date = new Date(when);
+    if (!isNaN(date.getTime())) when = date.toLocaleString();
+    var dest = names[item.destination] || item.destination || 'Send';
+    var result = item.ok ? 'Sent' : ('Failed' + (item.error ? ': ' + item.error : ''));
+    var who = item.author ? ' @' + item.author : '';
+    var url = item.url ? ' — ' + item.url : '';
+    return when + ' — ' + dest + who + ' — ' + result + url;
+  }
+
+  document.getElementById('form').addEventListener('submit', function (event) {
+    event.preventDefault();
+    var code = input.value.replace(/\s+/g, '');
+    list.replaceChildren();
+    if (!code) {
+      say('Paste the relay code.', true);
+      return;
+    }
+    say('Loading...');
+    fetch('https://relay.sendtogrokbot.com/v1/history', {
+      headers: { 'Authorization': 'Bearer ' + code }
+    }).then(function (res) {
+      return res.json().catch(function () { return null; }).then(function (data) {
+        if (!res.ok || !data || !data.ok) {
+          say((data && data.error) || 'Could not load sends.', true);
+          return;
+        }
+        var items = data.history || [];
+        if (!items.length) {
+          say('No sends yet.');
+          return;
+        }
+        say(items.length === 1 ? '1 send.' : items.length + ' sends.');
+        for (var i = 0; i < items.length; i++) {
+          var p = document.createElement('p');
+          p.textContent = line(items[i]);
+          list.appendChild(p);
+        }
+      });
+    }).catch(function () {
+      say('Could not reach the relay. Open this page on sendtogrokbot.com.', true);
+    });
+  });
+})();
+</script>
+
+<footer><div class="wrap">
+  <span>Free and open source.</span>
+  <a href="https://github.com/jamespendry/send-to-grok-bot">GitHub</a>
+  <a href="/setup">Setup</a>
+  <a href="/mobile">iPhone</a>
+  <a href="/history">History</a>
+  <a href="/connect">Connect</a>
+  <a href="/privacy">Privacy</a>
+  <span class="sp"></span>
+  <span>Not affiliated with X, xAI, Anthropic, or OpenAI.</span>
+</div></footer>
+<script src="/assets/site.js" defer></script>
+</body>
+</html>

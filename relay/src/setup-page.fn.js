@@ -43,7 +43,8 @@ function setupPage() {
     var when = item.sentAt || "";
     var date = new Date(when);
     if (!isNaN(date.getTime())) when = date.toLocaleString();
-    var dest = item.destination === "claude" ? "Claude" : "Grok Bot";
+    var names = { grokbot: "Grok Bot", claude: "Claude", chatgpt: "ChatGPT", codex: "Codex" };
+    var dest = names[item.destination] || item.destination || "Send";
     var result = item.ok ? "Sent" : ("Failed" + (item.error ? ": " + item.error : ""));
     var who = item.author ? " @" + item.author : "";
     var url = item.url ? " — " + item.url : "";

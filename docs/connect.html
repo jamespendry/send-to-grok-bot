@@ -4,29 +4,46 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Connect Send to Grok Bot</title>
-<link rel="stylesheet" href="../site/public/assets/site.css">
+<meta name="description" content="Connect your AI to the Send to Grok Bot extension.">
+<meta name="theme-color" content="#ffffff" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#000000" media="(prefers-color-scheme: dark)">
+<meta property="og:title" content="Connect Send to Grok Bot">
+<meta property="og:description" content="Connect your AI to the Send to Grok Bot extension.">
+<meta property="og:image" content="https://sendtogrokbot.com/assets/promo/marquee-1400x560.png">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="robots" content="noindex">
+<link rel="icon" href="/assets/icons/icon32.png" sizes="32x32">
+<meta name="robots" content="noindex">
+<link rel="icon" href="/logo.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="/assets/icons/icon128.png">
+<link rel="stylesheet" href="/assets/site.css">
 </head>
 <body>
-<main>
-<nav>
-  <a href="https://sendtogrokbot.com/setup">Setup</a>
-  <a href="https://sendtogrokbot.com/setup/grok">Grok Bot</a>
-  <a href="https://sendtogrokbot.com/setup/claude">Claude</a>
-  <a href="connect.html">Connect</a>
-  <a href="https://sendtogrokbot.com/privacy">Privacy</a>
-</nav>
-<h1>Connect</h1>
-<p>Paste the link you were given, or paste the address and the secret from Grok Bot or Claude. Then click Connect.</p>
-<p class="muted">This page stays in your browser. It does not send the address or the secret anywhere except into the Send to Grok Bot extension on this computer, and only after you click Connect.</p>
-<label for="paste">Paste here</label>
-<textarea id="paste" spellcheck="false" autocomplete="off" placeholder="Paste the link, or the address and the secret, in any order"></textarea>
-<button id="connect" type="button">Connect</button>
-<span id="msg" role="status"></span>
-<p class="muted" id="ready"></p>
-<p class="muted">If Chrome asks to allow a site, choose Allow. Then open x.com, refresh, and click the arrow on a post.</p>
-<p class="muted">ChatGPT and Codex need none of this. Check the box in the extension and click Save. A post opens with the text filled in, and you press Send.</p>
+<header class="top"><div class="wrap">
+  <a class="brand" href="/"><img src="/assets/icons/icon48.png" alt="" width="28" height="28"><span>Send to Grok Bot</span></a>
+  <nav aria-label="Main">
+    <a href="/setup" aria-current="page">Setup</a>
+    <a href="/mobile" class="hide-sm">iPhone</a>
+    <a class="btn small" data-chrome-store href="https://github.com/jamespendry/send-to-grok-bot#readme">Add to Chrome</a>
+  </nav>
+</div></header>
+
+<main class="narrow page">
+  <h1>Connect</h1>
+  <p class="intro" style="margin-top:12px">Paste the link you were given, or the address and the secret from Grok Bot or Claude. Then click Connect.</p>
+
+  <label class="field-label" for="paste">Paste here</label>
+  <textarea id="paste" spellcheck="false" autocomplete="off" placeholder="Paste the link, or the address and the secret, in any order"></textarea>
+  <div class="actions" style="margin-top:14px"><button id="connect" class="btn large" type="button">Connect</button></div>
+  <span id="msg" role="status"></span>
+  <p class="status muted" id="ready"></p>
+
+  <div class="note">If Chrome asks to allow a site, choose <b>Allow</b>. Then open x.com, refresh, and click the Send button on a post.</div>
+
+  <p class="muted">This page stays in your browser. It does not send the address or the secret anywhere except into the Send to Grok Bot extension on this computer, and only after you click Connect.</p>
+  <p class="muted" style="margin-top:12px">ChatGPT and Codex need none of this. Check the box in the extension and click Save. A post opens with the text filled in, and you press Send.</p>
 </main>
-<script src="../extension/connect.js"></script>
+<script src="/connect.js"></script>
 <script>
 (function () {
   var paste = document.getElementById('paste');
@@ -40,7 +57,7 @@
 
   function showParsed() {
     if (!api) {
-      say('This page could not load. Open it from the project folder.', false);
+      say('This page did not finish loading. Refresh and try again.', false);
       return;
     }
     if (!paste.value.trim()) { say('', true); return; }
@@ -67,12 +84,25 @@
 
   document.getElementById('connect').addEventListener('click', function () {
     if (document.documentElement.dataset.stgbReady) return;
-    if (!api) { say('This page could not load. Open it from the project folder.', false); return; }
+    if (!api) { say('This page did not finish loading. Refresh and try again.', false); return; }
     var parsed = api.parseSetupPaste(paste.value);
     if (!parsed.ok) { say(parsed.error, false); return; }
     say('Install Send to Grok Bot in this browser, then open this page again and click Connect.', false);
   });
 })();
 </script>
+
+<footer><div class="wrap">
+  <span>Free and open source.</span>
+  <a href="https://github.com/jamespendry/send-to-grok-bot">GitHub</a>
+  <a href="/setup">Setup</a>
+  <a href="/mobile">iPhone</a>
+  <a href="/history">History</a>
+  <a href="/connect">Connect</a>
+  <a href="/privacy">Privacy</a>
+  <span class="sp"></span>
+  <span>Not affiliated with X, xAI, Anthropic, or OpenAI.</span>
+</div></footer>
+<script src="/assets/site.js" defer></script>
 </body>
 </html>

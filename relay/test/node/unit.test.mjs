@@ -8,6 +8,8 @@ import { fileURLToPath } from "node:url";
 import vm from "node:vm";
 import { buildClientScript } from "../../src/build-client.js";
 import { CODEC_SOURCE, PAGE_SOURCE } from "../../src/browser-sources.js";
+import { relayKeyFromToken } from "../../src/connect-code.js";
+import { prefilledOpenUrl } from "../../src/open-link.js";
 import { ConfigError, decryptSecret, encryptSecret } from "../../src/crypto.js";
 import { STATEMENTS } from "../../src/db.js";
 import { safeLog } from "../../src/log.js";
@@ -26,7 +28,29 @@ function read(rel) {
 test("browser sources match the checked function files", () => {
   assert.equal(CODEC_SOURCE, read("src/relay-codec.fn.js"));
   assert.equal(PAGE_SOURCE, read("src/setup-page.fn.js"));
+  assert.match(PAGE_SOURCE, /chatgpt: "ChatGPT"/);
   assert.ok(read("../extension/relay.js").includes(read("src/relay-codec.fn.js").trim()));
+});
+
+test("a relay code and a raw key identify the same account", () => {
+  const context = vm.createContext({
+    btoa, atob, TextEncoder, TextDecoder, URL, Uint8Array, crypto: webcrypto
+  });
+  vm.runInContext(CODEC_SOURCE + "\nglobalThis.codec = relayCodec();", context);
+  const key = context.codec.newRelayKey();
+  const code = context.codec.encodeConnectCode("https://relay.sendtogrokbot.com/", key);
+  assert.equal(relayKeyFromToken(key), key);
+  assert.equal(relayKeyFromToken(code), key);
+  assert.equal(relayKeyFromToken("stgbr1.not-a-code"), "");
+  assert.equal(relayKeyFromToken("rk_short"), "");
+  const chat = prefilledOpenUrl("chatgpt", "https://x.com/a/status/1");
+  assert.match(chat, /^https:\/\/chatgpt\.com\/\?q=/);
+  assert.match(decodeURIComponent(chat), /https:\/\/x\.com\/a\/status\/1/);
+  assert.match(decodeURIComponent(chat), /one-line takeaway/);
+  assert.ok(chat.length < 6000);
+  const codex = prefilledOpenUrl("codex", "https://x.com/a/status/1");
+  assert.match(codex, /^https:\/\/chatgpt\.com\/codex\?prompt=/);
+  assert.equal(prefilledOpenUrl("grokbot", "https://x.com/a/status/1"), "");
 });
 
 test("schema.sql contains the worker statements", () => {
@@ -35,7 +59,7 @@ test("schema.sql contains the worker statements", () => {
 });
 
 test("only the log helper writes to the console", () => {
-  const files = ["src/index.js", "src/crypto.js", "src/validate.js", "src/db.js", "src/rate.js", "src/page.js", "src/client.js", "src/setup-page.fn.js", "src/relay-codec.fn.js"];
+  const files = ["src/index.js", "src/crypto.js", "src/validate.js", "src/db.js", "src/rate.js", "src/page.js", "src/client.js", "src/setup-page.fn.js", "src/relay-codec.fn.js", "src/connect-code.js", "src/open-link.js"];
   for (const file of files) {
     assert.equal(/\bconsole\./.test(read(file)), false, file);
   }
@@ -93,7 +117,7 @@ test("Claude text matches the extension block and stays within the limit", () =>
   const long = claudeText({ url: "https://x.com/a/status/1", author: "ada", sentAt: "t", text: "x".repeat(70000) });
   assert.equal(long.length, 65536);
   const parsed = parseSendBody({ destination: "nope" });
-  assert.match(parsed.error, /grokbot or claude/);
+  assert.match(parsed.error, /chatgpt, or codex/);
   const rich = parseSendBody({
     destination: "grokbot",
     url: "https://x.com/a/status/1",
@@ -340,6 +364,205 @@ test("a pasted connect link, header, or Fire URL is recognized in any order", ()
   assert.deepEqual(plan.settings.enabled, ["chatgpt", "grokbot"]);
   assert.equal(plan.settings.promptPreset, "research");
   assert.match(plan.message, /Saved Send to Grok Bot/);
+});
+
+test("1.1.0 settings survive an update and a blank local webhook does not win", () => {
+  const { stgbMigrateSettings } = require("../../../extension/hosts.js");
+  const fromSync = stgbMigrateSettings(
+    { enabled: ["grokbot"], webhookUrl: "", senderKey: "" },
+    { webhookUrl: "https://hooks.example/hook", senderKey: "whsec_old" }
+  );
+  assert.equal(fromSync.settings.webhookUrl, "https://hooks.example/hook");
+  assert.equal(fromSync.settings.senderKey, "whsec_old");
+  assert.deepEqual(fromSync.settings.enabled, ["grokbot"]);
+  assert.deepEqual(fromSync.removeSync.sort(), ["senderKey", "webhookUrl"]);
+  const keepLocal = stgbMigrateSettings(
+    { enabled: ["grokbot"], webhookUrl: "https://hooks.example/local", senderKey: "local-key", claudePrompt: "old lens" },
+    { webhookUrl: "https://hooks.example/sync", senderKey: "sync-key" }
+  );
+  assert.equal(keepLocal.settings.webhookUrl, "https://hooks.example/local");
+  assert.equal(keepLocal.settings.senderKey, "local-key");
+  assert.equal(keepLocal.settings.promptPreset, "custom");
+  assert.equal(keepLocal.settings.promptText, "old lens");
+  const already = stgbMigrateSettings(
+    { promptPreset: "research", promptText: "", claudePrompt: "do not replace" },
+    {}
+  );
+  assert.equal(already.patch.promptText, undefined);
+  assert.equal(already.settings.promptPreset, "research");
+});
+
+test("service worker scripts share one scope and an empty webhook stays in the menu", () => {
+  const context = vm.createContext({ console });
+  context.globalThis = context;
+  context.self = context;
+  context.importScripts = () => {};
+  context.chrome = {
+    runtime: { onMessage: { addListener() {} }, onInstalled: { addListener() {} }, openOptionsPage() {} },
+    action: { onClicked: { addListener() {} } },
+    storage: { session: { set() {} } }
+  };
+  for (const file of ["hosts.js", "prompts.js", "destinations/grokbot.js", "destinations/claude.js", "destinations/chatgpt.js", "destinations/codex.js", "relay.js", "background.js"]) {
+    vm.runInContext(read("../extension/" + file), context, { filename: file });
+  }
+  assert.equal(typeof context.STGB_DESTINATIONS.grokbot.send, "function");
+  assert.equal(typeof context.STGB_DESTINATIONS.claude_routine.send, "function");
+  assert.equal(typeof context.STGB_DESTINATIONS.chatgpt_link.send, "function");
+  assert.equal(typeof context.STGB_DESTINATIONS.codex.send, "function");
+  const empty = context.menuItems({ enabled: ["grokbot"], webhookUrl: "" });
+  assert.equal(empty.length, 1);
+  assert.equal(empty[0].needsSetup, true);
+  const ready = context.menuItems({ enabled: ["grokbot"], webhookUrl: "https://hooks.example/hook" });
+  assert.equal(ready[0].needsSetup, false);
+  assert.equal(context.menuItems({}).length, 0);
+  assert.equal(context.menuItems({ enabled: ["chatgpt"] })[0].needsSetup, false);
+});
+
+test("the share sheet shortcut posts one relay code and names each destination", () => {
+  const file = read("../shortcuts/Send to Grok Bot.shortcut");
+  assert.match(file, /Send to Grok Bot/);
+  for (const name of ["Grok Bot", "Claude", "ChatGPT", "Codex"]) assert.ok(file.includes(name), name);
+  for (const id of ["grokbot", "claude", "chatgpt", "codex"]) assert.ok(file.includes(`<string>${id}</string>`), id);
+  assert.match(file, /https:\/\/relay\.sendtogrokbot\.com\/v1\/send/);
+  assert.match(file, /WFWorkflowImportQuestions/);
+  assert.match(file, /WFTextActionText/);
+  assert.match(file, /ActionExtension/);
+  assert.match(file, /<string>Authorization<\/string>/);
+  assert.match(file, /application\/json/);
+  assert.match(file, /<string>notice<\/string>/);
+  assert.match(file, /<string>openUrl<\/string>/);
+  assert.match(file, /<string>shortcut<\/string>/);
+  assert.match(file, /Bearer \uFFFC/);
+  assert.doesNotMatch(file, /rk_[A-Za-z0-9_-]{20}/);
+  assert.doesNotMatch(file, /icloud\.com\/shortcuts\/[0-9a-f]{8}/);
+  const steps = read("../shortcuts/BUILD.md");
+  assert.match(steps, /Copy iCloud Link/);
+  assert.match(steps, /Allow Untrusted Shortcuts/);
+  assert.match(steps, /docs\/mobile\.html/);
+  assert.match(steps, /stgbr1/);
+});
+
+test("the connect site is rooted at docs and hands the code to the extension", async () => {
+  const page = read("../docs/connect.html");
+  assert.match(page, /src="\/connect\.js"/);
+  assert.match(page, /id="paste"/);
+  assert.match(page, /id="connect"/);
+  assert.match(read("../docs/_redirects"), /\/connect\s+\/connect\.html\s+200/);
+  assert.match(read("../extension/manifest.json"), /"version": "1\.2\.1"/);
+  assert.match(read("../extension/manifest.json"), /https:\/\/sendtogrokbot\.com\/connect\*/);
+  assert.match(read("../site/wrangler.toml"), /directory = "\.\.\/dist\/site"/);
+  assert.match(read("../README.md"), /npx wrangler deploy --config site\/wrangler\.toml/);
+  const mobile = read("../docs/mobile.html");
+  assert.match(mobile, /id="install-link"/);
+  assert.match(mobile, /not published yet/);
+  assert.match(mobile, /stgbr1/);
+  assert.match(mobile, /https:\/\/relay\.sendtogrokbot\.com/);
+  assert.doesNotMatch(mobile, /icloud\.com\/shortcuts\/[0-9a-f]{8}/);
+  assert.doesNotMatch(mobile, /rk_[A-Za-z0-9_-]{20}/);
+  const history = read("../docs/history.html");
+  assert.match(history, /https:\/\/relay\.sendtogrokbot\.com\/v1\/history/);
+  assert.match(history, /Authorization/);
+  assert.doesNotMatch(history, /localStorage/);
+  assert.match(read("../docs/_redirects"), /\/mobile\s+\/mobile\.html\s+200/);
+  assert.match(read("../docs/_redirects"), /\/history\s+\/history\.html\s+200/);
+  assert.match(read("../_redirects"), /\/mobile\s+\/docs\/mobile\.html\s+200/);
+  assert.match(read("../docs/setup/index.html"), /href="\/mobile"/);
+  assert.match(read("../README.md"), /\/mobile/);
+  const script = history.slice(history.indexOf("<script>") + 8, history.lastIndexOf("</script>"));
+  const nodes = {};
+  function el(id) {
+    if (!nodes[id]) {
+      nodes[id] = {
+        value: "",
+        textContent: "",
+        className: "",
+        children: [],
+        addEventListener(type, fn) { this["on" + type] = fn; },
+        replaceChildren() { this.children = []; },
+        appendChild(child) { this.children.push(child); }
+      };
+    }
+    return nodes[id];
+  }
+  const context = {
+    document: {
+      getElementById: el,
+      createElement() { return { textContent: "" }; }
+    },
+    fetch(url, init) {
+      context.fetched = { url, init };
+      return Promise.resolve({
+        ok: true,
+        status: 200,
+        json: () => Promise.resolve({
+          ok: true,
+          history: [{ sentAt: "2026-10-16T00:00:00.000Z", destination: "chatgpt", url: "https://x.com/a/status/1", author: "ada", ok: true, error: "" }]
+        })
+      });
+    },
+    Date,
+    console
+  };
+  context.globalThis = context;
+  vm.createContext(context);
+  vm.runInContext(script, context);
+  function settle() { return new Promise(resolve => setTimeout(resolve, 0)); }
+  nodes.code.value = "  stgbr1.example  ";
+  nodes.form.onsubmit({ preventDefault() {} });
+  await settle();
+  assert.equal(context.fetched.url, "https://relay.sendtogrokbot.com/v1/history");
+  assert.equal(context.fetched.init.headers.Authorization, "Bearer stgbr1.example");
+  assert.match(nodes.list.children[0].textContent, /ChatGPT/);
+  assert.match(nodes.list.children[0].textContent, /https:\/\/x.com\/a\/status\/1/);
+  assert.equal(nodes.code.value, "  stgbr1.example  ");
+  nodes.code.value = " ";
+  nodes.form.onsubmit({ preventDefault() {} });
+  await settle();
+  assert.match(nodes.msg.textContent, /Paste the relay code/);
+});
+
+test("the marketplace plugin package and logo match the form", () => {
+  const cursorManifest = JSON.parse(read("../plugin/.cursor-plugin/plugin.json"));
+  const agentManifest = JSON.parse(read("../plugin/plugin.json"));
+  const marketplace = JSON.parse(read("../.cursor-plugin/marketplace.json"));
+  assert.equal(cursorManifest.name, "send-to-grok-bot");
+  assert.equal(agentManifest.name, "send-to-grok-bot");
+  assert.equal(agentManifest.$schema, "https://agent-plugins.org/schemas/1.0.0/plugin.schema.json");
+  assert.equal(cursorManifest.logo, "assets/logo.svg");
+  assert.equal(cursorManifest.skills, "./skills/");
+  assert.equal(marketplace.plugins[0].source, "plugin");
+  assert.equal(marketplace.plugins[0].name, "send-to-grok-bot");
+  const skill = read("../plugin/skills/send-to-grok-bot/SKILL.md");
+  assert.match(skill, /^---\nname: send-to-grok-bot\n/);
+  assert.match(skill, /description:/);
+  assert.match(skill, /https:\/\/sendtogrokbot\.com\/connect#/);
+  assert.match(skill, /one-line takeaway/);
+  assert.match(skill, /job-hunt/);
+  assert.doesNotMatch(skill, /rk_[A-Za-z0-9_-]{20}/);
+  const routine = read("../plugin/skills/send-to-grok-bot/routine-prompt.md").trim();
+  const general = read("../prompts/general.md").split("---").pop().trim();
+  assert.equal(routine, general);
+  const svg = read("../plugin/assets/logo.svg");
+  assert.equal(svg, read("../docs/logo.svg"));
+  assert.match(svg, /viewBox="0 0 128 128"/);
+  assert.match(svg, /fill="#ffffff"/);
+  assert.match(svg, /fill="#0f1419"/);
+  assert.doesNotMatch(svg, /[\u{1F300}-\u{1FAFF}]/u);
+  const png = readFileSync(join(root, "../plugin/assets/logo.png"));
+  assert.equal(png.subarray(0, 8).toString("hex"), "89504e470d0a1a0a");
+  assert.equal(png.readUInt32BE(16), 512);
+  assert.equal(png.readUInt32BE(20), 512);
+  assert.equal(png[25], 2);
+  assert.ok(png.equals(readFileSync(join(root, "../docs/logo.png"))));
+  const form = read("../plugin/SUBMIT.md");
+  const desc = form.match(/\| Brief Description \| (.*) \|/)[1];
+  const steps = form.match(/\| Testing Instructions \| (.*) \|/)[1];
+  assert.ok(desc.length <= 600, desc.length);
+  assert.ok(steps.length <= 600, steps.length);
+  assert.match(form, /Organization Handle \| sendtogrokbot/);
+  assert.match(form, /Website URL \| https:\/\/sendtogrokbot\.com \|/);
+  assert.match(form, /https:\/\/sendtogrokbot\.com\/logo\.svg/);
+  assert.match(form, /Grok \(coming soon\), Grok Bot, and Cursor/);
 });
 
 test("Claude text keeps the old shape and prefixes a preset prompt", () => {

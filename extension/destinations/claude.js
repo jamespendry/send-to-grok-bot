@@ -8,7 +8,7 @@
 //      The endpoint sends no CORS headers (OPTIONS -> 405). The service worker can call it
 //      only after you grant https://api.anthropic.com/* from the options page.
 //  - claude_link: opens claude.ai/new?q=<prompt> in a new tab (prefill only; user presses Send). Any plan.
-const root = typeof globalThis !== 'undefined' ? globalThis : self;
+var root = typeof globalThis !== 'undefined' ? globalThis : self;
 root.STGB_DESTINATIONS = root.STGB_DESTINATIONS || {};
 
 // prompts/general.md. The service worker loads prompts.js first. The fallback matches that file.

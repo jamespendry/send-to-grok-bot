@@ -37,7 +37,7 @@ A token is sent only to the destination it belongs to, and only as the credentia
 
 ## Relay
 
-Relay is off unless you check it and paste a connect code. That code points at a relay you choose, such as https://relay.sendtogrokbot.com. The extension then sends the post to that relay, which forwards it to the Grok Bot webhook or Claude routine saved there. The webhook key and Claude token are stored encrypted on the relay and are not written to its logs. The relay keeps the time, destination, link, author, and result of recent sends. It does not keep the post text. ChatGPT and Codex still open a tab on this computer and do not go through the relay. Leave Relay off and the extension talks only to the destination you set up.
+Relay is off unless you check it and paste a connect code. That code points at a relay you choose, such as https://relay.sendtogrokbot.com. The extension then sends the post to that relay, which forwards it to the Grok Bot webhook or Claude routine saved there. The webhook key and Claude token are stored encrypted on the relay and are not written to its logs. The relay keeps the time, destination, link, author, and result of the last 50 sends, and drops older ones. It does not keep the post text. That list is what sendtogrokbot.com/history shows when you paste the relay code. The history page sends the code only to the relay and does not store it. ChatGPT and Codex from the Chrome extension still open a tab on this computer and do not go through the relay. The iPhone shortcut sends the post link to the relay for whichever destination you pick. ChatGPT and Codex then open with that link filled in. Leave Relay off and the extension talks only to the destination you set up.
 
 ## What the extension does not do
 

@@ -158,6 +158,7 @@ function fill(local) {
 }
 
 function persist(o, done) {
+  if (!settingsLoaded) { done('Settings did not load. Reload this page before you click Save.'); return; }
   const problem = settingsProblem(o);
   if (problem) { done(problem); return; }
   const origins = stgbNeededOrigins(o);
@@ -238,17 +239,36 @@ function dropUnusedOrigins(keep) {
   });
 }
 
+let settingsLoaded = false;
+
+function showNotice(text) {
+  const el = $('notice');
+  if (!el) return;
+  el.textContent = text || '';
+  el.hidden = !text;
+}
+
 async function load() {
-  let local = await getStore('local', null);
-  const sync = await getStore('sync', ['webhookUrl', 'senderKey']);
-  if ((sync.webhookUrl || sync.senderKey) && local.webhookUrl == null && local.senderKey == null) {
-    const patch = {webhookUrl: sync.webhookUrl || '', senderKey: sync.senderKey || ''};
-    if (!Array.isArray(local.enabled)) patch.enabled = ['grokbot'];
-    await setStore('local', patch);
-    await removeStore('sync', ['webhookUrl', 'senderKey']);
-    local = {...local, ...patch};
-  }
+  let local = await getStore('local', null) || {};
+  let sync = {};
+  try { sync = await getStore('sync', null) || {}; }
+  catch (_) { sync = {}; }
+  const migrated = stgbMigrateSettings(local, sync);
+  if (migrated.patch && Object.keys(migrated.patch).length) await setStore('local', migrated.patch);
+  if (migrated.removeSync && migrated.removeSync.length) await removeStore('sync', migrated.removeSync);
+  local = migrated.settings;
   fill(local);
+  settingsLoaded = true;
+  let notice = '';
+  try {
+    const session = await new Promise(resolve => chrome.storage.session.get('setupNotice', resolve));
+    notice = session && session.setupNotice || '';
+    if (notice) chrome.storage.session.remove('setupNotice');
+  } catch (_) {}
+  const grokOn = brandSet(local.enabled, local.webhookUrl).has('grokbot');
+  const grokEmpty = !(local.webhookUrl || '').trim() && !(local.useRelay && (local.relayCode || '').trim());
+  if (!notice && grokOn && grokEmpty) notice = 'Grok Bot is checked, but the webhook is empty. Paste a connect link and click Connect. A webhook saved by version 1.1.0 is kept when it is still in this browser.';
+  showNotice(notice);
 }
 
 fillPresetSelect();

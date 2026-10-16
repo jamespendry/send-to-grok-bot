@@ -1,0 +1,101 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Set up Grok Bot</title>
+<meta name="description" content="Paste one line into Grok Bot and click the link it sends back.">
+<meta name="theme-color" content="#ffffff" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#000000" media="(prefers-color-scheme: dark)">
+<meta property="og:title" content="Set up Grok Bot">
+<meta property="og:description" content="Paste one line into Grok Bot and click the link it sends back.">
+<meta property="og:image" content="https://sendtogrokbot.com/assets/promo/marquee-1400x560.png">
+<meta name="twitter:card" content="summary_large_image">
+<link rel="icon" href="/assets/icons/icon32.png" sizes="32x32">
+<link rel="icon" href="/logo.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="/assets/icons/icon128.png">
+<link rel="stylesheet" href="/assets/site.css">
+</head>
+<body>
+<header class="top"><div class="wrap">
+  <a class="brand" href="/"><img src="/assets/icons/icon48.png" alt="" width="28" height="28"><span>Send to Grok Bot</span></a>
+  <nav aria-label="Main">
+    <a href="/setup" aria-current="page">Setup</a>
+    <a href="/mobile" class="hide-sm">iPhone</a>
+    <a class="btn small" data-chrome-store href="https://github.com/jamespendry/send-to-grok-bot#readme">Add to Chrome</a>
+  </nav>
+</div></header>
+
+<main class="narrow page">
+  <a class="crumb" href="/setup">Setup</a>
+  <div class="page-head">
+    <span class="logo grokbot"><svg><use href="/assets/logos.svg#grokbot"/></svg></span>
+    <h1>Grok Bot</h1>
+  </div>
+  <p class="intro">The easiest setup. Grok Bot does the work. You paste one line and click one link.</p>
+
+  <div class="note"><b>Before you start:</b> add the extension to Chrome. <a data-chrome-store href="https://github.com/jamespendry/send-to-grok-bot#readme">Add to Chrome</a></div>
+
+  <ol class="steps num">
+    <li>
+      <h3>Copy this line into Grok Bot</h3>
+      <div class="copy">
+        <span class="val" id="grokline">Set up Send to Grok Bot for me: https://github.com/jamespendry/send-to-grok-bot</span>
+        <button type="button" data-copy="#grokline">Copy</button>
+      </div>
+      <p class="muted">Paste it into the Grok Bot you want to use. It reads the project, creates a webhook routine named Send to Grok Bot, and puts the General reply style on it. You never copy a key into a chat.</p>
+    </li>
+    <li>
+      <h3>Click the link it sends back</h3>
+      <p class="muted">The reply is one link shaped like <span class="mono">https://sendtogrokbot.com/connect#stgb1.…</span> The box on that page is already filled. Open it in Chrome, then click <span class="ui">Connect</span>. If Chrome asks to allow a site, choose <span class="ui">Allow</span>.</p>
+      <figure>
+        <div class="slot">
+          <b>Screenshot slot</b>
+          <code>/img/connect-page.png</code>
+          <span>The connect page opened from the link, the box filled in, the Connect button visible. Blur the code in the box.</span>
+        </div>
+      </figure>
+    </li>
+    <li>
+      <h3>You're done</h3>
+      <p class="muted">Open x.com and refresh. Click the Send button on any post and choose <span class="ui">Send to Grok Bot</span>. The icon turns green when the run has started. The reply shows up in your Grok Bot chat when the run finishes.</p>
+    </li>
+  </ol>
+
+  <details class="fallback">
+    <summary>If the bot can't send a link</summary>
+    <p class="muted">Do this on a computer. The phone app doesn't show these fields.</p>
+    <ol>
+      <li>In Grok Bot, open the bot's sidebar and go to the <span class="ui">Routines</span> tab.</li>
+      <li>Open the routine named <span class="ui">Send to Grok Bot</span>.</li>
+      <li>At the bottom, <span class="ui">When to run</span> is Webhook and <span class="ui">Method</span> is POST. Copy the <span class="ui">URL</span> and the <span class="ui">Authorization</span> header.</li>
+      <li>Open the <a href="/connect">connect page</a>, paste both into the box in any order, and click <span class="ui">Connect</span>.</li>
+    </ol>
+    <p class="muted">Or paste them into the extension settings: the URL into <span class="ui">Webhook URL</span> and the header into <span class="ui">Webhook key</span>. The word Bearer is removed for you. Click <span class="ui">Save</span>. If Chrome asks, choose <span class="ui">Allow</span>.</p>
+    <figure>
+      <div class="slot">
+        <b>Screenshot slot</b>
+        <code>/img/grok-routines-webhook.png</code>
+        <span>Grok Bot, Routines tab, the Send to Grok Bot routine open, the Webhook section at the bottom. Blur the URL and the Authorization header.</span>
+      </div>
+    </figure>
+  </details>
+
+  <h2>Change the reply style later</h2>
+  <p>Leave the routine as it is. In the extension settings, under <span class="ui">Replies</span>, pick Research, Job hunt, Buy or skip, Learn later, or Content ideas. The routine follows it on the next post.</p>
+</main>
+
+<footer><div class="wrap">
+  <span>Free and open source.</span>
+  <a href="https://github.com/jamespendry/send-to-grok-bot">GitHub</a>
+  <a href="/setup">Setup</a>
+  <a href="/mobile">iPhone</a>
+  <a href="/history">History</a>
+  <a href="/connect">Connect</a>
+  <a href="/privacy">Privacy</a>
+  <span class="sp"></span>
+  <span>Not affiliated with X, xAI, Anthropic, or OpenAI.</span>
+</div></footer>
+<script src="/assets/site.js" defer></script>
+</body>
+</html>
