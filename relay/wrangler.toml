@@ -1,22 +1,17 @@
 name = "stgb-relay"
 main = "src/index.js"
-compatibility_date = "2026-10-16"
+compatibility_date = "2026-10-01"
+routes = [ { pattern = "relay.sendtogrokbot.com", custom_domain = true } ]
 
-# Replace database_id after: npx wrangler d1 create stgb-relay
 [[d1_databases]]
 binding = "DB"
 database_name = "stgb-relay"
-database_id = "00000000-0000-0000-0000-000000000000"
+database_id = "933c0063-2236-480e-a9e5-b73ec76466dc"
 
-# Replace id after: npx wrangler kv namespace create STGB_KV
 [[kv_namespaces]]
 binding = "KV"
-id = "00000000000000000000000000000000"
+id = "5c50f8ce458846739e5a1b9470ee4098"
 
 # ENCRYPTION_KEY is a secret. Set it with:
 #   npx wrangler secret put ENCRYPTION_KEY
 # Do not put the key in this file.
-#
-# To attach a hostname from this file instead of the dashboard, uncomment one:
-# routes = [ { pattern = "relay.sendtogrokbot.com", custom_domain = true } ]
-# routes = [ { pattern = "sendtogrokbot.com/api/*", zone_name = "sendtogrokbot.com" } ]

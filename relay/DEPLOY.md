@@ -1,6 +1,6 @@
 # Deploy the relay
 
-This is the Cloudflare Worker for sendtogrokbot.com. It is not deployed yet. You already have a Cloudflare account, and the domain sendtogrokbot.com is already on that account. You do not need a new account or a new domain.
+The relay is live at https://relay.sendtogrokbot.com. `wrangler.toml` already points at that custom domain, the D1 database, and the KV namespace on the Cloudflare account that holds sendtogrokbot.com. You do not need a new account or a new domain.
 
 The worker does three things:
 
@@ -31,44 +31,19 @@ npx wrangler login
 
 A browser opens. Sign in to the Cloudflare account that already has sendtogrokbot.com. Leave the window open until it says you are logged in.
 
-## 3. Create the database
+## 3. Database and KV
 
-```bash
-npx wrangler d1 create stgb-relay
-```
+These already exist and are named in `wrangler.toml`. D1 database `stgb-relay` is `933c0063-2236-480e-a9e5-b73ec76466dc`. The KV namespace id is `5c50f8ce458846739e5a1b9470ee4098`. Leave those values as they are.
 
-The output includes a `database_id`. Copy it into `wrangler.toml`, replacing `00000000-0000-0000-0000-000000000000`:
-
-```toml
-[[d1_databases]]
-binding = "DB"
-database_name = "stgb-relay"
-database_id = "paste-the-id-here"
-```
-
-Then create the tables:
+If the tables were never created on that database, run:
 
 ```bash
 npx wrangler d1 execute stgb-relay --remote --file=schema.sql
 ```
 
-The worker also creates the tables if they are missing. Run the command anyway so the database is ready before the first request.
+The worker also creates the tables if they are missing.
 
-## 4. Create the KV namespace
-
-```bash
-npx wrangler kv namespace create STGB_KV
-```
-
-Copy the `id` into `wrangler.toml`, replacing the line of zeros:
-
-```toml
-[[kv_namespaces]]
-binding = "KV"
-id = "paste-the-id-here"
-```
-
-## 5. Set the encryption secret
+## 4. Set the encryption secret
 
 This key encrypts webhook keys and Claude tokens at rest. Generate it on your machine:
 
@@ -86,51 +61,17 @@ Paste the `openssl` output when asked. Do not put it in `wrangler.toml`, do not 
 
 If you later change `ENCRYPTION_KEY`, every saved webhook key and Claude token becomes unreadable. People set those fields again on the setup page. Old connect codes still identify the account. Only the secrets are lost.
 
-## 6. Deploy
+## 5. Deploy again
 
 ```bash
 npx wrangler deploy
 ```
 
-This publishes the worker. It does not, by itself, put it on sendtogrokbot.com. The command prints a `*.workers.dev` address. You can open that to confirm the setup page loads. The connect code will use whatever address you opened, so create the real hostname before you paste a code into the extension.
+The route in `wrangler.toml` is `relay.sendtogrokbot.com`. After a deploy, the setup page is https://relay.sendtogrokbot.com/. Open that page before you paste a connect code into the extension. The code stores whatever address you used.
 
-## 7. Put it on the domain
+## 6. Use it
 
-Pick one. The setup page and the API both work either way.
-
-### relay.sendtogrokbot.com
-
-1. In the Cloudflare dashboard, open **Workers & Pages**.
-2. Open **stgb-relay**.
-3. Open **Settings**, then **Domains & Routes**.
-4. Choose **Add**, then **Custom domain**.
-5. Enter `relay.sendtogrokbot.com`.
-
-Cloudflare creates the DNS record because the zone is already on this account. Wait until the certificate is active, then open:
-
-```text
-https://relay.sendtogrokbot.com/
-```
-
-### Or a path on the existing site
-
-1. In the same **Domains & Routes** screen, choose **Add route**.
-2. Route: `sendtogrokbot.com/api/*`
-3. Zone: `sendtogrokbot.com`
-
-Then open:
-
-```text
-https://sendtogrokbot.com/api/
-```
-
-The connect code stores that `/api` base. The extension posts to `https://sendtogrokbot.com/api/v1/send`.
-
-You can instead uncomment one `routes` line in `wrangler.toml` and run `npx wrangler deploy` again. The dashboard does the same thing.
-
-## 8. Use it
-
-1. Open the setup page on the hostname you chose.
+1. Open https://relay.sendtogrokbot.com/.
 2. Copy the connect code. It starts with `stgbr1.`. Keep it. If you lose it, the saved destinations cannot be read back.
 3. Add the Grok Bot webhook, the Claude routine, or both. Save.
 4. In the extension options, check **Relay**, paste the code, and click **Save**. Leave Relay off to keep sending directly from the browser.
@@ -149,7 +90,7 @@ Put a real `openssl rand -base64 32` value in `.dev.vars`, then:
 npx wrangler dev
 ```
 
-Open the localhost address it prints. That connect code only works against your computer. Use the public hostname for the extension you actually run.
+Open the localhost address it prints. That connect code only works against your computer. For the extension you actually run, open https://relay.sendtogrokbot.com and use the code from that page.
 
 ## A future iPhone Shortcut
 
@@ -157,7 +98,7 @@ The same endpoint takes a post from the Shortcuts app. No app install is require
 
 1. Open Shortcuts and make a new shortcut.
 2. Add **Get Contents of URL**.
-3. URL: `https://relay.sendtogrokbot.com/v1/send` (or `https://sendtogrokbot.com/api/v1/send` if you used the path).
+3. URL: `https://relay.sendtogrokbot.com/v1/send`.
 4. Method: POST.
 5. Add a header named `Authorization`. The value is `Bearer ` followed by the relay key (the `rk_...` value on the setup page).
 6. Add a header named `Content-Type` with the value `application/json`.
