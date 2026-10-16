@@ -74,10 +74,9 @@ summary{cursor:pointer;font-weight:600}
   <label class="check"><input type="checkbox" data-dest="claude"> Send to Claude</label>
   <div class="fields" data-for="claude" hidden>
     <p class="hint">Leave the box empty to open Claude with the post filled in. You press Send. No secret.</p>
-    <p class="hint">For a routine that runs on its own, create the task, then paste the Fire URL and the secret below, together or one at a time, in any order.</p>
+    <p class="hint">For a task that runs on its own, follow the 2 steps at <a href="https://sendtogrokbot.com/setup/claude" target="_blank" rel="noopener">sendtogrokbot.com/setup/claude</a>, then paste the Fire URL and the token below, in any order.</p>
     <div class="row">
       <button id="copyPrompt" class="secondary" type="button">Copy task prompt</button>
-      <button id="copySites" class="secondary" type="button">Copy allowed websites</button>
     </div>
     <label class="field" for="claudePaste">Fire URL and token</label>
     <textarea id="claudePaste" class="short" placeholder="Paste both, in any order" spellcheck="false" autocomplete="off"></textarea>

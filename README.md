@@ -10,7 +10,7 @@ People who use Grok Bot can paste this one line into the bot:
 Set up Send to Grok Bot for me: https://github.com/jamespendry/send-to-grok-bot
 ```
 
-The bot creates a webhook routine with the General prompt and replies with one link, `https://sendtogrokbot.com/connect#stgb1.` followed by a code. Open that link and click Connect. With the extension installed, Connect writes it into the extension. The website (`/`, `/setup`, `/setup/grok`, `/setup/claude`, `/setup/chatgpt`, `/setup/codex`, `/mobile`, `/history`, `/connect`, `/privacy`) is in [docs/](docs/). [site/README.md](site/README.md) covers how to build and deploy it.
+The bot creates a webhook routine with the General prompt and replies with one link, `https://sendtogrokbot.com/connect#stgb1.` followed by a code. Open that link and click Connect. With the extension installed, Connect writes it into the extension. The website (`/`, `/setup`, `/setup/grok`, `/setup/claude`, `/setup/chatgpt`, `/setup/codex`, `/mobile`, `/history`, `/connect`, `/privacy`) is in [docs/](docs/). To publish it: `bash scripts/build-site.sh`, then `npx wrangler deploy --config site/wrangler.toml`. [site/README.md](site/README.md) has the details.
 
 People installing by hand: the steps below are from a folder. Store listing text, promo images, and the upload steps are in [store/](store/). `scripts/package.sh` writes the zip.
 
@@ -126,8 +126,7 @@ The pictures above are placeholders. Take these and save them under `docs/img/` 
 | `docs/img/grok-routines-webhook.png` | Grok Bot sidebar, Routines tab, routine open. Bottom shows When to run = Webhook, Method POST, URL, and Authorization header. Blur both secrets |
 | `docs/img/connect-page.png` | sendtogrokbot.com/connect with the paste box and Connect. No real secret |
 | `docs/img/claude-scheduled-tasks.png` | claude.ai left sidebar, Routines, page titled Scheduled tasks. Blur account details |
-| `docs/img/claude-cloud-environment.png` | A past run, the down arrow next to the task name, Edit cloud environment, Network access = Custom, Allowed domains |
-| `docs/img/options-replies.png` | Options page, Replies preset menu, and the Claude box with Copy task prompt and Copy allowed websites |
+| `docs/img/options-replies.png` | Options page, Replies preset menu, and the Claude box with Copy task prompt |
 
 `docs/img/claude-routine-overview.png` and `docs/img/claude-routine-api-trigger.png` are already in the repo. They are blurred. Use them for the task page and the Edit dialog. Do not retake them unless the screen has changed.
 
@@ -254,18 +253,17 @@ Leave the box empty to open claude.ai in a new tab with the post filled in. You 
 
 To run it for you, save the task's Fire URL and token. You need a Claude Pro, Max, Team, or Enterprise plan with Claude Code on the web. Claude cannot create this task from outside the site. The clicks below match the product.
 
-1. On claude.ai, in the left sidebar, click **Routines**. The page is titled **Scheduled tasks**. Create a task named Send to Claude. In the extension, click **Copy task prompt** and paste it into the task. That prompt is [prompts/general.md](prompts/general.md).
-2. On the task page, click the three dots (...) at the top right, next to the Active toggle. Click **Edit**. Set the Trigger dropdown to **API**. Copy the Fire URL (`https://api.anthropic.com/v1/claude_code/routines/trig_…`). The round-arrows **Regenerate** button makes a new token. Copy both, and paste them into the one box in the extension, in any order. Click **Save**.
+1. On claude.ai, in the left sidebar, click **Scheduled**. Click **New task**, then **Set up manually**.
+2. Name it Send to Claude. In the extension, click **Copy task prompt** and paste it into the instructions box. Set **Trigger** to **API**. Click **Create**.
+3. Copy the **Fire URL** and the **Token** that appear. The token is shown once. Paste both into https://sendtogrokbot.com/connect, or the box in the extension, in any order. Click Connect.
 
-![The task page. History is on the left. The three dots are at the top right, next to Active.](docs/img/claude-routine-overview.png)
+![claude.ai, Scheduled in the sidebar, then New task and Set up manually](docs/img/claude-step1-new-task.png)
 
-![Edit. Trigger is API. Copy the Fire URL. Regenerate makes a new token.](docs/img/claude-routine-api-trigger.png)
+![The new task form: name, instructions, Trigger set to API, Create](docs/img/claude-step1-form.png)
 
-3. Allowed websites are not in the task editor. Do a first test send so a run exists. On the task page, open any past run from the History column. At the top of the main pane, click the down arrow next to the task name, then **Edit cloud environment**. Set **Network access** to **Custom**. Click **Copy allowed websites** in the extension and paste into **Allowed domains**. Save.
+![The Fire URL and Token, blurred](docs/img/claude-step2-copy.png)
 
-The list is `api.fxtwitter.com`, `fxtwitter.com`, `api.vxtwitter.com`, `vxtwitter.com`, `fixupx.com`, `x.com`, `twitter.com`, `t.co`, `video.twimg.com`, and `pbs.twimg.com`, one per line.
-
-There is no screenshot of the Scheduled tasks list or of Edit cloud environment yet. Take `docs/img/claude-scheduled-tasks.png` and `docs/img/claude-cloud-environment.png`. Blur account details.
+No allowed websites are needed. The extension sends the whole post and the reply preset with every run, and the task prompt tells Claude to use only that.
 
 A send shows up under **History**. Leave the task Active. Regenerating a token invalidates the previous one. Paste the new token into the same box and click Save.
 
