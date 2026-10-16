@@ -1,0 +1,204 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Make a connection code</title>
+<style>
+body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;max-width:520px;margin:40px auto;padding:0 20px;color:#0f1419;font-size:14px}
+h1{font-size:20px;margin:0 0 4px}
+h2{font-size:16px;margin:28px 0 8px}
+p{color:#536471;margin:0 0 8px;line-height:1.4}
+label.field{display:block;font-weight:600;margin:12px 0 6px}
+.choice{display:flex;gap:16px;margin:8px 0}
+.choice label{font-weight:600;display:flex;gap:6px;align-items:center}
+input[type="url"],input[type="password"],input[type="text"],textarea,select{width:100%;box-sizing:border-box;padding:10px;border:1px solid #cfd9de;border-radius:6px;font:inherit;background:#fff;color:inherit}
+textarea{height:88px;resize:vertical}
+textarea.tall{height:120px}
+input:focus,textarea:focus,select:focus{outline:none;border-color:#1d9bf0}
+.hint{font-weight:400;color:#536471;font-size:13px;margin-top:4px;line-height:1.4}
+button{margin-top:8px;padding:9px 18px;border:0;border-radius:9999px;background:#0f1419;color:#fff;font:inherit;font-weight:600;cursor:pointer}
+button.secondary{background:#eff3f4;color:#0f1419}
+#msg.ok{color:#00ba7c}
+#msg.err,#checkMsg.err{color:#f4212e}
+#msg,#checkMsg{display:block;margin-top:8px;line-height:1.4}
+#checkMsg.ok{color:#0f1419}
+[hidden]{display:none}
+details{margin-top:12px}
+summary{cursor:pointer;font-weight:600}
+</style>
+</head>
+<body>
+<h1>Make a connection code</h1>
+<p>This page stays in your browser. It does not send the address, the key, the token, or the code anywhere.</p>
+<p>Copy the code it makes and paste it into the Send to Grok Bot options page, in the box labeled Connection code, then click Connect. A chrome-extension link cannot be opened reliably from a normal web page, so use that box.</p>
+
+<label class="field" for="dest">Destination</label>
+<select id="dest">
+  <option value="grokbot">Grok Bot</option>
+  <option value="claude">Claude</option>
+  <option value="chatgpt">ChatGPT</option>
+  <option value="codex">Codex</option>
+</select>
+
+<div id="panel-grokbot">
+  <p class="hint">The routine already holds the prompt. This code only carries the webhook address and, if you have one, the key.</p>
+  <label class="field" for="g-url">Webhook URL</label>
+  <input id="g-url" type="url" placeholder="https://..." autocomplete="off">
+  <label class="field" for="g-key">Webhook key (optional)</label>
+  <input id="g-key" type="password" autocomplete="off">
+</div>
+
+<div id="panel-claude" hidden>
+  <div class="choice">
+    <label><input type="radio" name="claude-mode" value="routine" checked> Routine</label>
+    <label><input type="radio" name="claude-mode" value="link"> Open Claude in a tab</label>
+  </div>
+  <div id="claude-routine">
+    <label class="field" for="c-url">Routine URL</label>
+    <input id="c-url" type="text" placeholder="https://claude.ai/code/routines/trig_..." autocomplete="off">
+    <label class="field" for="c-token">Routine token</label>
+    <input id="c-token" type="password" placeholder="sk-ant-oat01-..." autocomplete="off">
+  </div>
+  <p id="claude-link" class="hint" hidden>No secret. Clicking a post opens Claude with the post filled in.</p>
+</div>
+
+<div id="panel-chatgpt" hidden>
+  <div class="choice">
+    <label><input type="radio" name="chatgpt-mode" value="link" checked> Open ChatGPT in a tab</label>
+    <label><input type="radio" name="chatgpt-mode" value="agent"> Workspace agent</label>
+  </div>
+  <p id="chatgpt-link" class="hint">No secret. Clicking a post opens ChatGPT with the post filled in.</p>
+  <div id="chatgpt-agent" hidden>
+    <label class="field" for="t-id">API trigger ID</label>
+    <input id="t-id" type="text" placeholder="agtch_..." autocomplete="off">
+    <label class="field" for="t-token">Access token</label>
+    <input id="t-token" type="password" autocomplete="off">
+  </div>
+</div>
+
+<div id="panel-codex" hidden>
+  <p class="hint">No secret is required. Clicking a post opens Codex with the post filled in. Add an environment or branch only if you already have one.</p>
+  <label class="field" for="x-env">Environment ID (optional)</label>
+  <input id="x-env" type="text" autocomplete="off">
+  <label class="field" for="x-branch">Branch (optional)</label>
+  <input id="x-branch" type="text" autocomplete="off">
+</div>
+
+<details id="prompt-wrap">
+  <summary>Custom prompt (optional)</summary>
+  <p class="hint">Leave this empty to use the extension's built-in prompt. Grok Bot ignores this box. Its prompt lives on the routine.</p>
+  <textarea id="prompt" class="tall"></textarea>
+</details>
+
+<button id="make" type="button">Make connection code</button>
+<label class="field" for="out">Connection code</label>
+<textarea id="out" readonly spellcheck="false"></textarea>
+<button id="copy" class="secondary" type="button">Copy</button>
+<span id="msg" role="status"></span>
+
+<h2>Check a code</h2>
+<p>Paste a code to see which destination it is for. The values stay hidden.</p>
+<textarea id="check" spellcheck="false" autocomplete="off"></textarea>
+<button id="checkBtn" class="secondary" type="button">Check</button>
+<span id="checkMsg" role="status"></span>
+
+<script src="../extension/connect.js"></script>
+<script>
+(function () {
+  const $ = id => document.getElementById(id);
+  const api = globalThis.STGB_CONNECT;
+  function say(id, text, ok) {
+    const el = $(id);
+    el.textContent = text || '';
+    el.className = text ? (ok ? 'ok' : 'err') : '';
+  }
+  function showDest() {
+    const d = $('dest').value;
+    ['grokbot', 'claude', 'chatgpt', 'codex'].forEach(name => {
+      $('panel-' + name).hidden = name !== d;
+    });
+    $('prompt-wrap').hidden = d === 'grokbot';
+  }
+  function syncClaude() {
+    const link = document.querySelector('input[name="claude-mode"]:checked').value === 'link';
+    $('claude-routine').hidden = link;
+    $('claude-link').hidden = !link;
+  }
+  function syncChatgpt() {
+    const link = document.querySelector('input[name="chatgpt-mode"]:checked').value === 'link';
+    $('chatgpt-agent').hidden = link;
+    $('chatgpt-link').hidden = !link;
+  }
+  $('dest').addEventListener('change', showDest);
+  document.querySelectorAll('input[name="claude-mode"]').forEach(el => el.addEventListener('change', syncClaude));
+  document.querySelectorAll('input[name="chatgpt-mode"]').forEach(el => el.addEventListener('change', syncChatgpt));
+  showDest();
+  syncClaude();
+  syncChatgpt();
+
+  if (!api) {
+    say('msg', 'The code builder did not load. Open this file from the project folder so it can read extension/connect.js.', false);
+    return;
+  }
+
+  $('make').onclick = () => {
+    const destination = $('dest').value;
+    const input = {destination: destination};
+    const prompt = $('prompt').value.trim();
+    try {
+      if (destination === 'grokbot') {
+        input.mode = 'webhook';
+        input.url = $('g-url').value.trim();
+        if ($('g-key').value.trim()) input.key = $('g-key').value.trim();
+      } else if (destination === 'claude') {
+        input.mode = document.querySelector('input[name="claude-mode"]:checked').value;
+        if (input.mode === 'routine') {
+          input.url = $('c-url').value.trim();
+          input.token = $('c-token').value.trim();
+        }
+        if (prompt) input.prompt = prompt;
+      } else if (destination === 'chatgpt') {
+        input.mode = document.querySelector('input[name="chatgpt-mode"]:checked').value;
+        if (input.mode === 'agent') {
+          input.triggerId = $('t-id').value.trim();
+          input.token = $('t-token').value.trim();
+        }
+        if (prompt) input.prompt = prompt;
+      } else {
+        input.mode = 'link';
+        if ($('x-env').value.trim()) input.environment = $('x-env').value.trim();
+        if ($('x-branch').value.trim()) input.branch = $('x-branch').value.trim();
+        if (prompt) input.prompt = prompt;
+      }
+      const code = api.encodeConnectionCode(input);
+      $('out').value = code;
+      const decoded = api.decodeConnectionCode(code);
+      say('msg', decoded.summary + ' Copy it into the extension options. This page did not send it anywhere.', true);
+    } catch (e) {
+      $('out').value = '';
+      say('msg', e.message || 'Could not make a code.', false);
+    }
+  };
+
+  $('copy').onclick = async () => {
+    const value = $('out').value;
+    if (!value) { say('msg', 'Make a code first.', false); return; }
+    try {
+      await navigator.clipboard.writeText(value);
+      say('msg', 'Copied. Paste it into the extension options, in Connection code, then click Connect.', true);
+    } catch (_) {
+      $('out').focus();
+      $('out').select();
+      say('msg', 'Copy it with Ctrl+C or Command+C, then paste it into the extension options.', false);
+    }
+  };
+
+  $('checkBtn').onclick = () => {
+    const decoded = api.decodeConnectionCode($('check').value);
+    if (!decoded.ok) { say('checkMsg', decoded.error, false); return; }
+    say('checkMsg', decoded.summary + ' Nothing was saved.', true);
+  };
+})();
+</script>
+</body>
+</html>

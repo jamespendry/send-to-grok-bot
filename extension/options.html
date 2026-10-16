@@ -2,6 +2,7 @@
 <style>
 body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;max-width:520px;margin:40px auto;padding:0 20px;color:#0f1419;font-size:14px}
 h1{font-size:20px;margin:0 0 4px}p{color:#536471;margin:0 0 8px;line-height:1.4}
+.connect{padding:0 0 16px;margin:0 0 4px;border-bottom:1px solid #eff3f4}
 .dest{padding:14px 0;border-top:1px solid #eff3f4}
 .dest:first-of-type{border-top:0}
 .check{display:flex;align-items:flex-start;gap:10px;font-weight:700;cursor:pointer}
@@ -12,13 +13,25 @@ label.field{display:block;font-weight:600;margin:12px 0 6px}
 label.field:first-child{margin-top:0}
 input[type="url"],input[type="password"],input[type="text"],textarea{width:100%;box-sizing:border-box;padding:10px;border:1px solid #cfd9de;border-radius:6px;font:inherit}
 textarea{height:140px;resize:vertical}
+textarea.code{height:72px;overflow-wrap:anywhere}
 input:focus,textarea:focus{outline:none;border-color:#1d9bf0}
 .hint{font-weight:400;color:#536471;font-size:13px;margin-top:4px;line-height:1.4}
 button{margin-top:8px;padding:9px 18px;border:0;border-radius:9999px;background:#0f1419;color:#fff;font:inherit;font-weight:600;cursor:pointer}
 #m{margin-left:12px;color:#00ba7c}
+#cm{display:block;margin-top:8px;line-height:1.4}
+#cm.ok{color:#00ba7c}
+#cm.err{color:#f4212e}
 </style></head><body>
 <h1>Send to Grok Bot</h1>
 <p>Check a destination to list it when you click a post. The menu sends to the one you pick. Nothing else is sent.</p>
+
+<div class="connect">
+  <label class="field" for="cc">Connection code</label>
+  <textarea id="cc" class="code" placeholder="stgb1...." spellcheck="false" autocomplete="off"></textarea>
+  <p class="hint">Paste the one code you were given, then click Connect. It fills in that destination and saves it on this computer. Another code later adds another destination. Paste the code only here, not into a chat.</p>
+  <button id="connect" type="button">Connect</button>
+  <span id="cm" role="status"></span>
+</div>
 
 <div class="dest">
   <label class="check"><input type="checkbox" data-dest="grokbot"> Send to Grok Bot</label>
@@ -34,7 +47,7 @@ button{margin-top:8px;padding:9px 18px;border:0;border-radius:9999px;background:
     <label class="field" for="cu">Routine URL (optional)<div class="hint">Leave blank to open Claude with the prompt. For an automatic routine, paste the claude.ai/code/routines/trig_… page, a trig_ ID, or the api.anthropic.com fire URL.</div></label>
     <input id="cu" type="text" placeholder="https://claude.ai/code/routines/trig_…" autocomplete="off">
     <label class="field" for="ct">Routine token (optional)</label><input id="ct" type="password" placeholder="sk-ant-oat01-..." autocomplete="off">
-    <label class="field" for="cp">Prompt<div class="hint">Leave blank for the default. Open in Claude uses it as the message. A routine prepends it to the post; the routine's saved prompt does the work.</div></label>
+    <label class="field" for="cp">Prompt<div class="hint">Leave blank for the default. It classifies the post, leads with a one-line takeaway, and does not post or message anyone. Open in Claude uses it as the message. A routine prepends it to the post; the routine's saved prompt does the work.</div></label>
     <textarea id="cp" data-prompt="claudePrompt"></textarea>
   </div>
 </div>
@@ -45,7 +58,7 @@ button{margin-top:8px;padding:9px 18px;border:0;border-radius:9999px;background:
     <label class="field" for="ti">API trigger ID (optional)<div class="hint">Leave the agent fields blank to open ChatGPT with the prompt filled in. For a Business or Enterprise workspace agent, paste the agtch_ trigger ID and token.</div></label>
     <input id="ti" type="text" placeholder="agtch_..." autocomplete="off">
     <label class="field" for="tt">Workspace Agent access token (optional)</label><input id="tt" type="password" placeholder="Sent as a Bearer token to api.chatgpt.com" autocomplete="off">
-    <label class="field" for="gp">Prompt<div class="hint">Leave blank for the default. The post link and text are added after it.</div></label>
+    <label class="field" for="gp">Prompt<div class="hint">Leave blank for the default. It classifies the post and leads with a one-line takeaway. The post link and text are added after it.</div></label>
     <textarea id="gp" data-prompt="chatgptPrompt"></textarea>
   </div>
 </div>
@@ -56,10 +69,11 @@ button{margin-top:8px;padding:9px 18px;border:0;border-radius:9999px;background:
     <label class="field" for="ce">Environment ID (optional)<div class="hint">Codex Cloud has no public POST for regular accounts. Send to Codex opens chatgpt.com/codex with the prompt filled in, and you press Send. The environment id is the hex id in the Codex environment URL.</div></label>
     <input id="ce" type="text" placeholder="environment id" autocomplete="off">
     <label class="field" for="cb">Branch (optional)</label><input id="cb" type="text" placeholder="branch name" autocomplete="off">
-    <label class="field" for="cpx">Prompt<div class="hint">Leave blank for the default. Long posts are shortened so the link stays under about 6,000 characters.</div></label>
+    <label class="field" for="cpx">Prompt<div class="hint">Leave blank for the default. It classifies the post and leads with a one-line takeaway. Long posts are shortened so the link stays under about 6,000 characters.</div></label>
     <textarea id="cpx" data-prompt="codexPrompt"></textarea>
   </div>
 </div>
 
 <button id="s">Save</button><span id="m"></span>
+<script src="connect.js"></script>
 <script src="options.js"></script></body></html>
