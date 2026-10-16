@@ -1,4 +1,4 @@
-importScripts('destinations/grokbot.js', 'destinations/claude.js', 'destinations/chatgpt.js', 'destinations/codex.js');
+importScripts('hosts.js', 'destinations/grokbot.js', 'destinations/claude.js', 'destinations/chatgpt.js', 'destinations/codex.js');
 
 function mediaLine(m) {
   if (!m || typeof m !== 'object') return '';

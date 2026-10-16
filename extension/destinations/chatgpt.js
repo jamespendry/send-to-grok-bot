@@ -58,6 +58,9 @@ self.STGB_DESTINATIONS.chatgpt_workspace_agent = {
     if (!s.chatgptTriggerId || !s.chatgptToken) return {ok: false, error: 'Set up first', needsSetup: true};
     const id = s.chatgptTriggerId.trim();
     if (!/^agtch_[A-Za-z0-9_-]+$/.test(id)) return {ok: false, error: 'Trigger ID should start with agtch_', needsSetup: true};
+    if (!(await chrome.permissions.contains({origins: ['https://api.chatgpt.com/*']}))) {
+      return {ok: false, error: 'Allow api.chatgpt.com in settings', needsSetup: true};
+    }
     const {instructions, body} = chatgptInput(post, s);
     const r = await fetch(`https://api.chatgpt.com/v1/workspace_agents/${id}/trigger`, {
       method: 'POST',
