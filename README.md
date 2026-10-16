@@ -2,7 +2,7 @@
 
 A Chrome extension that puts a button on every post on X. You click the button, pick where the post should go, and that tool reads it. It is free. There is nothing to buy.
 
-If you are an AI agent and someone asked you to set this up, stop here and follow [AGENTS.md](AGENTS.md). Do the parts you can. Walk them through the rest one step at a time.
+If you are an AI agent and someone asked you to set this up, stop here and follow [AGENTS.md](AGENTS.md). Grok Bot sends one message after the routine exists. Claude stays one step at a time.
 
 People who use Grok Bot can paste this one line into the bot:
 
@@ -10,7 +10,7 @@ People who use Grok Bot can paste this one line into the bot:
 Set up Send to Grok Bot for me: https://github.com/jamespendry/send-to-grok-bot
 ```
 
-The bot creates a webhook routine with the General prompt and replies with one link, `https://sendtogrokbot.com/connect#stgb1.` followed by a code. Open that link and click Connect. With the extension installed, Connect writes it into the extension. The website (`/`, `/setup`, `/setup/grok`, `/setup/claude`, `/setup/chatgpt`, `/setup/codex`, `/mobile`, `/history`, `/connect`, `/privacy`) is in [docs/](docs/). To publish it: `bash scripts/build-site.sh`, then `npx wrangler deploy --config site/wrangler.toml`. [site/README.md](site/README.md) has the details.
+The bot creates a webhook routine with the General prompt. It cannot read the webhook key. After the routine exists it sends one message: install the extension, then open the sidebar links named Webhook URL and Authorization header, copy both, and paste them at `https://sendtogrokbot.com/connect`. With the extension installed, pasting on `/connect` saves it. There is no Connect button. The website (`/`, `/setup`, `/setup/grok`, `/setup/claude`, `/setup/chatgpt`, `/setup/codex`, `/mobile`, `/history`, `/connect`, `/privacy`) is in [docs/](docs/). To publish it: `bash scripts/build-site.sh`, then `npx wrangler deploy --config site/wrangler.toml`. [site/README.md](site/README.md) has the details.
 
 People installing by hand: the steps below are from a folder. Store listing text, promo images, and the upload steps are in [store/](store/). `scripts/package.sh` writes the zip.
 
@@ -70,21 +70,21 @@ You should see the Send to Grok Bot icon on the toolbar.
 
 Click that toolbar icon.
 
-You should see a page titled **Send to Grok Bot**, with a box labeled **Connect link**, a Replies preset, and a list of destinations.
+You should see a page titled **Send to Grok Bot**, with a box labeled **Paste here** at the top. Replies, destinations, and Save are under **More options**.
 
-![The options page, with the Connect link box at the top](docs/img/07-options.png)
+![The options page, with the paste box at the top](docs/img/07-options.png)
 
 ### 8. Turn on a destination
 
-If someone gave you a connect link, paste the whole link into **Connect link** and click **Connect**. Opening `https://sendtogrokbot.com/connect#stgb1.…` does the same thing when the extension is installed: the box is filled, and you click Connect.
+Paste the webhook URL and the Authorization header together into **Paste here**. The same paste works on `https://sendtogrokbot.com/connect`. If the extension is installed, the paste saves. There is no Connect button.
 
-You should see a green line that starts with "Saved Send to" and names that destination. Paste the link only on this page or on that connect page, not into a chat. Another link later adds another destination. It does not erase the ones already saved.
+For Grok Bot you should see: Now open x.com and click the arrow. Paste those two values only on this page or on that connect page, not into a chat. Another paste later adds another destination. It does not erase the ones already saved.
 
 If you do not have a link:
 
 - **ChatGPT** needs no setup. Check **Send to ChatGPT** and click **Save**. You should see the word Saved. No password. Clicking a post opens ChatGPT with the post filled in. You press Send.
 - **Codex** needs no setup. Check **Send to Codex** and click **Save**. You should see the word Saved. No password. Clicking a post opens Codex with the post filled in. You press Send.
-- **Grok Bot**: check **Send to Grok Bot**. Paste the URL into **Webhook URL** and the Authorization header into **Webhook key**. Click **Save**. You should see the word Saved. Where those two values are is in the Grok Bot section below.
+- **Grok Bot**: paste the URL and the Authorization header together into **Paste here**. You should see: Now open x.com and click the arrow. Where those two values are is in the Grok Bot section below. The separate URL and key fields are under **More options**.
 - **Claude**, opening a tab: check **Send to Claude**, leave the box empty, and click **Save**. You should see the word Saved.
 - **Claude**, a routine: check **Send to Claude**. Paste the Fire URL and the token into the one box, in any order. Click **Save**. You should see the word Saved. The Claude section below is the click path.
 
@@ -119,22 +119,22 @@ The pictures above are placeholders. Take these and save them under `docs/img/` 
 | `docs/img/04-developer-mode.png` | Developer mode on, and the Load unpacked button |
 | `docs/img/05-load-unpacked.png` | The folder picker selecting `extension`, and the Send to Grok Bot card |
 | `docs/img/06-pin.png` | The puzzle-piece menu, with Send to Grok Bot and the pin |
-| `docs/img/07-options.png` | The options page, showing the Connect link box and the Replies preset |
+| `docs/img/07-options.png` | The options page, showing the paste box at the top |
 | `docs/img/08-destinations.png` | A destination checked, its fields, and the word Saved |
 | `docs/img/09-post-button.png` | The arrow icon in an X post's action row |
 | `docs/img/10-menu.png` | The destination menu open on a post |
 | `docs/img/grok-routines-webhook.png` | Grok Bot sidebar, Routines tab, routine open. Bottom shows When to run = Webhook, Method POST, URL, and Authorization header. Blur both secrets |
-| `docs/img/connect-page.png` | sendtogrokbot.com/connect with the paste box and Connect. No real secret |
+| `docs/img/connect-page.png` | sendtogrokbot.com/connect with Step 1, the paste box, and no Connect button. No real secret |
 | `docs/img/claude-scheduled-tasks.png` | claude.ai left sidebar, Routines, page titled Scheduled tasks. Blur account details |
 | `docs/img/options-replies.png` | Options page, Replies preset menu, and the Claude box with Copy task prompt |
 
 `docs/img/claude-routine-overview.png` and `docs/img/claude-routine-api-trigger.png` are already in the repo. They are blurred. Use them for the task page and the Edit dialog. Do not retake them unless the screen has changed.
 
-## Where a connect link comes from
+## Where the paste comes from
 
-A connect link is `https://sendtogrokbot.com/connect#stgb1.` plus one code. An agent that set up the routine hands you that link. Open it and click Connect. The page reads the link, tells you what it found, and does not upload it.
+Grok Bot cannot read the webhook key, so it does not hand you a connect link. After it creates the routine, you open the sidebar links named Webhook URL and Authorization header, copy both, and paste them together at `https://sendtogrokbot.com/connect`. The page does not upload what you paste.
 
-The same page accepts a Grok Bot URL and Authorization header pasted together, in any order, or a Claude Fire URL and token pasted together, in any order. It accepts a `trig_` id. The options page accepts those same pastes.
+The same box accepts a Claude Fire URL and token pasted together, in any order. It accepts a `trig_` id. The options page accepts those same pastes. A Claude, ChatGPT, or Codex connection code can still be pasted there. It starts with `stgb1.`. Grok Bot setup does not use one.
 
 `options.html#stgb1.` and `options.html#connect=stgb1.` also fill the options page, and then the page removes the hash. Links that start with `chrome-extension://` do not open reliably from a web page.
 
@@ -149,7 +149,7 @@ scripts/build-site.sh
 npx wrangler deploy --config site/wrangler.toml
 ```
 
-`scripts/build-site.sh` writes `dist/site`. That folder is the site root: `/` opens setup, `/connect` is the connect page, `/setup`, `/setup/grok`, `/setup/claude`, `/mobile`, `/history`, and `/privacy` are the guides. The build copies `extension/connect.js` to `/connect.js` and `extension/prompts.js` to `/prompts.js` so the pages work without the rest of the repository. Attach the domain `sendtogrokbot.com` to the `sendtogrokbot` worker in the Cloudflare dashboard after the first deploy. `/mobile` tells an iPhone user to install the shortcut and paste one relay code. The iCloud link is not in the repository. Copy it from the Shortcuts app and paste it into `docs/mobile.html` where the page says the link is not published yet, then deploy again. The steps are in [shortcuts/BUILD.md](shortcuts/BUILD.md).
+`scripts/build-site.sh` writes `dist/site`. That folder is the site root: `/` is a short landing page, `/connect` is the connect page, `/setup`, `/setup/grok`, `/setup/claude`, `/mobile`, `/history`, and `/privacy` are the guides. The build copies `extension/connect.js` to `/connect.js` and `extension/prompts.js` to `/prompts.js` so the pages work without the rest of the repository. Attach the domain `sendtogrokbot.com` to the `sendtogrokbot` worker in the Cloudflare dashboard after the first deploy. `/mobile` tells an iPhone user to install the shortcut and paste one relay code. The iCloud link is not in the repository. Copy it from the Shortcuts app and paste it into `docs/mobile.html` where the page says the link is not published yet, then deploy again. The steps are in [shortcuts/BUILD.md](shortcuts/BUILD.md).
 
 The same folder can go to Cloudflare Pages:
 
@@ -167,7 +167,7 @@ The relay is a Cloudflare Worker in [`relay/`](relay/). Setup, including the exa
 
 ## Marketplace plugin
 
-[`plugin/`](plugin/) is the Grok Bot and Cursor plugin. It creates the webhook routine and returns the connect link. The logo on the site is `/logo.svg`. The form answers are in [plugin/SUBMIT.md](plugin/SUBMIT.md). Submit them at https://x.ai/bot/marketplace/submit-a-plugin.
+[`plugin/`](plugin/) is the Grok Bot and Cursor plugin. It creates the webhook routine, then sends one message telling you to paste the Webhook URL and Authorization header at sendtogrokbot.com/connect. The logo on the site is `/logo.svg`. The form answers are in [plugin/SUBMIT.md](plugin/SUBMIT.md). Submit them at https://x.ai/bot/marketplace/submit-a-plugin.
 
 When Relay is on, Grok Bot and Claude still receive the version 2 post, including `digest` and media fields. The relay forwards that object.
 
@@ -237,11 +237,11 @@ Presets on the options page: General, Research, Job hunt, Buy or skip, Learn lat
 
 ### Grok Bot
 
-The automatic path is the one line at the top of this file. The bot replies with one connect link. Open it and click Connect.
+The automatic path is the one line at the top of this file. The bot cannot read the webhook key. After the routine exists it tells you to install the extension, then open the sidebar links named Webhook URL and Authorization header, copy both, and paste them at sendtogrokbot.com/connect.
 
-To copy it yourself, on a computer: in Grok Bot, open the bot's sidebar, open the Routines tab, and open the routine. At the bottom, When to run is Webhook and Method is POST. Copy the URL and the Authorization header. Paste both on [the connect page](docs/connect.html), or paste the URL into **Webhook URL** and the header into **Webhook key**. The phone app does not show these fields.
+To copy it yourself, on a computer: in Grok Bot, open the bot's sidebar, open the Routines tab, and open the routine. At the bottom, When to run is Webhook and Method is POST. Copy the URL and the Authorization header. Paste both on [the connect page](docs/connect.html). The phone app does not show these fields.
 
-Any webhook that accepts the JSON above will do, including Zapier, Make, or n8n. The key is optional. A response of 200 means the run started. The reply shows up in the bot's chat.
+Any webhook that accepts the JSON above will do, including Zapier, Make, or n8n. On the connect page, paste the URL and the Authorization header together. A response of 200 means the run started. The reply shows up in the bot's chat.
 
 There is no screenshot of that Routines screen yet. Take `docs/img/grok-routines-webhook.png` and blur the URL and the header.
 

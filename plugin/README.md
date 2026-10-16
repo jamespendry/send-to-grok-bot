@@ -2,9 +2,7 @@
 
 This is the marketplace plugin for Grok Bot and Cursor. The Chrome extension lives in `extension/` at the repository root. This folder is the plugin.
 
-It has one skill, `send-to-grok-bot`. The skill creates a webhook routine named Send to Grok Bot, puts the General prompt on it, and replies with one link:
-
-`https://sendtogrokbot.com/connect#stgb1.` followed by a code.
+It has one skill, `send-to-grok-bot`. The skill creates a webhook routine named Send to Grok Bot and puts the General prompt on it. The bot cannot read the webhook key. After the routine exists, it sends one message: install the extension, then open the sidebar links named Webhook URL and Authorization header, copy both, and paste them at sendtogrokbot.com/connect.
 
 Research, Job hunt, Buy or skip, Learn later, and Content ideas travel on the post. The routine stays on General. The skill also says how to answer a post that arrives on that routine.
 
@@ -30,4 +28,4 @@ The logo files are also on the site as `/logo.svg` and `/logo.png`. Form answers
 
 In Grok Bot, with this plugin installed, say: Set up Send to Grok Bot.
 
-The reply should be one connect link. Open it and click Connect. On x.com, click the arrow on a post and choose Send to Grok Bot.
+After the routine exists, the reply is one message. It tells you to install the extension, then open the sidebar links named Webhook URL and Authorization header, copy both, and paste them at sendtogrokbot.com/connect. On x.com, click the arrow on a post and choose Send to Grok Bot.

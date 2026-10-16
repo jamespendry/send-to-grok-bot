@@ -33,22 +33,22 @@
 
   <ol class="steps num">
     <li>
-      <h3>Add the extension to Chrome</h3>
+      <h2>Add the extension to Chrome</h2>
       <p class="muted">A Send button appears next to Share on every post on x.com. Until it is in the Chrome Web Store, the button below opens the install steps: turn on Developer mode and load the folder named extension.</p>
       <div class="actions" style="margin-top:14px"><a class="btn" data-chrome-store href="https://github.com/jamespendry/send-to-grok-bot#readme">Add to Chrome</a></div>
     </li>
     <li>
-      <h3>Pick your AI</h3>
+      <h2>Pick your AI</h2>
       <p class="muted" style="margin-bottom:14px">Choose one to start. Each takes you to its own short page.</p>
       <div class="rows">
         <a class="row" href="/setup/grok">
           <span class="logo grokbot"><svg><use href="/assets/logos.svg#grokbot"/></svg></span>
-          <span class="text"><b>Grok Bot <span class="tag easy">Easiest</span></b><span>Paste one line into Grok Bot. It does the rest.</span></span>
+          <span class="text"><b>Grok Bot</b><span>Paste one line into Grok Bot, then paste what it gives you.</span></span>
           <svg class="chev" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" d="M9 6l6 6-6 6"/></svg>
         </a>
         <a class="row" href="/setup/claude">
           <span class="logo claude"><svg><use href="/assets/logos.svg#claude"/></svg></span>
-          <span class="text"><b>Claude</b><span>Three short steps on claude.ai. Runs in the background.</span></span>
+          <span class="text"><b>Claude</b><span>Four short steps on claude.ai. Replies on its own.</span></span>
           <svg class="chev" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" d="M9 6l6 6-6 6"/></svg>
         </a>
         <a class="row" href="/setup/chatgpt">
@@ -65,20 +65,9 @@
     </li>
   </ol>
 
-  <h2>How replies are written</h2>
-  <p>Every send starts with a one-line takeaway. The default, General, works out what the post is first:</p>
-  <div class="rows" style="margin-top:14px">
-    <div class="row"><div class="text"><b>Tool, repo, or app</b><span>What it does, whether it is worth installing, and how to try it.</span></div></div>
-    <div class="row"><div class="text"><b>Thread or long article</b><span>A three-line summary, then the key takeaway.</span></div></div>
-    <div class="row"><div class="text"><b>News</b><span>What happened, why it matters, and what to watch.</span></div></div>
-    <div class="row"><div class="text"><b>Video</b><span>A description from the captions, thumbnail, and text. It does not claim to have watched.</span></div></div>
-    <div class="row"><div class="text"><b>Tip, prompt, or how-to</b><span>One step you can save.</span></div></div>
-    <div class="row"><div class="text"><b>Job, company, or founder</b><span>Who they are, the stage, and who to follow.</span></div></div>
-    <div class="row"><div class="text"><b>Product or deal</b><span>Worth buying or not.</span></div></div>
-    <div class="row"><div class="text"><b>Meme, opinion, or anything else</b><span>One line of context, then it stops.</span></div></div>
-  </div>
-  <p style="margin-top:16px">In the extension settings, under <span class="ui">Replies</span>, you can switch the style or edit the text. The one you pick is sent with the post.</p>
-  <div class="chips" style="margin-top:14px">
+  <h2>How replies sound</h2>
+  <p>Every reply starts with a one-line takeaway, then answers in the shape that fits the post. Change the style in the extension settings, under <span class="ui">Replies</span>.</p>
+  <div class="chips reply-chips">
     <span class="chip">General</span><span class="chip">Research</span><span class="chip">Job hunt</span>
     <span class="chip">Buy or skip</span><span class="chip">Learn later</span><span class="chip">Content ideas</span>
   </div>

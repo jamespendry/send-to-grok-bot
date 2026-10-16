@@ -1,8 +1,9 @@
 // Shared by every page. Sets the Add to Chrome link in one place and wires copy buttons.
 (function () {
   'use strict';
-  // Placeholder until the Chrome Web Store listing is live. Change this one line.
-  var CHROME_STORE_URL = 'https://github.com/jamespendry/send-to-grok-bot#readme';
+  // Until the Chrome Web Store listing is live, this opens /connect, which has the install steps.
+  // When the listing is live, put its URL here.
+  var CHROME_STORE_URL = '/connect';
 
   document.querySelectorAll('[data-chrome-store]').forEach(function (a) {
     a.href = CHROME_STORE_URL;

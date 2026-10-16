@@ -27,7 +27,7 @@ The build makes `assets/logos.svg` from `extension/logos.js`, so the site and th
 
 ## /connect must keep working
 
-`extension/site-connect.js` runs only on `https://sendtogrokbot.com/connect*` (and `www.`). It listens for a click on `#connect`, reads `#paste`, writes to `#msg`, and sets `data-stgb-ready` on `<html>`. Keep those ids, keep the page at `/connect`, and keep the inline script that fills `#paste` from a `#stgb1.` or `#stgbr1.` hash. The build fails if one of the ids is missing.
+`extension/site-connect.js` runs only on `https://sendtogrokbot.com/connect*` (and `www.`). It listens for a paste into `#paste`, writes to `#msg`, and sets `data-stgb-ready` on `<html>`. Keep those ids, the `installed` and `install-steps` ids, the page at `/connect`, and the inline script. That logic belongs to the Grok Bot path (PR #6). The build fails if one of the ids is missing.
 
 ## Placeholders to fill
 

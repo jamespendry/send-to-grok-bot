@@ -27,6 +27,6 @@ require("fs").writeFileSync(process.argv[1], out.join("\n") + "\n");
 for f in connect.html connect.js prompts.js _redirects _headers setup/index.html assets/site.css assets/site.js assets/logos.svg logo.svg logo.png; do
   test -f "$out/$f" || { echo "missing $out/$f"; exit 1; }
 done
-grep -q 'id="paste"' "$out/connect.html" && grep -q 'id="connect"' "$out/connect.html" && grep -q 'id="msg"' "$out/connect.html" \
+grep -q 'id="paste"' "$out/connect.html" && grep -q 'id="msg"' "$out/connect.html" \
   || { echo "connect.html lost an id that extension/site-connect.js needs"; exit 1; }
 echo "wrote $out"

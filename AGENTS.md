@@ -6,17 +6,17 @@ The person may have started with this one line:
 
 Set up Send to Grok Bot for me: https://github.com/jamespendry/send-to-grok-bot
 
-If you are Grok Bot, that line means: do the Grok Bot section, then reply with one connect link and nothing else they have to copy.
+If you are Grok Bot, that line means: do the Grok Bot section. After the routine exists, send one message and stop.
 
 Read this file before you give instructions. The human steps in the README are for a person working alone. You are not that person.
 
 ## Rules
 
-1. Do every step your tools and permissions allow. Reading this repo, creating the routine, and building the connection code are your job.
-2. Speak to the person one step at a time. One action in a message. Wait until they tell you what they see. If it does not match the success line, fix that step before you send the next one.
-3. Do not ask the person to paste a webhook key, routine token, or other secret into this chat. Tell them which box on the extension options page to paste it into.
-4. When you can see both the address and the secret, return them as one connection code. They paste that code once, into the options page. They do not paste it back into this chat. Do not also print the raw key.
-5. When you cannot see the secret, do not collect it. The person copies it from the routine page straight into the options page. A secret-request card is the wrong destination. The secret belongs in the extension, in `chrome.storage.local`, not in your notes.
+1. Do every step your tools and permissions allow. Reading this repo and creating the routine are your job. You cannot read a Grok Bot webhook key. Do not build a Grok Bot connection code.
+2. Grok Bot, after the routine exists, sends one message and stops. Do not walk those clicks one per message. Claude stays one action per message. Wait until they tell you what they see. If it does not match the success line, fix that step before you send the next one.
+3. Do not ask the person to paste a webhook key, routine token, or other secret into this chat. For Grok Bot they paste the webhook URL and the Authorization header together at https://sendtogrokbot.com/connect. For Claude they paste into the extension options page.
+4. A connection code is for Claude, ChatGPT, or Codex, and only when you can see every field that code needs. Grok Bot does not use one. Do not print a Grok Bot key. Do not invent the webhook URL.
+5. When you cannot see a Claude secret, do not collect it. The person copies it from the task page straight into the options page. A secret-request card is the wrong destination. The secret belongs in the extension, in `chrome.storage.local`, not in your notes.
 6. Do not invent webhook URLs, `trig_` ids, or tokens. Copy them from the tool or the screen that created them.
 7. Do not post, follow, or message anyone on X while you set this up.
 8. Do not edit `extension/content.js`. Another change owns how posts are read.
@@ -37,6 +37,8 @@ You cannot load an unpacked extension into their Chrome unless you are driving t
 If they named one, use it. If they did not, ask once which they want: Grok Bot, Claude, ChatGPT, or Codex. Then start. A second destination is a second connection code later. Do not make them choose a stack of options before the first one works.
 
 ## Connection code
+
+Grok Bot setup does not use a connection code. You cannot read the webhook key. Skip this section when the destination is Grok Bot, and use the one message in the Grok Bot section.
 
 A connection code is one string. It starts with `stgb1.` and the rest is base64url-encoded JSON. The options page reads it, fills that destination, and saves to `chrome.storage.local`. It does not keep the code string, and it does not send the code anywhere.
 
@@ -61,13 +63,13 @@ The key is optional for Grok Bot. For Claude, `url` is the **Fire URL** copied f
 
 A Claude or ChatGPT `link` code clears a routine token already saved for that destination, so the button opens a tab. It does not clear the other destinations.
 
-The link you send a person is:
+For Claude, ChatGPT, or Codex, the link you send a person is:
 
 `https://sendtogrokbot.com/connect#stgb1.<code>`
 
-The hash is the code. There is no `connect=` in front of it. The page fills the box from that hash. If the extension is installed, Connect writes it into the extension. The options page accepts the same link in its paste box, and `options.html#connect=stgb1....` still works. Do not send a `chrome-extension://` link. Those links do not open reliably.
+The hash is the code. There is no `connect=` in front of it. The page can fill the box from that hash. Pasting the box saves it when the extension is installed. There is no Connect button. `options.html#connect=stgb1....` still fills the options page. Do not send a `chrome-extension://` link. Those links do not open reliably.
 
-[docs/connect.html](docs/connect.html) is that page. It also accepts a webhook URL plus an Authorization header, or a Claude Fire URL plus a token, in any order. It does not upload what they paste. Do not ask them to paste the secret into chat so you can run the Node command.
+[docs/connect.html](docs/connect.html) is that page. For Grok Bot the person pastes the webhook URL and the Authorization header together. A Claude Fire URL plus a token also works, in any order. It does not upload what they paste. Do not ask them to paste the secret into chat so you can run the Node command.
 
 ## Grok Bot
 
@@ -79,25 +81,17 @@ Create a webhook-triggered routine yourself.
 
 If creating it shows a confirm card, that confirmation is one step. Ask, wait, then continue. Leave the routine on, not paused.
 
-The routine prompt tells the bot to follow a `prompt` field on the post when one is present. The extension sends `preset` and `prompt` with every post, so the person can switch Research, Job hunt, Buy or skip, Learn later, or Content ideas on the options page without you editing the routine. Do not put a prompt inside the connection code. The encoder rejects it.
+The routine prompt tells the bot to follow a `prompt` field on the post when one is present. The extension sends `preset` and `prompt` with every post, so the person can switch Research, Job hunt, Buy or skip, Learn later, or Content ideas on the options page without you editing the routine. Do not put a prompt inside a connection code.
 
-The create result often does not include the webhook URL or the key. Read them from the routine after it exists. Do not construct the URL. The phone app does not show these fields. Desktop does.
+You cannot read the webhook URL or the Authorization header. Do not invent them. Do not print a key. Do not build an `stgb1.` code for Grok Bot. Do not walk the person through one click per message.
 
-In the Grok Bot desktop app: open the bot's sidebar, open the Routines tab, and open this routine. At the bottom, When to run is Webhook and Method is POST. Copy the URL and the Authorization header. The header value is the key. Strip a leading `Bearer ` before you put it in the code. The extension adds `Bearer ` itself.
+After the routine is on, send one message and stop. That message has the install steps, then the paste. Use these words:
 
-When you can read both, build a `grokbot` connection code. Your reply to the person is one link and no other secret:
+Install Send to Grok Bot. It is not in the Chrome Web Store yet. Download the zip from https://github.com/jamespendry/send-to-grok-bot and unzip it. Find the folder named extension. It contains manifest.json. In Chrome, open chrome://extensions, turn on Developer mode, and click Load unpacked. Select that extension folder. Then open https://sendtogrokbot.com/connect.
 
-`https://sendtogrokbot.com/connect#` plus the code.
+Open the sidebar links named Webhook URL and Authorization header, copy both, and paste them together at sendtogrokbot.com/connect.
 
-Do not print the key on its own line. Do not also paste the raw URL. Do not ask them to paste the link back into this chat. Tell them to open it and click Connect, and to choose Allow if Chrome asks.
-
-When you cannot read the URL or the header, do not invent them and do not send a link. Walk these clicks, one per message, and wait:
-
-1. Open the bot's sidebar.
-2. Open the Routines tab.
-3. Open the routine named Send to Grok Bot.
-4. At the bottom, When to run is Webhook and Method is POST. Copy the URL and the Authorization header.
-5. Open https://sendtogrokbot.com/connect and paste both, in any order, then click Connect. They can instead paste the URL into Webhook URL and the header into Webhook key on the extension settings page, then click Save. The key box accepts the whole Authorization header.
+Do not add a second message. Do not ask them to paste the key into this chat. The page saves when they paste, if the extension is installed. Success on that page is: Now open x.com and click the arrow.
 
 The extension POSTs the post as JSON, including `preset` and `prompt`, and sends the key as `Authorization: Bearer <key>` and as `X-Sender-Key: <key>`. A 200 means the routine started. The reply shows up in the bot's chat when the run finishes.
 
@@ -136,9 +130,11 @@ Codex needs no setup. Say that in one sentence. They check **Send to Codex** and
 
 ## Handoff
 
-If the extension is already installed, do not walk through the download. For Grok Bot, the connect link is the whole handoff: they open it and click Connect. For ChatGPT and Codex, they check the box and click Save. There is nothing else to set up.
+Grok Bot does not use the walkthrough below. After the routine exists, the one message in the Grok Bot section is the whole handoff. Stop after that message.
 
-Do the steps below when they do not have the extension yet. Send one step. Stop. Wait for them to say what they see. Use these words, with their real file name filled in.
+If the extension is already installed and the destination is ChatGPT or Codex, they check the box and click Save. There is nothing else to set up.
+
+Do the steps below for Claude, ChatGPT, and Codex when they do not have the extension yet. Send one step. Stop. Wait for them to say what they see. Use these words, with their real file name filled in.
 
 1. "Open the project page on GitHub in Chrome. Click the green Code button, then click Download ZIP. Tell me when a file whose name starts with send-to-grok-bot is in your Downloads folder."
 2. "Double-click that zip. Open the folder inside it until you see a folder named extension. Open extension and tell me when you see a file named manifest.json. Then go back so extension is a folder you can select, not a window full of files."
@@ -146,10 +142,10 @@ Do the steps below when they do not have the extension yet. Send one step. Stop.
 4. "At the top right, turn Developer mode on. Tell me when a button named Load unpacked appears."
 5. "Click Load unpacked. Select the extension folder, the one that contains manifest.json, and confirm. Tell me when a card named Send to Grok Bot appears and its switch is on. If Chrome says the manifest is missing, you selected the outer folder. Go back and select extension."
 6. "Click the puzzle-piece icon on the Chrome toolbar. Beside Send to Grok Bot, click the pin. Tell me when that icon is sitting on the toolbar."
-7. "Click that icon. Tell me when you see a page titled Send to Grok Bot with a box labeled Connect link."
+7. "Click that icon. Tell me when you see a page titled Send to Grok Bot with a box labeled Paste here."
 8. Then one of these, not both:
-   - You have a connection code: send `https://sendtogrokbot.com/connect#` plus the code. "Open this link and click Connect. If Chrome asks, choose Allow. Do not paste it back here." Success is a green line that starts with "Saved Send to" and names their destination.
-   - They are the only ones who can see the secret. For Grok Bot: "In Grok Bot, open the bot's sidebar, open the Routines tab, and open the routine. At the bottom, copy the URL and the Authorization header. Paste both into the box on sendtogrokbot.com/connect and click Connect. Do not paste them here." For Claude: "On the task page, click the three dots next to Active, then Edit. Copy the Fire URL and the token. Paste both into the Fire URL and token box in the extension. Do not paste them here." Next message: "Click Save. Tell me when you see the word Saved." Remind them that Allowed websites is a separate step, after a run exists, under Edit cloud environment.
+   - You have a connection code for Claude, ChatGPT, or Codex: send `https://sendtogrokbot.com/connect#` plus the code. "Paste that link into the box. If Chrome asks, choose Allow. Do not paste it back here." Success is a green line that starts with "Saved Send to" and names their destination.
+   - They are the only ones who can see the secret. For Claude: "On the task page, click the three dots next to Active, then Edit. Copy the Fire URL and the token. Paste both into the Fire URL and token box in the extension. Do not paste them here." Next message: "Click Save. Tell me when you see the word Saved." Remind them that Allowed websites is a separate step, after a run exists, under Edit cloud environment.
 
 9. "Open x.com and refresh. On any post, click the arrow icon in the row with reply, repost, like, and share. Tell me which names you see." Success is the destination you set up. Then: "Click that name."
    - Grok Bot: the icon turns green, and a run shows up in the bot's chat. A 200 only means the run started.

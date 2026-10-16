@@ -102,7 +102,7 @@ function grokReady(s) {
 
 const SETUP_NOTICE = {
   none: 'Check a destination, then click Save. ChatGPT and Codex need no webhook. The button on X stays on each post either way.',
-  grokbot: 'Grok Bot is checked, but the webhook is empty. Paste a connect link and click Connect. The button on X stays on each post either way.'
+  grokbot: 'Grok Bot is checked, but the webhook is empty. Paste the webhook URL and the Authorization header together. The button on X stays on each post either way.'
 };
 
 function menuItems(s) {
@@ -147,6 +147,16 @@ function alreadySent(url, brand) {
 
 chrome.runtime.onMessage.addListener((msg, _s, reply) => {
   if (!msg || typeof msg !== 'object') { reply({ok: false, error: 'Bad message'}); return; }
+  if (msg.stgbAction === 'request-origins') {
+    const origins = Array.isArray(msg.origins) ? msg.origins.filter(origin => typeof origin === 'string' && origin.startsWith('https://')) : [];
+    if (!origins.length) { reply({ok: true}); return; }
+    // Called in this turn, before any await, so a content-script paste can still be the gesture.
+    chrome.permissions.request({origins: origins}, granted => {
+      const err = chrome.runtime.lastError && chrome.runtime.lastError.message;
+      reply({ok: !!granted && !err, error: err || ''});
+    });
+    return true;
+  }
   if (msg.stgbAction === 'list') {
     (async () => {
       const s = await loadSettings();

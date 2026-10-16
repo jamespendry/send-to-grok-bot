@@ -8,7 +8,7 @@
   --line-strong: #cfd9de;
   --surface: #f7f9f9;
   --raised: #ffffff;
-  --link: #1d9bf0;
+  --link: #0f75bd;
   --btn: #0f1419;
   --btn-fg: #ffffff;
   --btn2: #eff3f4;
@@ -30,7 +30,8 @@
   :root:not([data-theme="light"]) {
     --bg: #000000;
     --fg: #e7e9ea;
-    --muted: #71767b;
+    --muted: #8b98a5;
+    --link: #1d9bf0;
     --line: #2f3336;
     --line-strong: #536471;
     --surface: #16181c;
@@ -47,7 +48,7 @@
   }
 }
 :root[data-theme="dark"] {
-  --bg: #000000; --fg: #e7e9ea; --muted: #71767b; --line: #2f3336; --line-strong: #536471;
+  --bg: #000000; --fg: #e7e9ea; --muted: #8b98a5; --link: #1d9bf0; --line: #2f3336; --line-strong: #536471;
   --surface: #16181c; --raised: #000000; --btn: #eff3f4; --btn-fg: #0f1419; --btn2: #16181c;
   --btn2-fg: #e7e9ea; --slot: #0b0d0f; --slot-line: #3e4144; --header: rgba(0, 0, 0, 0.65);
   --shadow: 0 0 15px rgba(255, 255, 255, 0.2), 0 0 3px 1px rgba(255, 255, 255, 0.15);
@@ -72,7 +73,7 @@ h2 { font-size: 23px; font-weight: 800; }
 h3 { font-size: 17px; font-weight: 700; }
 p { margin: 0; }
 code, pre, .mono { font-family: var(--mono); font-size: 13.5px; overflow-wrap: anywhere; }
-:focus-visible { outline: 2px solid var(--link); outline-offset: 2px; border-radius: 6px; }
+:focus-visible { outline: 2px solid var(--link); outline-offset: 2px; }
 
 .wrap { max-width: 1040px; margin: 0 auto; padding: 0 16px; }
 .narrow { max-width: 680px; margin: 0 auto; padding: 0 16px; }
@@ -328,3 +329,26 @@ footer .sp { flex: 1; }
 .fill-row b { display: block; }
 .fill-row .muted { font-size: 14px; }
 figure.shot img { border-radius: 12px; border: 1px solid var(--line); width: 100%; background: #1f1f1e; }
+
+/* Design review pass */
+.tag.easy { color: #00875a; font-weight: 700; }
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) .tag.easy { color: #00ba7c; } :root:not([data-theme="light"]) .logo.grokbot { box-shadow: inset 0 0 0 1px #536471; } :root:not([data-theme="light"]) .menu { box-shadow: var(--shadow), 0 0 0 1px var(--line); } }
+:root[data-theme="dark"] .tag.easy { color: #00ba7c; }
+:root[data-theme="dark"] .logo.grokbot { box-shadow: inset 0 0 0 1px #536471; }
+.menu { right: 12px; }
+footer a { padding: 8px 0; display: inline-block; }
+footer .wrap { gap: 4px 20px; }
+.crumb { min-height: 44px; margin-bottom: 4px; font-weight: 600; color: var(--link); }
+.crumb a, a.crumb { color: var(--link); }
+.crumb svg { width: 18px; height: 18px; margin-left: -4px; }
+.steps h2, .steps .step-title { font-size: 17px; font-weight: 700; margin: 0 0 8px; padding-top: 4px; letter-spacing: 0; }
+@media (max-width: 520px) {
+  .steps > li { padding-left: 40px; }
+  .steps > li::before { width: 28px; height: 28px; font-size: 14px; }
+  .steps > li::after { left: 13.5px; top: 34px; }
+}
+#code { min-height: 56px; }
+.btn:focus-visible { border-radius: 9999px; }
+.reply-chips { margin-top: 16px; }
+.steps.plain > li { padding-left: 0; }
+.steps.plain > li::before, .steps.plain > li::after { display: none; }

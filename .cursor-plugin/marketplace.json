@@ -10,7 +10,7 @@
     {
       "name": "send-to-grok-bot",
       "source": "plugin",
-      "description": "Creates the Send to Grok Bot webhook routine, returns one connect link, and replies to an X post using the preset sent with that post.",
+      "description": "Creates the Send to Grok Bot webhook routine, then one message to paste the Webhook URL and Authorization header at sendtogrokbot.com/connect, and replies to an X post using the preset sent with that post.",
       "homepage": "https://sendtogrokbot.com",
       "repository": "https://github.com/jamespendry/send-to-grok-bot",
       "license": "MIT",

@@ -23,7 +23,7 @@
 <header class="top"><div class="wrap">
   <a class="brand" href="/"><img src="/assets/icons/icon48.png" alt="" width="28" height="28"><span>Send to Grok Bot</span></a>
   <nav aria-label="Main">
-    <a href="/setup" aria-current="page">Setup</a>
+    <a href="/setup">Setup</a>
     <a href="/mobile" class="hide-sm">iPhone</a>
     <a class="btn small" data-chrome-store href="https://github.com/jamespendry/send-to-grok-bot#readme">Add to Chrome</a>
   </nav>
@@ -31,18 +31,34 @@
 
 <main class="narrow page">
   <h1>Connect</h1>
-  <p class="intro" style="margin-top:12px">Paste the link you were given, or the address and the secret from Grok Bot or Claude. Then click Connect.</p>
+  <p class="intro" style="margin-top:12px">Two steps. Install the extension, then paste what your setup page told you to copy.</p>
 
-  <label class="field-label" for="paste">Paste here</label>
-  <textarea id="paste" spellcheck="false" autocomplete="off" placeholder="Paste the link, or the address and the secret, in any order"></textarea>
-  <div class="actions" style="margin-top:14px"><button id="connect" class="btn large" type="button">Connect</button></div>
-  <span id="msg" role="status"></span>
-  <p class="status muted" id="ready"></p>
+  <ol class="steps plain">
+    <li class="hero-step" id="step-install">
+      <h2 class="step-title">Step 1. Install the extension</h2>
+      <p id="installed" class="note done" hidden><b>Installed.</b> Go to step 2.</p>
+      <div id="install-steps">
+        <p class="muted">It is not in the Chrome Web Store yet, so it takes five short steps:</p>
+        <ol>
+          <li>Download the zip from <a href="https://github.com/jamespendry/send-to-grok-bot/archive/refs/heads/main.zip">GitHub</a> and unzip it.</li>
+          <li>In Chrome's address bar, type <span class="mono">chrome://extensions</span> and press Enter.</li>
+          <li>Turn on <span class="ui">Developer mode</span>, at the top right.</li>
+          <li>Click <span class="ui">Load unpacked</span> and pick the folder named <span class="ui">extension</span>.</li>
+          <li>Come back to this page and refresh it.</li>
+        </ol>
+      </div>
+    </li>
+    <li class="hero-step" id="step-paste">
+      <h2 class="step-title">Step 2. Paste here</h2>
+      <p class="muted">Paste with Command+V (Mac) or Ctrl+V (Windows). Pasting saves it to the extension right away. There is no button to click.</p>
+      <label class="field-label" for="paste">Paste here</label>
+      <textarea id="paste" spellcheck="false" autocomplete="off" placeholder="Paste here"></textarea>
+      <span id="msg" role="status"></span>
+      <div class="note"><b>Grok Bot:</b> paste the Webhook URL and the Authorization header together.<br><b>Claude:</b> paste the API token, then the Fire URL. One at a time is fine.<br>If Chrome asks to allow a site, choose <b>Allow</b>.</div>
+    </li>
+  </ol>
 
-  <div class="note">If Chrome asks to allow a site, choose <b>Allow</b>. Then open x.com, refresh, and click the Send button on a post.</div>
-
-  <p class="muted">This page stays in your browser. It does not send the address or the secret anywhere except into the Send to Grok Bot extension on this computer, and only after you click Connect.</p>
-  <p class="muted" style="margin-top:12px">ChatGPT and Codex need none of this. Check the box in the extension and click Save. A post opens with the text filled in, and you press Send.</p>
+  <p class="muted">This page stays in your browser. Pasting saves into the extension on this computer and nowhere else. ChatGPT and Codex need none of this.</p>
 </main>
 <script src="/connect.js"></script>
 <script>
@@ -50,20 +66,17 @@
   var paste = document.getElementById('paste');
   var msg = document.getElementById('msg');
   var api = globalThis.STGB_CONNECT;
+  var installed = !!document.documentElement.dataset.stgbReady;
+  var steps = document.getElementById('install-steps');
+  var badge = document.getElementById('installed');
+  if (installed) {
+    if (steps) steps.hidden = true;
+    if (badge) badge.hidden = false;
+  }
 
   function say(text, ok) {
     msg.textContent = text || '';
     msg.className = text ? (ok ? 'ok' : 'err') : '';
-  }
-
-  function showParsed() {
-    if (!api) {
-      say('This page did not finish loading. Refresh and try again.', false);
-      return;
-    }
-    if (!paste.value.trim()) { say('', true); return; }
-    var parsed = api.parseSetupPaste(paste.value);
-    say(parsed.ok ? parsed.plain : parsed.error, parsed.ok);
   }
 
   var hash = location.hash || '';
@@ -72,23 +85,20 @@
     catch (e) { paste.value = hash.slice(1); }
     try { history.replaceState(null, '', location.pathname + location.search); }
     catch (e) {}
-  }
-  showParsed();
-  paste.addEventListener('input', showParsed);
-
-  var ready = document.getElementById('ready');
-  if (document.documentElement.dataset.stgbReady) {
-    ready.textContent = 'The extension is installed in this browser. Click Connect.';
-  } else {
-    ready.textContent = 'Install Send to Grok Bot in this browser, open this page again, and click Connect. The same paste also works in the extension settings.';
+    if (installed) say('Paste again in the box to finish.', false);
   }
 
-  document.getElementById('connect').addEventListener('click', function () {
-    if (document.documentElement.dataset.stgbReady) return;
-    if (!api) { say('This page did not finish loading. Refresh and try again.', false); return; }
-    var parsed = api.parseSetupPaste(paste.value);
+  if (installed) return;
+
+  paste.addEventListener('paste', function (event) {
+    var data = event.clipboardData;
+    var text = data ? data.getData('text') : '';
+    if (!api) { say('This page could not load. Open it from the project folder.', false); return; }
+    var parsed = api.parseSetupPaste(text);
     if (!parsed.ok) { say(parsed.error, false); return; }
-    say('Install Send to Grok Bot in this browser, then open this page again and click Connect.', false);
+    var plan = api.planConnect({enabled: []}, parsed);
+    if (!plan.ok) { say(plan.error, false); return; }
+    say('Install the extension first. Step 1 is on this page. Then paste here again.', false);
   });
 })();
 </script>
