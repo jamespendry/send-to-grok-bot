@@ -166,6 +166,10 @@ You can store the Grok Bot webhook and the Claude routine on a small relay, and 
 
 The relay is a Cloudflare Worker in [`relay/`](relay/). Setup, including the exact commands, is in [relay/DEPLOY.md](relay/DEPLOY.md). The iPhone shortcut posts the same `/v1/send` endpoint with the whole `stgbr1.` code. ChatGPT and Codex come back as a link the phone opens. `GET /v1/history` is the list on `/history`.
 
+## Marketplace plugin
+
+[`plugin/`](plugin/) is the Grok Bot and Cursor plugin. It creates the webhook routine and returns the connect link. The logo on the site is `/logo.svg`. The form answers are in [plugin/SUBMIT.md](plugin/SUBMIT.md). Submit them at https://x.ai/bot/marketplace/submit-a-plugin.
+
 When Relay is on, Grok Bot and Claude still receive the version 2 post, including `digest` and media fields. The relay forwards that object.
 
 ## What gets sent

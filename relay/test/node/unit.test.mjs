@@ -521,6 +521,50 @@ test("the connect site is rooted at docs and hands the code to the extension", a
   assert.match(nodes.msg.textContent, /Paste the relay code/);
 });
 
+test("the marketplace plugin package and logo match the form", () => {
+  const cursorManifest = JSON.parse(read("../plugin/.cursor-plugin/plugin.json"));
+  const agentManifest = JSON.parse(read("../plugin/plugin.json"));
+  const marketplace = JSON.parse(read("../.cursor-plugin/marketplace.json"));
+  assert.equal(cursorManifest.name, "send-to-grok-bot");
+  assert.equal(agentManifest.name, "send-to-grok-bot");
+  assert.equal(agentManifest.$schema, "https://agent-plugins.org/schemas/1.0.0/plugin.schema.json");
+  assert.equal(cursorManifest.logo, "assets/logo.svg");
+  assert.equal(cursorManifest.skills, "./skills/");
+  assert.equal(marketplace.plugins[0].source, "plugin");
+  assert.equal(marketplace.plugins[0].name, "send-to-grok-bot");
+  const skill = read("../plugin/skills/send-to-grok-bot/SKILL.md");
+  assert.match(skill, /^---\nname: send-to-grok-bot\n/);
+  assert.match(skill, /description:/);
+  assert.match(skill, /https:\/\/sendtogrokbot\.com\/connect#/);
+  assert.match(skill, /one-line takeaway/);
+  assert.match(skill, /job-hunt/);
+  assert.doesNotMatch(skill, /rk_[A-Za-z0-9_-]{20}/);
+  const routine = read("../plugin/skills/send-to-grok-bot/routine-prompt.md").trim();
+  const general = read("../prompts/general.md").split("---").pop().trim();
+  assert.equal(routine, general);
+  const svg = read("../plugin/assets/logo.svg");
+  assert.equal(svg, read("../docs/logo.svg"));
+  assert.match(svg, /viewBox="0 0 128 128"/);
+  assert.match(svg, /fill="#ffffff"/);
+  assert.match(svg, /fill="#0f1419"/);
+  assert.doesNotMatch(svg, /[\u{1F300}-\u{1FAFF}]/u);
+  const png = readFileSync(join(root, "../plugin/assets/logo.png"));
+  assert.equal(png.subarray(0, 8).toString("hex"), "89504e470d0a1a0a");
+  assert.equal(png.readUInt32BE(16), 512);
+  assert.equal(png.readUInt32BE(20), 512);
+  assert.equal(png[25], 2);
+  assert.ok(png.equals(readFileSync(join(root, "../docs/logo.png"))));
+  const form = read("../plugin/SUBMIT.md");
+  const desc = form.match(/\| Brief Description \| (.*) \|/)[1];
+  const steps = form.match(/\| Testing Instructions \| (.*) \|/)[1];
+  assert.ok(desc.length <= 600, desc.length);
+  assert.ok(steps.length <= 600, steps.length);
+  assert.match(form, /Organization Handle \| sendtogrokbot/);
+  assert.match(form, /Website URL \| https:\/\/sendtogrokbot\.com \|/);
+  assert.match(form, /https:\/\/sendtogrokbot\.com\/logo\.svg/);
+  assert.match(form, /Grok \(coming soon\), Grok Bot, and Cursor/);
+});
+
 test("Claude text keeps the old shape and prefixes a preset prompt", () => {
   const { claudeRoutineText } = require("../../../extension/destinations/claude.js");
   const bare = { url: "https://x.com/a/status/1", author: "ada", sentAt: "t", text: "hello" };

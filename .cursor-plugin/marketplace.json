@@ -1,0 +1,22 @@
+{
+  "name": "send-to-grok-bot",
+  "owner": {
+    "name": "Send to Grok Bot"
+  },
+  "metadata": {
+    "description": "Send an X post to Grok Bot from one button."
+  },
+  "plugins": [
+    {
+      "name": "send-to-grok-bot",
+      "source": "plugin",
+      "description": "Creates the Send to Grok Bot webhook routine, returns one connect link, and replies to an X post using the preset sent with that post.",
+      "homepage": "https://sendtogrokbot.com",
+      "repository": "https://github.com/jamespendry/send-to-grok-bot",
+      "license": "MIT",
+      "keywords": ["x", "grok-bot", "webhook", "posts"],
+      "logo": "plugin/assets/logo.svg",
+      "category": "productivity"
+    }
+  ]
+}

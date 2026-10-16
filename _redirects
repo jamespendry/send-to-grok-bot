@@ -15,6 +15,8 @@
 /mobile.html        /docs/mobile.html          200
 /history            /docs/history.html         200
 /history.html       /docs/history.html         200
+/logo.svg           /docs/logo.svg             200
+/logo.png           /docs/logo.png             200
 /site.css           /docs/site.css             200
 /connect.js         /extension/connect.js      200
 /prompts.js         /extension/prompts.js      200
