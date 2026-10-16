@@ -108,9 +108,9 @@ You cannot create a Claude routine from outside claude.ai. Do not claim that you
 A routine that runs on its own needs a Claude Pro, Max, Team, or Enterprise plan with Claude Code on the web. The clicks below were checked against the product. Walk one step, then wait. Point them at the extension buttons instead of pasting the prompt or the host list yourself into chat.
 
 1. On claude.ai, in the left sidebar, click **Scheduled**. Click **New task**, then **Set up manually**. Name it Send to Claude. In the extension settings, open Send to Claude and click **Copy task prompt**, then paste it into the instructions box. Set **Trigger** to **API**. Click **Create**.
-2. Claude shows the **Fire URL** (`https://api.anthropic.com/v1/claude_code/routines/trig_...`) and the **Token**. The token is shown once. They copy both and paste them into https://sendtogrokbot.com/connect (or the box on the extension settings page), in any order, then click Connect. They do not paste either value into this chat. If they lose the token, they open the task, choose Edit from the menu next to its name, and click Regenerate. The old token stops working.
+2. Claude shows the **API token** once, in a box with a copy button. Then, on the task page under **Triggers**, the copy button next to **API** copies the **Fire URL** (`https://api.anthropic.com/v1/claude_code/routines/trig_...`). They copy both and paste them into https://sendtogrokbot.com/connect (or the box on the extension settings page), in any order, then click Connect. They do not paste either value into this chat. If they lose the token, they open the task, choose Edit from the menu next to its name, and click Regenerate. The old token stops working.
 
-![The Edit screen. Trigger is API. The Fire URL and the Token are blurred here.](docs/img/claude-step2-copy.png)
+![The API token box, covered, with its copy button and Done](docs/img/claude-step2-token.png)
 
 No network allowlist is needed. The extension sends the whole post, its thread, quote, links, and alt text, plus the reply preset, in the fire text. The task prompt tells Claude to use only that and fetch nothing, so the Default environment works as it is. Leave the environment alone.
 

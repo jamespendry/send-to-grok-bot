@@ -255,13 +255,16 @@ To run it for you, save the task's Fire URL and token. You need a Claude Pro, Ma
 
 1. On claude.ai, in the left sidebar, click **Scheduled**. Click **New task**, then **Set up manually**.
 2. Name it Send to Claude. In the extension, click **Copy task prompt** and paste it into the instructions box. Set **Trigger** to **API**. Click **Create**.
-3. Copy the **Fire URL** and the **Token** that appear. The token is shown once. Paste both into https://sendtogrokbot.com/connect, or the box in the extension, in any order. Click Connect.
+3. Claude shows the **API token** once. Click its copy button and paste it into https://sendtogrokbot.com/connect. Click **Done**.
+4. On the task page, under **Triggers**, click the copy button next to **API** (Copy fire URL). Paste it into the same box on a new line. Click Connect.
 
 ![claude.ai, Scheduled in the sidebar, then New task and Set up manually](docs/img/claude-step1-new-task.png)
 
 ![The new task form: name, instructions, Trigger set to API, Create](docs/img/claude-step1-form.png)
 
-![The Fire URL and Token, blurred](docs/img/claude-step2-copy.png)
+![The API token box, covered, with its copy button and Done](docs/img/claude-step2-token.png)
+
+![The task page with Copy fire URL next to API](docs/img/claude-step2-fire-url.png)
 
 No allowed websites are needed. The extension sends the whole post and the reply preset with every run, and the task prompt tells Claude to use only that.
 
