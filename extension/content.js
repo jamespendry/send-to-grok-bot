@@ -1,5 +1,9 @@
 // Send to Grok Bot: adds an icon-only action to each post's action bar on x.com.
 (() => {
+  if (globalThis.__STGB_BOOTED || document.documentElement.dataset.stgbBoot) return;
+  globalThis.__STGB_BOOTED = true;
+  document.documentElement.dataset.stgbBoot = '1';
+
   const NS = 'http://www.w3.org/2000/svg';
   const ICONS = {
     send: 'M2.5 3.5l19 8.5-19 8.5 2.6-8.5L2.5 3.5zm4.2 9.25l-1.5 4.9L17.3 12 5.2 6.35l1.5 4.9H13v1.5H6.7z',
@@ -19,22 +23,136 @@
     }
     btn.title = title; btn.setAttribute('aria-label', title);
   }
+  function brandSvg(brand) {
+    const svg = document.createElementNS(NS, 'svg');
+    svg.setAttribute('viewBox', '0 0 24 24');
+    svg.setAttribute('aria-hidden', 'true');
+    const p = document.createElementNS(NS, 'path');
+    p.setAttribute('d', (globalThis.STGB_LOGOS && globalThis.STGB_LOGOS[brand]) || '');
+    svg.appendChild(p);
+    return svg;
+  }
+  function xDark() {
+    const c = getComputedStyle(document.body).backgroundColor || '';
+    const m = c.match(/(\d+),\s*(\d+),\s*(\d+)/);
+    if (!m) return matchMedia('(prefers-color-scheme: dark)').matches;
+    return (0.2126 * +m[1] + 0.7152 * +m[2] + 0.0722 * +m[3]) < 140;
+  }
   let toastEl, toastTimer;
-  function showToast(message, err) {
+  function showToast(brand, title, reason) {
     if (!toastEl || !toastEl.isConnected) {
       toastEl = document.createElement('div');
-      toastEl.className = 'stgb-toast';
       toastEl.setAttribute('role', 'status');
       toastEl.setAttribute('aria-live', 'polite');
     }
-    toastEl.textContent = message;
-    toastEl.classList.toggle('stgb-toast-err', !!err);
+    toastEl.className = 'stgb-toast stgb-b-' + brand + (xDark() ? ' stgb-dark' : '') + (reason ? ' stgb-err' : '');
+    const mark = document.createElement('span');
+    mark.className = 'stgb-toast-mark';
+    mark.appendChild(brandSvg(brand));
+    const copy = document.createElement('span');
+    copy.className = 'stgb-toast-copy';
+    const heading = document.createElement('span');
+    heading.className = 'stgb-toast-title';
+    heading.textContent = title;
+    copy.appendChild(heading);
+    if (reason) {
+      const detail = document.createElement('span');
+      detail.className = 'stgb-toast-reason';
+      detail.textContent = reason;
+      copy.appendChild(detail);
+    }
+    toastEl.replaceChildren(mark, copy);
     toastEl.classList.remove('stgb-toast-show');
     document.body.appendChild(toastEl);
     void toastEl.offsetWidth;
     toastEl.classList.add('stgb-toast-show');
     clearTimeout(toastTimer);
     toastTimer = setTimeout(() => { if (toastEl) toastEl.classList.remove('stgb-toast-show'); }, 3000);
+  }
+  const recentSends = new Map();
+  function tooSoon(url, brand) {
+    const now = Date.now();
+    const key = url + '\n' + brand;
+    for (const [k, t] of recentSends) if (now - t >= 5000) recentSends.delete(k);
+    const t = recentSends.get(key);
+    if (t != null && now - t < 5000) return true;
+    recentSends.set(key, now);
+    return false;
+  }
+  // Flat post fields. Add fields on the returned object; the service worker forwards them.
+  function readPost(article) {
+    const link = [...article.querySelectorAll('a[href*="/status/"]')].find(l => l.querySelector('time'));
+    const url = link ? link.href : location.href;
+    const text = article.querySelector('[data-testid="tweetText"]')?.innerText || '';
+    const author = (url.split('/')[3]) || '';
+    return {url, text, author};
+  }
+  let menuEl, menuCloser;
+  function closeMenu() {
+    if (menuCloser) { menuCloser(); menuCloser = null; }
+    if (menuEl) { menuEl.remove(); menuEl = null; }
+  }
+  function openMenu(btn, items, article) {
+    closeMenu();
+    const menu = document.createElement('div');
+    menu.className = 'stgb-menu' + (xDark() ? ' stgb-dark' : '');
+    menu.setAttribute('role', 'menu');
+    items.forEach(item => {
+      const row = document.createElement('button');
+      row.type = 'button';
+      row.className = 'stgb-b-' + item.brand;
+      row.setAttribute('role', 'menuitem');
+      row.appendChild(brandSvg(item.brand));
+      const label = document.createElement('span');
+      label.textContent = item.label;
+      row.appendChild(label);
+      row.addEventListener('click', e => {
+        e.preventDefault(); e.stopPropagation(); e.stopImmediatePropagation();
+        const post = readPost(article);
+        closeMenu();
+        if (btn.classList.contains('stgb-busy') || tooSoon(post.url, item.brand)) return;
+        setState(btn, 'busy', 'Sending…');
+        chrome.runtime.sendMessage({stgbDestination: item.brand, ...post}, r => {
+          if (r && r.duplicate) { setState(btn, 'send', 'Send'); return; }
+          if (r && r.ok) {
+            setState(btn, 'ok', r.title || item.label);
+            showToast(item.brand, r.title || ('Sent to ' + item.label.replace(/^Send to /, '')), '');
+          } else {
+            const reason = (r && r.error) || 'failed';
+            const title = (r && r.title) || ("Couldn't send to " + item.label.replace(/^Send to /, ''));
+            setState(btn, 'err', title);
+            showToast(item.brand, title, reason);
+            setTimeout(() => setState(btn, 'send', 'Send'), 5000);
+          }
+        });
+      }, true);
+      menu.appendChild(row);
+    });
+    menu.addEventListener('pointerdown', e => e.stopPropagation());
+    menu.dataset.for = btn.dataset.stgbId || '';
+    document.body.appendChild(menu);
+    const r = btn.getBoundingClientRect();
+    const mw = menu.offsetWidth, mh = menu.offsetHeight;
+    let left = r.left + r.width / 2 - mw / 2;
+    left = Math.max(8, Math.min(left, innerWidth - mw - 8));
+    let top = r.bottom + 8;
+    if (top + mh > innerHeight - 8) top = Math.max(8, r.top - mh - 8);
+    menu.style.left = left + 'px';
+    menu.style.top = top + 'px';
+    menuEl = menu;
+    const onDoc = e => { if (!menu.contains(e.target)) closeMenu(); };
+    const onKey = e => { if (e.key === 'Escape') closeMenu(); };
+    const onScroll = () => closeMenu();
+    setTimeout(() => {
+      document.addEventListener('pointerdown', onDoc, true);
+      document.addEventListener('keydown', onKey, true);
+      window.addEventListener('scroll', onScroll, true);
+    }, 0);
+    menuCloser = () => {
+      document.removeEventListener('pointerdown', onDoc, true);
+      document.removeEventListener('keydown', onKey, true);
+      window.removeEventListener('scroll', onScroll, true);
+    };
   }
   // Direct child of the action bar that holds Share. Its classes are what space the row out.
   function shareWrap(bar) {
@@ -59,34 +177,25 @@
       wrap.querySelectorAll('[id]').forEach(n => n.removeAttribute('id'));
       wrap.querySelectorAll('[data-testid]').forEach(n => n.removeAttribute('data-testid'));
       const btn = wrap.querySelector('button, [role="button"]');
-      if (!btn) return;
+      if (!btn || btn.dataset.stgbBound) return;
+      btn.dataset.stgbBound = '1';
+      btn.dataset.stgbId = String(Date.now()) + Math.random().toString(36).slice(2);
       btn.classList.add('stgb-btn');
-      btn.removeAttribute('aria-haspopup');
       btn.removeAttribute('aria-expanded');
       btn.removeAttribute('aria-describedby');
+      btn.setAttribute('aria-haspopup', 'menu');
       if (btn.tagName === 'BUTTON') btn.type = 'button';
       btn.querySelectorAll('[style]').forEach(n => n.style.removeProperty('color'));
       const svg = btn.querySelector('svg');
       if (svg && svg.previousElementSibling) svg.previousElementSibling.classList.add('stgb-circle');
-      setState(btn, 'send', 'Send to Grok Bot');
+      setState(btn, 'send', 'Send');
       btn.addEventListener('click', e => {
-        e.preventDefault(); e.stopPropagation();
-        if (btn.classList.contains('stgb-busy')) return;
-        const link = [...a.querySelectorAll('a[href*="/status/"]')].find(l => l.querySelector('time'));
-        const url = link ? link.href : location.href;
-        const text = a.querySelector('[data-testid="tweetText"]')?.innerText || '';
-        const author = (url.split('/')[3]) || '';
-        setState(btn, 'busy', 'Sending…');
-        chrome.runtime.sendMessage({url, text, author}, r => {
-          if (r && r.ok) {
-            setState(btn, 'ok', 'Sent to Grok Bot');
-            showToast('Sent to Grok Bot');
-          } else {
-            const err = (r && r.error) || 'failed';
-            setState(btn, 'err', 'Not sent: ' + err + '. Click to retry.');
-            showToast(err, true);
-            setTimeout(() => setState(btn, 'send', 'Send to Grok Bot'), 4000);
-          }
+        e.preventDefault(); e.stopPropagation(); e.stopImmediatePropagation();
+        if (menuEl && menuEl.dataset.for === btn.dataset.stgbId) { closeMenu(); return; }
+        chrome.runtime.sendMessage({stgbAction: 'list'}, r => {
+          const items = r && r.items;
+          if (!items || !items.length) return;
+          openMenu(btn, items, a);
         });
       }, true);
       bar.appendChild(wrap);
