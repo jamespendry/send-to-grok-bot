@@ -21,7 +21,7 @@ Read this file before you give instructions. The human steps in the README are f
 Chrome shows a button on each X post. The person clicks it and picks a destination you prepared.
 
 - Grok Bot: a webhook routine exists, and the extension has its URL and key.
-- Claude Code: an API-triggered routine exists with the default prompt and the network allowlist below, and the extension has its URL and token. If they cannot use routines, Claude opens in a tab and no secret is stored.
+- Claude Code: an API task exists under Scheduled tasks, with the default prompt and the network allowlist below, and the extension has its Fire URL and token. Runs show up under that task's History. If they cannot use tasks, Claude opens in a tab and no secret is stored.
 - ChatGPT or Codex: no secret. Clicking a post opens that product with the post filled in.
 
 You cannot load an unpacked extension into their Chrome unless you are driving that Chrome window. Assume you are not. The last section is the walkthrough you give them.
@@ -45,13 +45,13 @@ node -e 'const {encodeConnectionCode}=require("./extension/connect.js"); console
 | Destination | JSON |
 | --- | --- |
 | Grok Bot | `{"destination":"grokbot","mode":"webhook","url":"https://...","key":"..."}` |
-| Claude routine | `{"destination":"claude","mode":"routine","url":"https://claude.ai/code/routines/trig_...","token":"sk-ant-oat01-..."}` |
+| Claude routine | `{"destination":"claude","mode":"routine","url":"https://api.anthropic.com/v1/claude_code/routines/trig_.../fire","token":"..."}` |
 | Claude tab | `{"destination":"claude","mode":"link"}` |
 | ChatGPT tab | `{"destination":"chatgpt","mode":"link"}` |
 | ChatGPT agent | `{"destination":"chatgpt","mode":"agent","triggerId":"agtch_...","token":"..."}` |
 | Codex | `{"destination":"codex","mode":"link"}` |
 
-The key is optional for Grok Bot. `url` for Claude may be the routines page, a bare `trig_` id, or the `api.anthropic.com` fire URL. Codex may also include `environment` and `branch`. Claude, ChatGPT, and Codex may include `prompt`. Grok Bot must not: the prompt lives on the routine, and the encoder rejects a Grok Bot code that contains one.
+The key is optional for Grok Bot. For Claude, `url` is the **Fire URL** copied from Edit scheduled task. A routines page link or a bare `trig_` id also works. Do not build the URL yourself. Codex may also include `environment` and `branch`. Claude, ChatGPT, and Codex may include `prompt`. Grok Bot must not: the prompt lives on the routine, and the encoder rejects a Grok Bot code that contains one.
 
 A Claude or ChatGPT `link` code clears a routine token already saved for that destination, so the button opens a tab. It does not clear the other destinations.
 
@@ -79,21 +79,30 @@ The extension POSTs the post as JSON and sends the key as `Authorization: Bearer
 
 ## Claude Code
 
-Create a routine the extension can start. Do this yourself if you are logged in at claude.ai. The CLI `/schedule` command creates a scheduled routine and cannot mint the API token. The token is created on the web, and it is shown once.
+Create a scheduled task the extension can start. Tasks live at [claude.ai/code/routines](https://claude.ai/code/routines). That page is titled **Scheduled tasks**. Do this yourself if you are logged in. The CLI `/schedule` command creates a scheduled routine and cannot mint the API token. The Fire URL and token are on the task, in **Edit scheduled task**.
 
-1. Open [claude.ai/code/routines](https://claude.ai/code/routines).
-2. Choose **Set up manually**. If the page says **New routine** instead, use that. The form you want is the manual one, with a trigger picker. Do not create a local Desktop task.
-3. Choose an **API** trigger.
-4. Name it Send to Grok Bot.
-5. Set the instructions to the prompt under the line in [prompts/default-routine-prompt.md](prompts/default-routine-prompt.md).
-6. The prompt does not commit or push. If the form will not save without a repository, ask which repo to attach and wait. Do not create a repository unless they ask.
-7. Set the network allowlist, below.
-8. Save.
-9. Generate the token (`sk-ant-oat01-...`). Copy the routine address as well. The extension accepts the `claude.ai/code/routines/trig_...` page, a bare `trig_` id, or the `https://api.anthropic.com/v1/claude_code/routines/trig_.../fire` URL.
+1. Click **New task**, then **Set up manually**. Do not create a local Desktop task.
+2. Name it Send to Claude.
+3. Set the instructions to the prompt under the line in [prompts/default-routine-prompt.md](prompts/default-routine-prompt.md).
+4. In the **Trigger** section, choose **API**.
+5. The prompt does not commit or push. If the form will not save without a repository, ask which repo to attach and wait. Do not create a repository unless they ask.
+6. Set the network allowlist, below. The dialog says permissions are set by the environment.
+7. Save.
+8. Click the task, then Edit. Copy the **Fire URL** and the **Token**.
 
-Generating the token is often a button only a person can press, and the value is shown once. If you cannot press it, the handoff tells them to click **Generate token**, copy it, and paste it into **Routine token** on the options page (and the address into **Routine URL**). Not into this chat. Generating a second token revokes the first one. Do not ask them to generate another so you can see it.
+![Edit scheduled task. Trigger is API. Fire URL has a copy button. Token has Regenerate and delete.](docs/img/claude-routine-api-trigger.png)
 
-If you hold both the address and the token, build a `claude` routine connection code for the handoff. Do not print the token by itself.
+The Fire URL goes in **Routine URL**. The token goes in **Routine token**. Copy them from this dialog. The extension also accepts a routines page link or a bare `trig_` id, but the Fire URL is the value on screen.
+
+**Regenerate** and the delete button sit on the Token row. Regenerating invalidates the previous token. Delete turns off API access. To get a new token, click the task, choose Edit, and click **Regenerate**. Do not ask the person to regenerate so you can read the token. If you cannot copy the two values yourself, the handoff walks them through it, one box at a time. They paste into the options page, not into this chat.
+
+The task page shows **History**, **Instructions**, **Triggers** (API, with a copy icon), and **Runs with**.
+
+![The task page: History, Instructions, Triggers set to API, and Runs with.](docs/img/claude-routine-overview.png)
+
+Runs show up under **History**. Leave the task **Active**.
+
+If you hold both the Fire URL and the token, build a `claude` routine connection code for the handoff. Do not print the token by itself.
 
 This needs a Claude Pro, Max, Team, or Enterprise plan with Claude Code on the web. If they do not have that, say so, and use a link code (`{"destination":"claude","mode":"link"}`) instead. No secret. Clicking a post opens claude.ai with the post filled in, and they press Send.
 
@@ -142,11 +151,11 @@ Do this after the destination exists, or, for ChatGPT and Codex, as soon as you 
 7. "Click that icon. Tell me when you see a page titled Send to Grok Bot with a box labeled Connection code."
 8. Then one of these, not both:
    - You have a connection code: "Paste this into the Connection code box and click Connect. Do not paste it back here." Put the code in that message. Success is a green line that starts with "Saved Send to" and names their destination.
-   - They are the only ones who can see the secret: "On the routine page, click the webhook address to copy it. On the extension page, paste it into Webhook URL. Tell me when the address is in that box." Next message: the key, into Webhook key, with "Do not paste the key here." Next message: "Click Save. Tell me when you see the word Saved." Claude uses Routine URL and Routine token the same way, one box per message.
+   - They are the only ones who can see the secret. For Grok Bot: "On the routine page, click the webhook address to copy it. On the extension page, paste it into Webhook URL. Tell me when the address is in that box." Next message: the key, into Webhook key, with "Do not paste the key here." Next message: "Click Save. Tell me when you see the word Saved." For Claude: "Click the task, then Edit. Copy the Fire URL. Paste it into Routine URL. Tell me when it is in that box." Next message: "Copy the token. Paste it into Routine token. Do not paste the token here." Next message: "Click Save. Tell me when you see the word Saved."
 
 9. "Open x.com and refresh. On any post, click the arrow icon in the row with reply, repost, like, and share. Tell me which names you see." Success is the destination you set up. Then: "Click that name."
    - Grok Bot: the icon turns green, and a run shows up in the bot's chat. A 200 only means the run started.
-   - Claude routine: a new session appears at claude.ai/code.
+   - Claude routine: the run is listed under History on the task page.
    - Claude, ChatGPT, or Codex tab: a new tab opens with the post written in the box. They press Send.
    - A red icon: read the line under the message at the bottom of the screen, and fix that one thing.
 
@@ -158,6 +167,6 @@ If they already have the folder, skip the download and start at the first step t
 - Developer mode is off: Load unpacked is hidden. That is step 4.
 - The menu on a post is empty and the options page opens: nothing is checked, or Grok Bot is checked without a webhook address.
 - Grok Bot returns anything other than 200: the routine is paused, or the key is not the current one.
-- Claude says the token is invalid: a newer token replaced it. They generate one token, paste it into Routine token, and stop.
+- Claude says the token is invalid: click the task, choose Edit, click **Regenerate**, paste that token into **Routine token**, and click Save. Regenerating invalidates the previous token.
 - Claude cannot open the post: the network allowlist is missing or still on Trusted. Repeat the environment step.
 - They pasted the code into this chat: tell them to paste it into the options page instead, and do not ask them to paste it again here.

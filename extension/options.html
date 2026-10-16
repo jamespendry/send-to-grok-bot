@@ -44,8 +44,8 @@ button{margin-top:8px;padding:9px 18px;border:0;border-radius:9999px;background:
 <div class="dest">
   <label class="check"><input type="checkbox" data-dest="claude"> Send to Claude</label>
   <div class="fields" data-for="claude" hidden>
-    <label class="field" for="cu">Routine URL (optional)<div class="hint">Leave blank to open Claude with the prompt. For an automatic routine, paste the claude.ai/code/routines/trig_… page, a trig_ ID, or the api.anthropic.com fire URL.</div></label>
-    <input id="cu" type="text" placeholder="https://claude.ai/code/routines/trig_…" autocomplete="off">
+    <label class="field" for="cu">Routine URL (optional)<div class="hint">Leave blank to open Claude with the prompt. For an automatic routine, paste the Fire URL from the task. A routines page link or a trig_ id also works.</div></label>
+    <input id="cu" type="text" placeholder="Fire URL" autocomplete="off">
     <label class="field" for="ct">Routine token (optional)</label><input id="ct" type="password" placeholder="sk-ant-oat01-..." autocomplete="off">
     <label class="field" for="cp">Prompt<div class="hint">Leave blank for the default. It classifies the post, leads with a one-line takeaway, and does not post or message anyone. Open in Claude uses it as the message. A routine prepends it to the post; the routine's saved prompt does the work.</div></label>
     <textarea id="cp" data-prompt="claudePrompt"></textarea>

@@ -77,9 +77,9 @@ If you do not have a code:
 - **ChatGPT** or **Codex**: check that box, leave the other fields blank, and click **Save**. You should see the word Saved. No password.
 - **Grok Bot**: check **Send to Grok Bot**. Paste the webhook address into **Webhook URL** and the key into **Webhook key**. Click **Save**. You should see the word Saved.
 - **Claude**, opening a tab: check **Send to Claude**, leave the routine fields blank, and click **Save**. You should see the word Saved.
-- **Claude**, a routine: check **Send to Claude**. Paste the routine address into **Routine URL** and the token into **Routine token**. Click **Save**. You should see the word Saved.
+- **Claude**, a routine: check **Send to Claude**. Paste the **Fire URL** into **Routine URL** and the token into **Routine token**. Click **Save**. You should see the word Saved. The Claude section below shows the task screen those two values come from.
 
-The address and the key are on the routine's own page. For Grok Bot, that is the routine's Webhook section: **POST to** and **key**, on the desktop app. For Claude, that is the API trigger at [claude.ai/code/routines](https://claude.ai/code/routines). The token is shown once. Put it in the box on this page. Do not send it to anyone.
+The address and the key are on the routine's own page. For Grok Bot, that is the routine's Webhook section: **POST to** and **key**, on the desktop app. For Claude, open the task, choose Edit, and copy **Fire URL** and **Token**. To get a new token, click the task, choose Edit, and click **Regenerate**. Put the token in the box on this page. Do not send it to anyone.
 
 ![One destination checked, with its fields filled in, and the word Saved](docs/img/08-destinations.png)
 
@@ -177,11 +177,31 @@ Check **Send to Claude**.
 
 Leave the routine fields blank to open claude.ai in a new tab with the post filled in. You press Send. Very long posts are shortened. This uses the `claude.ai/new?q=` link.
 
-To run it for you, save a routine address and a token. You need a Claude Pro, Max, Team, or Enterprise plan with Claude Code on the web. At [claude.ai/code/routines](https://claude.ai/code/routines), choose **Set up manually**, choose an **API** trigger, and paste in [prompts/default-routine-prompt.md](prompts/default-routine-prompt.md). The token is shown once when you click **Generate token**. Paste the routines page (`https://claude.ai/code/routines/trig_…`), a bare `trig_…` id, or the fire URL into **Routine URL**.
+To run it for you, save the task's Fire URL and token. You need a Claude Pro, Max, Team, or Enterprise plan with Claude Code on the web. Tasks live at [claude.ai/code/routines](https://claude.ai/code/routines). That page is titled **Scheduled tasks**.
 
-Claude's default network blocks most sites, so the routine cannot open the post. In the routine's environment settings, set **Network access** to **Custom** and allow `api.fxtwitter.com`, `fxtwitter.com`, `api.vxtwitter.com`, `vxtwitter.com`, `x.com`, `twitter.com`, and `t.co`, one per line. If a box offers to keep the usual package-manager sites too, turn it on.
+1. Click **New task**, then **Set up manually**.
+2. Name the task Send to Claude.
+3. Paste the prompt under the line in [prompts/default-routine-prompt.md](prompts/default-routine-prompt.md) into the instructions.
+4. In the **Trigger** section, choose **API**.
+5. Save the task.
+6. Click the task, then Edit. **Edit scheduled task** shows **Fire URL**, with a copy button, and **Token**, with **Regenerate** and a delete button.
 
-The API is experimental and may change. Limits are 30 sends an hour per routine and 100 an hour per account. Runs count against the Claude plan. The extension sends the post as `{"text": "..."}`. The token only starts that one routine. Generating a new token revokes the old one.
+![Edit scheduled task. The Trigger section is set to API, with Fire URL and Token.](docs/img/claude-routine-api-trigger.png)
+
+7. Copy the **Fire URL** and paste it into **Routine URL** on the extension options page.
+8. Copy the token and paste it into **Routine token**. Click **Save**. You should see the word Saved.
+
+Open the task. You should see **History**, **Instructions**, **Triggers** (API, with a copy icon), and **Runs with**.
+
+![The task page, with History, Instructions, an API trigger, and Runs with.](docs/img/claude-routine-overview.png)
+
+A send shows up under **History**.
+
+To get a new token, click the task, choose Edit, and click **Regenerate**. Regenerating invalidates the previous token. Paste the new token into **Routine token** and click **Save**. The delete button next to Regenerate turns off API access.
+
+The task says permissions are set by the environment. Claude's default network blocks most sites, so the routine cannot open the post. In the environment settings, set **Network access** to **Custom** and allow `api.fxtwitter.com`, `fxtwitter.com`, `api.vxtwitter.com`, `vxtwitter.com`, `x.com`, `twitter.com`, and `t.co`, one per line. If a box offers to keep the usual package-manager sites too, turn it on.
+
+The API is experimental and may change. Limits are 30 sends an hour per routine and 100 an hour per account. Runs count against the Claude plan. The extension sends the post as `{"text": "..."}`. The token only starts that one routine.
 
 ### ChatGPT
 
