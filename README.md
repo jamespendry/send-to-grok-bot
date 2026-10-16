@@ -150,7 +150,7 @@ scripts/build-site.sh
 npx wrangler deploy --config site/wrangler.toml
 ```
 
-`scripts/build-site.sh` writes `dist/site`. That folder is the site root: `/` opens setup, `/connect` is the connect page, `/setup`, `/setup/grok`, `/setup/claude`, and `/privacy` are the guides. The build copies `extension/connect.js` to `/connect.js` and `extension/prompts.js` to `/prompts.js` so the pages work without the rest of the repository. Attach the domain `sendtogrokbot.com` to the `sendtogrokbot` worker in the Cloudflare dashboard after the first deploy.
+`scripts/build-site.sh` writes `dist/site`. That folder is the site root: `/` opens setup, `/connect` is the connect page, `/setup`, `/setup/grok`, `/setup/claude`, `/mobile`, `/history`, and `/privacy` are the guides. The build copies `extension/connect.js` to `/connect.js` and `extension/prompts.js` to `/prompts.js` so the pages work without the rest of the repository. Attach the domain `sendtogrokbot.com` to the `sendtogrokbot` worker in the Cloudflare dashboard after the first deploy. `/mobile` tells an iPhone user to install the shortcut and paste one relay code. The iCloud link is not in the repository. Copy it from the Shortcuts app and paste it into `docs/mobile.html` where the page says the link is not published yet, then deploy again. The steps are in [shortcuts/BUILD.md](shortcuts/BUILD.md).
 
 The same folder can go to Cloudflare Pages:
 
@@ -162,9 +162,9 @@ npx wrangler pages deploy dist/site --project-name sendtogrokbot
 
 ## Relay (optional)
 
-You can store the Grok Bot webhook and the Claude routine on a small relay, and paste one code into the extension instead of those secrets. Check **Relay** at the bottom of the options page and paste the code from the setup page. It starts with `stgbr1.`. Leave it off to keep sending directly. ChatGPT and Codex are unchanged, because those open a tab.
+You can store the Grok Bot webhook and the Claude routine on a small relay, and paste one code into the extension instead of those secrets. Check **Relay** at the bottom of the options page and paste the code from the setup page. It starts with `stgbr1.`. Leave it off to keep sending directly. From the extension, ChatGPT and Codex open a tab.
 
-The relay is a Cloudflare Worker in [`relay/`](relay/). Setup, including the exact commands, is in [relay/DEPLOY.md](relay/DEPLOY.md). A future iPhone Shortcut can POST to the same `/v1/send` endpoint. That note is in the deploy doc too.
+The relay is a Cloudflare Worker in [`relay/`](relay/). Setup, including the exact commands, is in [relay/DEPLOY.md](relay/DEPLOY.md). The iPhone shortcut posts the same `/v1/send` endpoint with the whole `stgbr1.` code. ChatGPT and Codex come back as a link the phone opens. `GET /v1/history` is the list on `/history`.
 
 When Relay is on, Grok Bot and Claude still receive the version 2 post, including `digest` and media fields. The relay forwards that object.
 

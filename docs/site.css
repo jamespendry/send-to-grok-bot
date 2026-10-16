@@ -24,6 +24,7 @@ button.secondary{background:#eff3f4;color:#0f1419}
 #msg.ok{color:#00ba7c}
 #msg.err{color:#f4212e}
 #msg{display:block;margin-top:8px}
+.history p{margin:0 0 8px;overflow-wrap:anywhere}
 figure{margin:16px 0}
 figure img{max-width:100%;height:auto;border:1px solid #eff3f4;border-radius:8px}
 figure.missing{background:#f7f9f9;border:1px dashed #cfd9de;border-radius:8px;padding:14px 16px;color:#536471;font-size:14px}

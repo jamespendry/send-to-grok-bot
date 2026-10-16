@@ -442,7 +442,7 @@ test("the share sheet shortcut posts one relay code and names each destination",
   assert.match(steps, /stgbr1/);
 });
 
-test("the connect site is rooted at docs and hands the code to the extension", () => {
+test("the connect site is rooted at docs and hands the code to the extension", async () => {
   const page = read("../docs/connect.html");
   assert.match(page, /src="\/connect\.js"/);
   assert.match(page, /id="paste"/);
@@ -452,6 +452,73 @@ test("the connect site is rooted at docs and hands the code to the extension", (
   assert.match(read("../extension/manifest.json"), /https:\/\/sendtogrokbot\.com\/connect\*/);
   assert.match(read("../site/wrangler.toml"), /directory = "\.\.\/dist\/site"/);
   assert.match(read("../README.md"), /npx wrangler deploy --config site\/wrangler\.toml/);
+  const mobile = read("../docs/mobile.html");
+  assert.match(mobile, /id="install-link"/);
+  assert.match(mobile, /not published yet/);
+  assert.match(mobile, /stgbr1/);
+  assert.match(mobile, /https:\/\/relay\.sendtogrokbot\.com/);
+  assert.doesNotMatch(mobile, /icloud\.com\/shortcuts\/[0-9a-f]{8}/);
+  assert.doesNotMatch(mobile, /rk_[A-Za-z0-9_-]{20}/);
+  const history = read("../docs/history.html");
+  assert.match(history, /https:\/\/relay\.sendtogrokbot\.com\/v1\/history/);
+  assert.match(history, /Authorization/);
+  assert.doesNotMatch(history, /localStorage/);
+  assert.match(read("../docs/_redirects"), /\/mobile\s+\/mobile\.html\s+200/);
+  assert.match(read("../docs/_redirects"), /\/history\s+\/history\.html\s+200/);
+  assert.match(read("../_redirects"), /\/mobile\s+\/docs\/mobile\.html\s+200/);
+  assert.match(read("../docs/setup/index.html"), /href="\/mobile"/);
+  assert.match(read("../README.md"), /\/mobile/);
+  const script = history.slice(history.indexOf("<script>") + 8, history.lastIndexOf("</script>"));
+  const nodes = {};
+  function el(id) {
+    if (!nodes[id]) {
+      nodes[id] = {
+        value: "",
+        textContent: "",
+        className: "",
+        children: [],
+        addEventListener(type, fn) { this["on" + type] = fn; },
+        replaceChildren() { this.children = []; },
+        appendChild(child) { this.children.push(child); }
+      };
+    }
+    return nodes[id];
+  }
+  const context = {
+    document: {
+      getElementById: el,
+      createElement() { return { textContent: "" }; }
+    },
+    fetch(url, init) {
+      context.fetched = { url, init };
+      return Promise.resolve({
+        ok: true,
+        status: 200,
+        json: () => Promise.resolve({
+          ok: true,
+          history: [{ sentAt: "2026-10-16T00:00:00.000Z", destination: "chatgpt", url: "https://x.com/a/status/1", author: "ada", ok: true, error: "" }]
+        })
+      });
+    },
+    Date,
+    console
+  };
+  context.globalThis = context;
+  vm.createContext(context);
+  vm.runInContext(script, context);
+  function settle() { return new Promise(resolve => setTimeout(resolve, 0)); }
+  nodes.code.value = "  stgbr1.example  ";
+  nodes.form.onsubmit({ preventDefault() {} });
+  await settle();
+  assert.equal(context.fetched.url, "https://relay.sendtogrokbot.com/v1/history");
+  assert.equal(context.fetched.init.headers.Authorization, "Bearer stgbr1.example");
+  assert.match(nodes.list.children[0].textContent, /ChatGPT/);
+  assert.match(nodes.list.children[0].textContent, /https:\/\/x.com\/a\/status\/1/);
+  assert.equal(nodes.code.value, "  stgbr1.example  ");
+  nodes.code.value = " ";
+  nodes.form.onsubmit({ preventDefault() {} });
+  await settle();
+  assert.match(nodes.msg.textContent, /Paste the relay code/);
 });
 
 test("Claude text keeps the old shape and prefixes a preset prompt", () => {

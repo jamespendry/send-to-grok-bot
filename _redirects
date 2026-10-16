@@ -11,6 +11,10 @@
 /setup/claude.html  /docs/setup/claude.html    200
 /privacy            /docs/privacy.html         200
 /privacy.html       /docs/privacy.html         200
+/mobile             /docs/mobile.html          200
+/mobile.html        /docs/mobile.html          200
+/history            /docs/history.html         200
+/history.html       /docs/history.html         200
 /site.css           /docs/site.css             200
 /connect.js         /extension/connect.js      200
 /prompts.js         /extension/prompts.js      200
