@@ -18,16 +18,38 @@ Grok Bot (and any other webhook) receives `POST` with `Content-Type: application
 ```json
 {
   "source": "x",
+  "version": 2,
   "url": "https://x.com/user/status/123",
-  "text": "Post text",
   "author": "user",
+  "authorName": "Display Name",
+  "text": "Post text, with t.co links replaced by their full URLs",
+  "postedAt": "2026-10-15T22:58:00.000Z",
+  "truncated": false,
+  "links": [{"text": "https://github.com/foo/bar", "url": "https://github.com/foo/bar", "href": "https://t.co/abc"}],
+  "media": [
+    {"type": "image", "alt": "Alt text", "url": "https://pbs.twimg.com/media/abc?format=jpg&name=large"},
+    {"type": "video", "duration": 15, "thumbnail": "https://pbs.twimg.com/ext_tw_video_thumb/1/pu/img/abc.jpg?name=large", "captions": "Visible caption"},
+    {"type": "gif", "duration": null, "thumbnail": "https://pbs.twimg.com/tweet_video_thumb/abc?format=jpg&name=large", "captions": ""}
+  ],
+  "card": {"href": "https://t.co/xyz", "text": "example.com | Title | Description"},
+  "metrics": "3 replies, 10 reposts, 99 likes, 5000 views",
+  "quoted": {"author": "other", "authorName": "Other", "text": "Quoted text", "postedAt": "…", "links": []},
+  "inReplyTo": {"url": "https://x.com/other/status/122", "author": "other", "text": "Parent text"},
+  "thread": [{"url": "https://x.com/user/status/123", "text": "1/", "postedAt": "…"}],
+  "digest": "Plain-text rendering of all of the above",
   "sentAt": "2026-10-15T23:00:00.000Z"
 }
 ```
+`url`, `author`, `text` and `sentAt` are always present. The rest are best-effort and may be empty or `null`. `thread` and `inReplyTo` are filled only when you click from a post's own page (`/status/…`), where X renders the conversation. Text fields keep line breaks and are capped at 20,000 characters. Threads are capped at 25 posts, in a window that still contains the post you clicked; `digest` prints that post's text even when it falls outside the window. Photo `url`s and video/GIF `thumbnail`s on `pbs.twimg.com` use `name=large`. A thumbnail is the `<video poster>` or an `ext_tw_video_thumb` / `amplify_video_thumb` / `tweet_video_thumb` image. `captions` is the text visible in the player, not a downloaded transcript. If your receiver passes a single text field to an AI, forward `digest`.
+
 If a key is set it is sent as both `Authorization: Bearer <key>` and `X-Sender-Key: <key>`.
 
+For a Claude Code routine prompt that uses this payload, see [docs/routine-prompt.md](docs/routine-prompt.md).
+
+The menu sends this same object to the destination you pick. Grok Bot posts the JSON. Claude, ChatGPT, and Codex receive that object too, and use `digest` when the destination can only take a single text field.
+
 ## Privacy
-The extension sends only the posts you click, and only to the destinations you enable. It does not track browsing, collect analytics, or read anything else. Tokens and keys are stored in `chrome.storage.local`. A webhook URL and key from an earlier version are copied out of `chrome.storage.sync` on first use.
+The extension sends only the posts you click (plus, on a post's page, the author's thread and the post it replies to), and only to the destinations you enable. It does not track browsing, collect analytics, or read anything else. Tokens and keys are stored in `chrome.storage.local`. A webhook URL and key from an earlier version are copied out of `chrome.storage.sync` on first use.
 
 ## Sending to Claude
 

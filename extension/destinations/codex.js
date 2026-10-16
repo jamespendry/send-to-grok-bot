@@ -28,7 +28,7 @@ function buildCodexLink(post, s) {
   if (env) staticParams.push('environment=' + encodeURIComponent(env));
   if (branch) staticParams.push('branch=' + encodeURIComponent(branch));
   const prefix = 'https://chatgpt.com/codex?' + (staticParams.length ? staticParams.join('&') + '&' : '');
-  let text = post.text || '';
+  let text = post.digest || post.text || '';
   const make = t => prefix + 'prompt=' + encodeURIComponent(head + t + '\n"""');
   if (make(text).length > CODEX_MAX_URL) {
     let lo = 0, hi = text.length;

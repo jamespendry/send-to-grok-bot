@@ -19,14 +19,14 @@ const CHATGPT_MAX_URL = 6000;
 
 function chatgptInput(post, s) {
   const instructions = (s.chatgptPrompt || CHATGPT_DEFAULT_PROMPT).trim();
-  return {instructions, body: `Post by @${post.author || 'unknown'}: ${post.url}\n\n"""\n${post.text || ''}\n"""`};
+  return {instructions, body: `Post by @${post.author || 'unknown'}: ${post.url}\n\n"""\n${post.digest || post.text || ''}\n"""`};
 }
 
 function buildChatGPTLink(post, s) {
   const {instructions} = chatgptInput(post, s);
   const base = 'https://chatgpt.com/?q=';
   const head = `${instructions}\n\nPost by @${post.author || 'unknown'}: ${post.url}\n\n"""\n`;
-  let text = post.text || '';
+  let text = post.digest || post.text || '';
   const make = t => base + encodeURIComponent(head + t + '\n"""');
   if (make(text).length > CHATGPT_MAX_URL) {
     // Binary-search the longest text prefix that fits; the URL is always kept so ChatGPT can open the full post.

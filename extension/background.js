@@ -1,5 +1,50 @@
 importScripts('destinations/grokbot.js', 'destinations/claude.js', 'destinations/chatgpt.js', 'destinations/codex.js');
 
+function mediaLine(m) {
+  if (!m || typeof m !== 'object') return '';
+  const label = m.type === 'gif' ? 'GIF' : m.type === 'video' ? 'Video' : 'Image';
+  const head = m.duration ? `${label} (${m.duration}s)` : label;
+  if (m.type === 'image') {
+    const body = [m.alt, m.url].filter(Boolean).join(' ');
+    return '- ' + (body ? `${head}: ${body}` : head);
+  }
+  const parts = [head];
+  if (m.alt) parts.push(m.alt);
+  if (m.captions) parts.push('captions: ' + m.captions);
+  if (m.thumbnail) parts.push('thumbnail: ' + m.thumbnail);
+  return '- ' + parts.join(' ');
+}
+function normUrl(u) {
+  return String(u || '').split('?')[0].replace(/\/$/, '');
+}
+// Plain-text rendering of the payload, for receivers that forward a single text field to an AI.
+function digest(p) {
+  const L = [`X post by @${p.author}${p.authorName ? ` (${p.authorName})` : ''}`, `URL: ${p.url}`];
+  if (p.postedAt) L.push(`Posted: ${p.postedAt}`);
+  if (p.metrics) L.push(`Engagement: ${p.metrics}`);
+  if (p.inReplyTo) L.push('', `In reply to @${p.inReplyTo.author} (${p.inReplyTo.url}):`, p.inReplyTo.text);
+  const thread = Array.isArray(p.thread) ? p.thread : [];
+  const url = normUrl(p.url);
+  const threadHasClicked = url
+    ? thread.some(t => normUrl(t && t.url) === url)
+    : !!(p.text && thread.some(t => t && t.text === p.text));
+  if (thread.length > 1) {
+    L.push('', `Thread (${thread.length} posts by the author):`);
+    thread.forEach((t, i) => L.push(`[${i + 1}/${thread.length}] ${t.url}`, t.text));
+    if (!threadHasClicked) L.push('', 'Text:', p.text || '(no text)');
+  } else L.push('', 'Text:', p.text || '(no text)');
+  if (p.truncated) L.push('(Post text was cut off by "Show more" in the timeline; the full text may be longer.)');
+  if (p.quoted) L.push('', `Quoting @${p.quoted.author}${p.quoted.postedAt ? ` (${p.quoted.postedAt})` : ''}:`, p.quoted.text);
+  const links = [...(p.links || []), ...((p.quoted && p.quoted.links) || [])];
+  if (links.length) L.push('', 'Links:', ...links.map(l => `- ${l.url || l.text} (${l.href})`));
+  if (p.card) L.push('', `Link card: ${p.card.text} (${p.card.href})`);
+  if (p.media && p.media.length) {
+    const lines = p.media.map(mediaLine).filter(Boolean);
+    if (lines.length) L.push('', 'Media:', ...lines);
+  }
+  return L.join('\n');
+}
+
 function getStore(area, keys) {
   return new Promise(resolve => chrome.storage[area].get(keys, resolve));
 }
@@ -98,10 +143,11 @@ chrome.runtime.onMessage.addListener((msg, _s, reply) => {
       reply({ok: false, error: 'Set up first', needsSetup: true, brand, title: "Couldn't send to " + name});
       return;
     }
-    // Flat post object. Extra fields on the message are kept for callers that add them.
-    const post = {source: 'x', ...msg, sentAt: new Date().toISOString()};
+    // Version 2 object, including media and thumbnails. Every destination receives it.
+    const post = {source: 'x', ...msg, version: 2, sentAt: new Date().toISOString()};
     delete post.stgbDestination;
     delete post.stgbAction;
+    try { post.digest = digest(post); } catch (_) { post.digest = ''; }
     try {
       const r = await dest.send(post, s);
       if (r.needsSetup) chrome.runtime.openOptionsPage();
