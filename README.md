@@ -4,7 +4,7 @@ A Chrome extension that puts a button on every post on X. You click the button, 
 
 If you are an AI agent and someone asked you to set this up, stop here and follow [AGENTS.md](AGENTS.md). Do the parts you can. Walk them through the rest one step at a time.
 
-People: the steps below are the whole install. You add it from a folder. A Chrome Web Store listing, which would make this a one-click install, is on the roadmap.
+People: the steps below install it from a folder. Store listing text, promo images, and the upload steps are in [store/](store/). `scripts/package.sh` writes the zip.
 
 ## Set it up
 
@@ -78,6 +78,8 @@ If you do not have a code:
 - **Grok Bot**: check **Send to Grok Bot**. Paste the webhook address into **Webhook URL** and the key into **Webhook key**. Click **Save**. You should see the word Saved.
 - **Claude**, opening a tab: check **Send to Claude**, leave the routine fields blank, and click **Save**. You should see the word Saved.
 - **Claude**, a routine: check **Send to Claude**. Paste the **Fire URL** into **Routine URL** and the token into **Routine token**. Click **Save**. You should see the word Saved. The Claude section below shows the task screen those two values come from.
+
+Saving a webhook, a Claude routine, or a ChatGPT agent asks Chrome for access to that site only. Opening Claude, ChatGPT, or Codex in a tab does not. A webhook address has to be https. If Chrome asks you to allow the site, choose Allow.
 
 The address and the key are on the routine's own page. For Grok Bot, that is the routine's Webhook section: **POST to** and **key**, on the desktop app. For Claude, open the task, choose Edit, and copy **Fire URL** and **Token**. To get a new token, click the task, choose Edit, and click **Regenerate**. Put the token in the box on this page. Do not send it to anyone.
 
@@ -163,7 +165,10 @@ For a Claude Code routine prompt that uses this payload, see [docs/routine-promp
 The menu sends this same object to the destination you pick. Grok Bot posts the JSON. Claude, ChatGPT, and Codex receive that object too, and use `digest` when the destination can only take a single text field.
 
 ## Privacy
-The extension sends only the posts you click (plus, on a post's page, the author's thread and the post it replies to), and only to the destinations you turn on. It does not track browsing, collect analytics, or read anything else. Addresses, tokens, and keys are stored in `chrome.storage.local`. A webhook URL and key from an earlier version are copied out of `chrome.storage.sync` once, then removed there.
+The extension sends only the posts you click (plus, on a post's page, the author's thread and the post it replies to), and only to the destination you pick. It does not track browsing, collect analytics, or sell data. Addresses, tokens, and keys are stored in `chrome.storage.local`. A webhook URL and key from an earlier version are copied out of `chrome.storage.sync` once, then removed there. Host access is optional and is limited to the webhook host, `api.anthropic.com`, or `api.chatgpt.com` after you save that destination. The policy to publish at sendtogrokbot.com/privacy is [store/privacy-policy.md](store/privacy-policy.md).
+
+## Chrome Web Store
+Listing text, promo images, and the upload steps are in [store/](store/). `scripts/package.sh` writes `dist/send-to-grok-bot-<version>.zip`. Screenshots of x.com are not in that zip. The shot list is in [store/listing.md](store/listing.md).
 
 ## How each destination works
 
@@ -230,7 +235,7 @@ Label text uses the brand color. Claude is `#D97757`. ChatGPT, Codex, and Grok B
 
 ## Roadmap
 
-- List Send to Grok Bot on the Chrome Web Store, so install is one click and Developer mode is not required.
+- Submit the listing prepared in [store/](store/) so install is one click and Developer mode is not required.
 
 ## License
 

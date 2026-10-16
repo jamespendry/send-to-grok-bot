@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Send to Grok Bot</title>
+<style>
+  html, body {
+    margin: 0;
+    width: 440px;
+    height: 280px;
+    overflow: hidden;
+    background: #0f1419;
+    color: #fff;
+    font-family: Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Liberation Sans", Helvetica, Arial, sans-serif;
+  }
+  body {
+    box-sizing: border-box;
+    padding: 40px 44px 36px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+  }
+  .mark {
+    width: 48px;
+    height: 48px;
+    border-radius: 14px;
+    background: #1d9bf0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  h1 {
+    margin: 20px 0 0;
+    font-size: 34px;
+    line-height: 1.05;
+    font-weight: 700;
+    letter-spacing: -0.035em;
+  }
+  .sub {
+    margin: 10px 0 0;
+    font-size: 18px;
+    line-height: 1.3;
+    font-weight: 400;
+    color: #d6dee6;
+  }
+  .dests {
+    margin: 26px 0 0;
+    font-size: 14px;
+    line-height: 1;
+    font-weight: 600;
+    color: #9aa8b4;
+  }
+  .dests span + span::before {
+    content: "";
+    display: inline-block;
+    width: 4px;
+    height: 4px;
+    margin: 0 12px 2px;
+    border-radius: 50%;
+    background: #3d4650;
+    vertical-align: middle;
+  }
+</style>
+</head>
+<body>
+  <div class="mark" aria-hidden="true">
+    <svg width="24" height="24" viewBox="0 0 24 24">
+      <path fill="#ffffff" d="M4.5 12.8h10.1l-4.2 4.2 1.6 1.6 6.6-6.6-6.6-6.6-1.6 1.6 4.2 4.2H4.5v2.6z"/>
+    </svg>
+  </div>
+  <h1>Send to Grok Bot</h1>
+  <p class="sub">One click on an X post.</p>
+  <p class="dests"><span>Grok Bot</span><span>Claude</span><span>ChatGPT</span><span>Codex</span></p>
+</body>
+</html>

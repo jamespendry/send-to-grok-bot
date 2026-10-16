@@ -5,8 +5,8 @@
 //      Headers: Authorization: Bearer sk-ant-oat01-... (per-routine token), anthropic-version: 2023-06-01
 //      Body: {"text": "..."} (freeform, max 65,536 chars). 200 -> {claude_code_session_url}.
 //      Limits: 30 fires/hour/routine, 100/hour/account. No idempotency key: each call = new session.
-//      The endpoint sends no CORS headers (OPTIONS -> 405). It works only because this runs in the
-//      extension service worker, which host_permissions exempt from CORS.
+//      The endpoint sends no CORS headers (OPTIONS -> 405). The service worker can call it
+//      only after you grant https://api.anthropic.com/* from the options page.
 //  - claude_link: opens claude.ai/new?q=<prompt> in a new tab (prefill only; user presses Send). Any plan.
 self.STGB_DESTINATIONS = self.STGB_DESTINATIONS || {};
 
@@ -77,6 +77,9 @@ self.STGB_DESTINATIONS.claude_routine = {
     const url = claudeFireUrl(s.claudeFireUrl);
     if (!s.claudeFireUrl || !s.claudeToken) return {ok: false, error: 'Set up first', needsSetup: true};
     if (!url) return {ok: false, error: 'Paste a claude.ai/code/routines/trig_… link, a trig_ ID, or the API fire URL'};
+    if (!(await chrome.permissions.contains({origins: ['https://api.anthropic.com/*']}))) {
+      return {ok: false, error: 'Allow api.anthropic.com in settings', needsSetup: true};
+    }
     // The routine's saved prompt carries the instructions; we send only the post (plus optional extra prompt).
     let text = (s.claudePrompt ? s.claudePrompt.trim() + '\n\n' : '') + claudePostBlock(post, post.digest || post.text || '');
     if (text.length > CLAUDE_MAX_TEXT) text = text.slice(0, CLAUDE_MAX_TEXT);

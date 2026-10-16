@@ -5,6 +5,11 @@ self.STGB_DESTINATIONS.grokbot = {
   toast: 'Sent to Grok Bot',
   async send(post, s) {
     if (!s.webhookUrl) return {ok: false, error: 'Set up first', needsSetup: true};
+    const pattern = stgbWebhookPattern(s.webhookUrl);
+    if (!pattern) return {ok: false, error: 'Webhook must be https', needsSetup: true};
+    if (!(await chrome.permissions.contains({origins: [pattern]}))) {
+      return {ok: false, error: 'Allow this site in settings', needsSetup: true};
+    }
     const headers = {'Content-Type': 'application/json'};
     if (s.senderKey) { headers['Authorization'] = 'Bearer ' + s.senderKey; headers['X-Sender-Key'] = s.senderKey; }
     const r = await fetch(s.webhookUrl, {method: 'POST', headers, body: JSON.stringify(post)});

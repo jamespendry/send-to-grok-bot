@@ -1,6 +1,12 @@
 const $ = id => document.getElementById(id);
 const FIELDS = {webhookUrl: 'u', senderKey: 'k', claudeFireUrl: 'cu', claudeToken: 'ct', chatgptTriggerId: 'ti', chatgptToken: 'tt', codexEnvironment: 'ce', codexBranch: 'cb'};
 const PROMPTS = ['claudePrompt', 'chatgptPrompt', 'codexPrompt'];
+const CONTENT_HOSTS = new Set(['x.com', 'twitter.com']);
+
+function hostOf(pattern) {
+  try { return new URL(String(pattern).replace(/\*$/, 'x')).host; }
+  catch { return ''; }
+}
 
 function brandSet(enabled, webhookUrl) {
   const keys = Array.isArray(enabled) ? enabled : (webhookUrl ? ['grokbot'] : []);
@@ -56,11 +62,25 @@ function applyDecoded(decoded) {
   show();
 }
 
-function saveForm(done) {
-  chrome.storage.local.set(formState(), () => done(chrome.runtime.lastError || null));
+function persist(o, done) {
+  const problem = settingsProblem(o);
+  if (problem) { done(problem); return; }
+  const origins = stgbNeededOrigins(o);
+  const write = () => {
+    chrome.storage.local.set(o, () => {
+      dropUnusedOrigins(stgbNeededOrigins(o));
+      done(chrome.runtime.lastError || null);
+    });
+  };
+  // permissions.request has to run in the click that started this, before any await.
+  if (!origins.length) { write(); return; }
+  chrome.permissions.request({origins}, granted => {
+    if (!granted) { done('Click Save and choose Allow to send there'); return; }
+    write();
+  });
 }
 
-function useCode(raw) {
+function useCode(raw, fromClick) {
   const decoded = globalThis.STGB_CONNECT.decodeConnectionCode(raw);
   if (!decoded.ok) {
     if (!$('cc').value.trim()) $('cc').value = String(raw).replace(/^#connect=/i, '');
@@ -69,7 +89,15 @@ function useCode(raw) {
   }
   applyDecoded(decoded);
   $('cc').value = '';
-  saveForm(err => connectMessage(err ? 'Could not save. Click Save.' : decoded.message, !err));
+  const o = formState();
+  if (!fromClick) {
+    chrome.storage.local.set(o, () => {
+      const needsAllow = stgbNeededOrigins(o).length > 0;
+      connectMessage(needsAllow ? decoded.message + ' Click Save and choose Allow.' : decoded.message, true);
+    });
+    return;
+  }
+  persist(o, err => connectMessage(err ? (typeof err === 'string' ? err : 'Could not save. Click Save.') : decoded.message, !err));
 }
 
 function fill(local) {
@@ -78,6 +106,31 @@ function fill(local) {
   for (const [key, id] of Object.entries(FIELDS)) $(id).value = local[key] || '';
   document.querySelectorAll('[data-prompt]').forEach(el => { el.value = local[el.dataset.prompt] || ''; });
   show();
+}
+
+function settingsProblem(o) {
+  if (!o.enabled.includes('grokbot') || !o.webhookUrl) return '';
+  if (!stgbWebhookPattern(o.webhookUrl)) return 'Webhook URL must be a valid https link';
+  return '';
+}
+
+function say(text, bad) {
+  $('m').textContent = text;
+  $('m').classList.toggle('bad', !!bad);
+  clearTimeout(say.t);
+  if (!bad && text) say.t = setTimeout(() => { $('m').textContent = ''; $('m').classList.remove('bad'); }, 2000);
+}
+
+function dropUnusedOrigins(keep) {
+  const needed = new Set(keep.map(hostOf));
+  chrome.permissions.getAll(all => {
+    const extra = (all.origins || []).filter(origin => {
+      const host = hostOf(origin);
+      return host && !needed.has(host) && !CONTENT_HOSTS.has(host);
+    });
+    if (!extra.length) return;
+    chrome.permissions.remove({origins: extra}, () => { void chrome.runtime.lastError; });
+  });
 }
 
 async function load() {
@@ -96,9 +149,12 @@ async function load() {
 document.querySelectorAll('input[data-dest]').forEach(el => el.addEventListener('change', show));
 $('cc').addEventListener('input', () => connectMessage('', true));
 const ready = load();
-$('connect').onclick = () => ready.then(() => useCode($('cc').value));
+$('connect').onclick = () => ready.then(() => useCode($('cc').value, true));
 $('s').onclick = () => ready.then(() => {
-  saveForm(() => { $('m').textContent = 'Saved'; setTimeout(() => $('m').textContent = '', 2000); });
+  persist(formState(), err => {
+    if (err) say(typeof err === 'string' ? err : 'Could not save', true);
+    else say('Saved', false);
+  });
 });
 
 ready.then(() => {
@@ -106,5 +162,5 @@ ready.then(() => {
   if (!/^#connect=/i.test(hash)) return;
   try { history.replaceState(null, '', location.pathname + location.search); }
   catch (_) {}
-  useCode(hash);
+  useCode(hash, false);
 });
