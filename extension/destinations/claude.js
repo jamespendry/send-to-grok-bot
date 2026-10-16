@@ -47,7 +47,7 @@ function claudePostBlock(post, text) {
 function buildClaudeLink(post, s) {
   const instructions = (s.claudePrompt || CLAUDE_DEFAULT_PROMPT).trim();
   const make = t => 'https://claude.ai/new?q=' + encodeURIComponent(`${instructions}\n\n${claudePostBlock(post, t)}`);
-  let text = post.text || '';
+  let text = post.digest || post.text || '';
   if (make(text).length > CLAUDE_MAX_URL) {
     let lo = 0, hi = text.length;
     while (lo < hi) { const mid = (lo + hi + 1) >> 1; make(text.slice(0, mid) + '…').length <= CLAUDE_MAX_URL ? lo = mid : hi = mid - 1; }
@@ -73,7 +73,7 @@ self.STGB_DESTINATIONS.claude_routine = {
     if (!s.claudeFireUrl || !s.claudeToken) return {ok: false, error: 'Set up first', needsSetup: true};
     if (!url) return {ok: false, error: 'Paste a claude.ai/code/routines/trig_… link, a trig_ ID, or the API fire URL'};
     // The routine's saved prompt carries the instructions; we send only the post (plus optional extra prompt).
-    let text = (s.claudePrompt ? s.claudePrompt.trim() + '\n\n' : '') + claudePostBlock(post, post.text || '');
+    let text = (s.claudePrompt ? s.claudePrompt.trim() + '\n\n' : '') + claudePostBlock(post, post.digest || post.text || '');
     if (text.length > CLAUDE_MAX_TEXT) text = text.slice(0, CLAUDE_MAX_TEXT);
     const r = await fetch(url, {
       method: 'POST',

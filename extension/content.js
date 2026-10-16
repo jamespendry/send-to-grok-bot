@@ -108,7 +108,8 @@
       row.appendChild(label);
       row.addEventListener('click', e => {
         e.preventDefault(); e.stopPropagation(); e.stopImmediatePropagation();
-        const post = readPost(article);
+        let post;
+        try { post = extract(article); } catch (_) { post = readPost(article); }
         closeMenu();
         if (btn.classList.contains('stgb-busy') || tooSoon(post.url, item.brand)) return;
         setState(btn, 'busy', 'Sending…');
@@ -164,6 +165,90 @@
   }
   function actionBar(article) {
     return [...article.querySelectorAll('[role="group"]')].find(g => g.closest('article') === article) || null;
+  }
+  // --- Post extraction. Everything is best-effort: X's DOM changes often, so each field degrades to empty. ---
+  const MAX_TEXT = 20000, MAX_THREAD = 25;
+  const clip = (s, n = MAX_TEXT) => (s && s.length > n ? s.slice(0, n) + '…' : s || '');
+  const own = (root, sel, article) => [...root.querySelectorAll(sel)].filter(n => n.closest('article') === article);
+  // Quoted posts render as a nested [role="link"] block inside the article.
+  const quoteBox = article => own(article, 'div[role="link"]', article).find(n => n.querySelector('[data-testid="User-Name"]')) || null;
+  const outsideQuote = (nodes, q) => nodes.filter(n => !q || !q.contains(n));
+  function postLink(article, q) {
+    return outsideQuote(own(article, 'a[href*="/status/"]', article), q).find(l => l.querySelector('time')) || null;
+  }
+  function userName(root) {
+    const n = root.querySelector('[data-testid="User-Name"]');
+    if (!n) return {name: '', handle: ''};
+    const t = n.textContent, m = t.match(/@([A-Za-z0-9_]{1,15})/);
+    return {name: (m ? t.slice(0, m.index) : t.split('·')[0]).trim(), handle: m ? m[1] : ''};
+  }
+  // X hides the full URL in invisible spans inside each link, so textContent recovers it while innerText shows "github.com/foo…".
+  function links(textEl) {
+    if (!textEl) return [];
+    return [...textEl.querySelectorAll('a[href]')].map(l => {
+      const shown = l.textContent.replace(/…$/, '').trim();
+      return {text: shown, href: l.href, url: /^https?:\/\//.test(shown) ? shown : ''};
+    }).filter(l => !/^[@#$]/.test(l.text));
+  }
+  function textOf(textEl) {
+    if (!textEl) return '';
+    const c = textEl.cloneNode(true);
+    c.querySelectorAll('a[href]').forEach(l => { const t = l.textContent.replace(/…$/, '').trim(); if (/^https?:\/\//.test(t)) l.replaceWith(t); });
+    c.querySelectorAll('img[alt]').forEach(i => i.replaceWith(i.alt)); // emoji
+    return clip(c.textContent);
+  }
+  function media(article, q) {
+    const out = [];
+    outsideQuote(own(article, '[data-testid="tweetPhoto"] img', article), q).forEach(i => out.push({type: 'image', alt: i.alt && i.alt !== 'Image' ? i.alt : ''}));
+    outsideQuote(own(article, '[data-testid="videoPlayer"]', article), q).forEach(v => {
+      const el = v.querySelector('video');
+      out.push({type: el && /gif/i.test(el.src || el.poster || '') ? 'gif' : 'video', duration: el && isFinite(el.duration) ? Math.round(el.duration) : null});
+    });
+    return out;
+  }
+  function card(article, q) {
+    const c = outsideQuote(own(article, '[data-testid="card.wrapper"]', article), q)[0];
+    if (!c) return null;
+    const a = c.querySelector('a[href]');
+    const lines = c.innerText.split('\n').map(s => s.trim()).filter(Boolean);
+    return {href: a ? a.href : '', text: clip(lines.join(' | '), 1000)};
+  }
+  function basic(article) {
+    const q = quoteBox(article);
+    const link = postLink(article, q);
+    const url = link ? link.href.replace(/\/(analytics|photo\/\d+|video\/\d+)$/, '') : '';
+    const textEl = outsideQuote(own(article, '[data-testid="tweetText"]', article), q)[0];
+    const {name, handle} = userName(article);
+    return {url, author: handle || (url.split('/')[3] || ''), authorName: name, text: textOf(textEl), postedAt: link?.querySelector('time')?.getAttribute('datetime') || '', textEl, q};
+  }
+  function extract(article) {
+    const b = basic(article);
+    const bar = actionBar(article);
+    const post = {
+      url: b.url || location.href, author: b.author, authorName: b.authorName, text: b.text, postedAt: b.postedAt,
+      truncated: !!own(article, '[data-testid="tweet-text-show-more-link"]', article).length,
+      links: links(b.textEl), media: media(article, b.q), card: card(article, b.q),
+      metrics: bar?.getAttribute('aria-label') || '', quoted: null, inReplyTo: null, thread: []
+    };
+    if (b.q) {
+      const qt = b.q.querySelector('[data-testid="tweetText"]');
+      const qu = userName(b.q);
+      post.quoted = {author: qu.handle, authorName: qu.name, text: textOf(qt), postedAt: b.q.querySelector('time')?.getAttribute('datetime') || '', links: links(qt)};
+    }
+    // On a post's own page, X renders ancestors above it and replies below. Collect the author's contiguous run as the thread.
+    if (/\/status\/\d+/.test(location.pathname)) {
+      const all = [...document.querySelectorAll('article[data-testid="tweet"]')];
+      const i = all.indexOf(article);
+      if (i >= 0) {
+        let s = i, e = i;
+        const same = n => basic(n).author.toLowerCase() === post.author.toLowerCase();
+        while (s > 0 && same(all[s - 1])) s--;
+        while (e < all.length - 1 && same(all[e + 1])) e++;
+        if (e > s) post.thread = all.slice(s, e + 1).slice(0, MAX_THREAD).map(n => { const x = basic(n); return {url: x.url, text: x.text, postedAt: x.postedAt}; });
+        if (s > 0) { const p = basic(all[s - 1]); post.inReplyTo = {url: p.url, author: p.author, text: p.text}; }
+      }
+    }
+    return post;
   }
   function addButtons() {
     document.querySelectorAll('article[data-testid="tweet"]').forEach(a => {
