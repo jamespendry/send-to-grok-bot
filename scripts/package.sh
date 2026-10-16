@@ -18,6 +18,7 @@ files=(
   logos.js
   options.html
   options.js
+  relay.js
   destinations/grokbot.js
   destinations/claude.js
   destinations/chatgpt.js

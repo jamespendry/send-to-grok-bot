@@ -31,8 +31,13 @@ function removeStore(area, keys) {
 
 function show() {
   document.querySelectorAll('.fields').forEach(el => {
-    el.hidden = !document.querySelector(`input[data-dest="${el.dataset.for}"]`).checked;
+    if (!el.dataset.for) return;
+    const box = document.querySelector(`input[data-dest="${el.dataset.for}"]`);
+    el.hidden = !(box && box.checked);
   });
+  const relayFields = document.getElementById('relayFields');
+  const relayOn = document.getElementById('relayOn');
+  if (relayFields && relayOn) relayFields.hidden = !relayOn.checked;
 }
 
 function formState() {
@@ -42,6 +47,10 @@ function formState() {
     const el = document.querySelector(`[data-prompt="${key}"]`);
     o[key] = el ? el.value.trim() : '';
   }
+  const relayBox = document.getElementById('relayOn');
+  const relayCode = document.getElementById('relayCode');
+  o.useRelay = !!(relayBox && relayBox.checked);
+  o.relayCode = relayCode ? relayCode.value.trim() : '';
   return o;
 }
 
@@ -105,12 +114,20 @@ function fill(local) {
   document.querySelectorAll('input[data-dest]').forEach(el => { el.checked = enabled.has(el.dataset.dest); });
   for (const [key, id] of Object.entries(FIELDS)) $(id).value = local[key] || '';
   document.querySelectorAll('[data-prompt]').forEach(el => { el.value = local[el.dataset.prompt] || ''; });
+  const relayOn = document.getElementById('relayOn');
+  const relayCode = document.getElementById('relayCode');
+  if (relayOn) relayOn.checked = !!local.useRelay;
+  if (relayCode) relayCode.value = local.relayCode || '';
   show();
 }
 
 function settingsProblem(o) {
-  if (!o.enabled.includes('grokbot') || !o.webhookUrl) return '';
-  if (!stgbWebhookPattern(o.webhookUrl)) return 'Webhook URL must be a valid https link';
+  if (o.useRelay) {
+    if (!self.STGB_RELAY) return 'Relay code could not be checked';
+    const parsed = self.STGB_RELAY.decodeConnectCode(o.relayCode || '');
+    if (!parsed.ok) return parsed.error;
+  }
+  if (o.enabled.includes('grokbot') && o.webhookUrl && !stgbWebhookPattern(o.webhookUrl)) return 'Webhook URL must be a valid https link';
   return '';
 }
 
@@ -147,6 +164,8 @@ async function load() {
 }
 
 document.querySelectorAll('input[data-dest]').forEach(el => el.addEventListener('change', show));
+const relayOn = document.getElementById('relayOn');
+if (relayOn) relayOn.addEventListener('change', show);
 $('cc').addEventListener('input', () => connectMessage('', true));
 const ready = load();
 $('connect').onclick = () => ready.then(() => useCode($('cc').value, true));

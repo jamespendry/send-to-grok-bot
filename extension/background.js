@@ -1,4 +1,4 @@
-importScripts('hosts.js', 'destinations/grokbot.js', 'destinations/claude.js', 'destinations/chatgpt.js', 'destinations/codex.js');
+importScripts('hosts.js', 'destinations/grokbot.js', 'destinations/claude.js', 'destinations/chatgpt.js', 'destinations/codex.js', 'relay.js');
 
 function mediaLine(m) {
   if (!m || typeof m !== 'object') return '';
@@ -82,10 +82,15 @@ function enabledBrands(s) {
   return set;
 }
 
+function relayOn(s) {
+  return !!(s && s.useRelay && String(s.relayCode || '').trim());
+}
+
 function menuItems(s) {
   const on = enabledBrands(s);
+  const relay = relayOn(s);
   const items = [];
-  if (on.has('grokbot') && (s.webhookUrl || '').trim()) items.push({brand: 'grokbot', label: 'Send to Grok Bot'});
+  if (on.has('grokbot') && (relay || (s.webhookUrl || '').trim())) items.push({brand: 'grokbot', label: 'Send to Grok Bot'});
   if (on.has('claude')) items.push({brand: 'claude', label: 'Send to Claude'});
   if (on.has('chatgpt')) items.push({brand: 'chatgpt', label: 'Send to ChatGPT'});
   if (on.has('codex')) items.push({brand: 'codex', label: 'Send to Codex'});
@@ -137,7 +142,8 @@ chrome.runtime.onMessage.addListener((msg, _s, reply) => {
     const s = await loadSettings();
     const name = BRAND_NAME[brand];
     const allowed = menuItems(s).some(item => item.brand === brand);
-    const dest = allowed && pickDest(brand, s);
+    const viaRelay = relayOn(s) && (brand === 'grokbot' || brand === 'claude');
+    const dest = allowed && (viaRelay ? self.STGB_RELAY : pickDest(brand, s));
     if (!dest) {
       chrome.runtime.openOptionsPage();
       reply({ok: false, error: 'Set up first', needsSetup: true, brand, title: "Couldn't send to " + name});
@@ -149,7 +155,7 @@ chrome.runtime.onMessage.addListener((msg, _s, reply) => {
     delete post.stgbAction;
     try { post.digest = digest(post); } catch (_) { post.digest = ''; }
     try {
-      const r = await dest.send(post, s);
+      const r = viaRelay ? await dest.send(post, s, brand) : await dest.send(post, s);
       if (r.needsSetup) chrome.runtime.openOptionsPage();
       const ok = !!r.ok;
       reply({ok, error: ok ? '' : (r.error || 'failed'), needsSetup: !!r.needsSetup, brand, title: (ok ? 'Sent to ' : "Couldn't send to ") + name});

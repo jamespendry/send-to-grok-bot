@@ -1,0 +1,15 @@
+{
+  "name": "stgb-relay",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "embed": "node scripts/embed-browser.js",
+    "test": "vitest run && node --test test/node/unit.test.mjs",
+    "check": "node --check src/index.js && node --check src/crypto.js && node --check src/validate.js && node --check src/db.js && node --check src/rate.js && node --check src/log.js && node --check src/page.js && node --check src/client.js && node --check src/build-client.js && node --check src/browser-sources.js && node --check src/relay-codec.fn.js && node --check src/setup-page.fn.js && node --check ../extension/relay.js && node --check ../extension/background.js && node --check ../extension/options.js && node --check ../extension/content.js && node --check ../extension/destinations/grokbot.js && node --check ../extension/destinations/claude.js && node --check ../extension/destinations/chatgpt.js && node --check ../extension/destinations/codex.js"
+  },
+  "devDependencies": {
+    "@cloudflare/vitest-plugin": "1.4.3",
+    "vitest": "5.0.5",
+    "wrangler": "4.151.0"
+  }
+}
