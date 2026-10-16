@@ -23,11 +23,21 @@ const CLAUDE_MAX_TEXT = 65536;
 // claude.ai/new?q= is undocumented; keep the encoded URL modest.
 const CLAUDE_MAX_URL = 8000;
 
-// Accepts the full fire URL from the API-trigger modal, or just the trig_ id.
+// Accepts a bare trig_ id, the api.anthropic.com fire URL, or the
+// claude.ai/code/routines/trig_... page (with or without https).
 function claudeFireUrl(v) {
   v = (v || '').trim();
-  if (/^trig_[A-Za-z0-9_-]+$/.test(v)) return `https://api.anthropic.com/v1/claude_code/routines/${v}/fire`;
-  return /^https:\/\/api\.anthropic\.com\/v1\/claude_code\/routines\/[A-Za-z0-9_-]+\/fire$/.test(v) ? v : '';
+  const fire = id => `https://api.anthropic.com/v1/claude_code/routines/${id}/fire`;
+  if (/^trig_[A-Za-z0-9_-]+$/.test(v)) return fire(v);
+  let url;
+  try { url = new URL(/^[a-z]+:/i.test(v) ? v : 'https://' + v.replace(/^\/\//, '')); }
+  catch { return ''; }
+  const id = (url.pathname.match(/\/(trig_[A-Za-z0-9_-]+)/) || [])[1];
+  if (!id) return '';
+  const host = url.hostname.replace(/^www\./, '');
+  if (host === 'api.anthropic.com' && /^\/v1\/claude_code\/routines\/trig_[A-Za-z0-9_-]+\/fire\/?$/.test(url.pathname)) return fire(id);
+  if (host === 'claude.ai' && /^\/code\/routines\/trig_[A-Za-z0-9_-]+\/?$/.test(url.pathname)) return fire(id);
+  return '';
 }
 
 function claudePostBlock(post, text) {
@@ -47,8 +57,8 @@ function buildClaudeLink(post, s) {
 }
 
 self.STGB_DESTINATIONS.claude_link = {
-  label: 'Open in Claude (one click)',
-  toast: 'Opened in Claude',
+  label: 'Send to Claude',
+  toast: 'Sent to Claude',
   async send(post, s) {
     await chrome.tabs.create({url: buildClaudeLink(post, s)});
     return {ok: true};
@@ -56,12 +66,12 @@ self.STGB_DESTINATIONS.claude_link = {
 };
 
 self.STGB_DESTINATIONS.claude_routine = {
-  label: 'Claude Code routine (automatic)',
+  label: 'Send to Claude',
   toast: 'Sent to Claude',
   async send(post, s) {
     const url = claudeFireUrl(s.claudeFireUrl);
     if (!s.claudeFireUrl || !s.claudeToken) return {ok: false, error: 'Set up first', needsSetup: true};
-    if (!url) return {ok: false, error: 'Routine URL should be https://api.anthropic.com/v1/claude_code/routines/trig_.../fire', needsSetup: true};
+    if (!url) return {ok: false, error: 'Paste a claude.ai/code/routines/trig_… link, a trig_ ID, or the API fire URL'};
     // The routine's saved prompt carries the instructions; we send only the post (plus optional extra prompt).
     let text = (s.claudePrompt ? s.claudePrompt.trim() + '\n\n' : '') + claudePostBlock(post, post.text || '');
     if (text.length > CLAUDE_MAX_TEXT) text = text.slice(0, CLAUDE_MAX_TEXT);

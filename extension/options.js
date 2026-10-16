@@ -1,5 +1,17 @@
 const $ = id => document.getElementById(id);
-const FIELDS = {webhookUrl: 'u', senderKey: 'k', claudeFireUrl: 'cu', claudeToken: 'ct', chatgptTriggerId: 'ti', chatgptToken: 'tt'};
+const FIELDS = {webhookUrl: 'u', senderKey: 'k', claudeFireUrl: 'cu', claudeToken: 'ct', chatgptTriggerId: 'ti', chatgptToken: 'tt', codexEnvironment: 'ce', codexBranch: 'cb'};
+const PROMPTS = ['claudePrompt', 'chatgptPrompt', 'codexPrompt'];
+
+function brandSet(enabled, webhookUrl) {
+  const keys = Array.isArray(enabled) ? enabled : (webhookUrl ? ['grokbot'] : []);
+  const set = new Set();
+  for (const k of keys) {
+    if (k === 'claude' || k === 'claude_routine' || k === 'claude_link') set.add('claude');
+    else if (k === 'chatgpt' || k === 'chatgpt_link' || k === 'chatgpt_workspace_agent') set.add('chatgpt');
+    else set.add(k);
+  }
+  return set;
+}
 
 function getStore(area, keys) {
   return new Promise(resolve => chrome.storage[area].get(keys, resolve));
@@ -18,10 +30,10 @@ function show() {
 }
 
 function fill(local) {
-  const enabled = new Set(Array.isArray(local.enabled) ? local.enabled : (local.webhookUrl ? ['grokbot'] : []));
+  const enabled = brandSet(local.enabled, local.webhookUrl);
   document.querySelectorAll('input[data-dest]').forEach(el => { el.checked = enabled.has(el.dataset.dest); });
   for (const [key, id] of Object.entries(FIELDS)) $(id).value = local[key] || '';
-  document.querySelectorAll('[data-sync]').forEach(el => { el.value = local[el.dataset.sync] || ''; });
+  document.querySelectorAll('[data-prompt]').forEach(el => { el.value = local[el.dataset.prompt] || ''; });
   show();
 }
 
@@ -39,14 +51,11 @@ async function load() {
 }
 
 document.querySelectorAll('input[data-dest]').forEach(el => el.addEventListener('change', show));
-document.querySelectorAll('[data-sync]').forEach(el => el.addEventListener('input', () => {
-  document.querySelectorAll(`[data-sync="${el.dataset.sync}"]`).forEach(other => { if (other !== el) other.value = el.value; });
-}));
 $('s').onclick = () => {
   const o = {enabled: [...document.querySelectorAll('input[data-dest]:checked')].map(el => el.dataset.dest)};
   for (const [key, id] of Object.entries(FIELDS)) o[key] = $(id).value.trim();
-  for (const key of ['claudePrompt', 'chatgptPrompt']) {
-    const el = document.querySelector(`[data-sync="${key}"]`);
+  for (const key of PROMPTS) {
+    const el = document.querySelector(`[data-prompt="${key}"]`);
     o[key] = el ? el.value.trim() : '';
   }
   chrome.storage.local.set(o, () => { $('m').textContent = 'Saved'; setTimeout(() => $('m').textContent = '', 2000); });

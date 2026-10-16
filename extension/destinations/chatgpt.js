@@ -38,8 +38,8 @@ function buildChatGPTLink(post, s) {
 }
 
 self.STGB_DESTINATIONS.chatgpt_link = {
-  label: 'Open in ChatGPT (one click)',
-  toast: 'Opened in ChatGPT',
+  label: 'Send to ChatGPT',
+  toast: 'Sent to ChatGPT',
   async send(post, s) {
     await chrome.tabs.create({url: buildChatGPTLink(post, s)});
     return {ok: true};
@@ -47,7 +47,7 @@ self.STGB_DESTINATIONS.chatgpt_link = {
 };
 
 self.STGB_DESTINATIONS.chatgpt_workspace_agent = {
-  label: 'ChatGPT Workspace Agent (Business/Enterprise)',
+  label: 'Send to ChatGPT',
   toast: 'Sent to ChatGPT',
   async send(post, s) {
     if (!s.chatgptTriggerId || !s.chatgptToken) return {ok: false, error: 'Set up first', needsSetup: true};

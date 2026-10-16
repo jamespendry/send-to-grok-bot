@@ -18,10 +18,10 @@ button{margin-top:8px;padding:9px 18px;border:0;border-radius:9999px;background:
 #m{margin-left:12px;color:#00ba7c}
 </style></head><body>
 <h1>Send to Grok Bot</h1>
-<p>Choose where posts go when you click the button. You can turn on more than one. Nothing else is sent.</p>
+<p>Check a destination to list it when you click a post. The menu sends to the one you pick. Nothing else is sent.</p>
 
 <div class="dest">
-  <label class="check"><input type="checkbox" data-dest="grokbot"> Grok Bot / webhook</label>
+  <label class="check"><input type="checkbox" data-dest="grokbot"> Send to Grok Bot</label>
   <div class="fields" data-for="grokbot" hidden>
     <label class="field" for="u">Webhook URL</label><input id="u" type="url" placeholder="https://...">
     <label class="field" for="k">Webhook key (optional)</label><input id="k" type="password" placeholder="Sent as a Bearer token" autocomplete="off">
@@ -29,39 +29,35 @@ button{margin-top:8px;padding:9px 18px;border:0;border-radius:9999px;background:
 </div>
 
 <div class="dest">
-  <label class="check"><input type="checkbox" data-dest="claude_routine"> Claude Code routine (automatic)</label>
-  <div class="fields" data-for="claude_routine" hidden>
-    <label class="field" for="cu">Routine URL<div class="hint">From claude.ai/code/routines: edit the routine, Add another trigger, API. A bare trig_ ID also works.</div></label>
-    <input id="cu" type="text" placeholder="https://api.anthropic.com/v1/claude_code/routines/trig_.../fire" autocomplete="off">
-    <label class="field" for="ct">Routine token</label><input id="ct" type="password" placeholder="sk-ant-oat01-..." autocomplete="off">
-    <label class="field" for="cp">Extra instructions (optional)<div class="hint">The routine's saved prompt does the work. This text is prepended to the post. Shared with Open in Claude.</div></label>
-    <textarea id="cp" data-sync="claudePrompt"></textarea>
+  <label class="check"><input type="checkbox" data-dest="claude"> Send to Claude</label>
+  <div class="fields" data-for="claude" hidden>
+    <label class="field" for="cu">Routine URL (optional)<div class="hint">Leave blank to open Claude with the prompt. For an automatic routine, paste the claude.ai/code/routines/trig_… page, a trig_ ID, or the api.anthropic.com fire URL.</div></label>
+    <input id="cu" type="text" placeholder="https://claude.ai/code/routines/trig_…" autocomplete="off">
+    <label class="field" for="ct">Routine token (optional)</label><input id="ct" type="password" placeholder="sk-ant-oat01-..." autocomplete="off">
+    <label class="field" for="cp">Prompt<div class="hint">Leave blank for the default. Open in Claude uses it as the message. A routine prepends it to the post; the routine's saved prompt does the work.</div></label>
+    <textarea id="cp" data-prompt="claudePrompt"></textarea>
   </div>
 </div>
 
 <div class="dest">
-  <label class="check"><input type="checkbox" data-dest="claude_link"> Open in Claude</label>
-  <div class="fields" data-for="claude_link" hidden>
-    <label class="field" for="cp2">Claude prompt<div class="hint">Leave blank for the default. The post is added after it, and you press Send in Claude. Shared with the Claude routine.</div></label>
-    <textarea id="cp2" data-sync="claudePrompt"></textarea>
+  <label class="check"><input type="checkbox" data-dest="chatgpt"> Send to ChatGPT</label>
+  <div class="fields" data-for="chatgpt" hidden>
+    <label class="field" for="ti">API trigger ID (optional)<div class="hint">Leave the agent fields blank to open ChatGPT with the prompt filled in. For a Business or Enterprise workspace agent, paste the agtch_ trigger ID and token.</div></label>
+    <input id="ti" type="text" placeholder="agtch_..." autocomplete="off">
+    <label class="field" for="tt">Workspace Agent access token (optional)</label><input id="tt" type="password" placeholder="Sent as a Bearer token to api.chatgpt.com" autocomplete="off">
+    <label class="field" for="gp">Prompt<div class="hint">Leave blank for the default. The post link and text are added after it.</div></label>
+    <textarea id="gp" data-prompt="chatgptPrompt"></textarea>
   </div>
 </div>
 
 <div class="dest">
-  <label class="check"><input type="checkbox" data-dest="chatgpt_link"> Open in ChatGPT</label>
-  <div class="fields" data-for="chatgpt_link" hidden>
-    <label class="field" for="gp">Research prompt<div class="hint">Leave blank for the default. The post link and text are added after it. Shared with the Workspace Agent.</div></label>
-    <textarea id="gp" data-sync="chatgptPrompt"></textarea>
-  </div>
-</div>
-
-<div class="dest">
-  <label class="check"><input type="checkbox" data-dest="chatgpt_workspace_agent"> ChatGPT Workspace Agent</label>
-  <div class="fields" data-for="chatgpt_workspace_agent" hidden>
-    <label class="field" for="ti">API trigger ID</label><input id="ti" type="text" placeholder="agtch_..." autocomplete="off">
-    <label class="field" for="tt">Workspace Agent access token</label><input id="tt" type="password" placeholder="Sent as a Bearer token to api.chatgpt.com" autocomplete="off">
-    <label class="field" for="gp2">Research prompt<div class="hint">Leave blank for the default. Shared with Open in ChatGPT.</div></label>
-    <textarea id="gp2" data-sync="chatgptPrompt"></textarea>
+  <label class="check"><input type="checkbox" data-dest="codex"> Send to Codex</label>
+  <div class="fields" data-for="codex" hidden>
+    <label class="field" for="ce">Environment ID (optional)<div class="hint">Codex Cloud has no public POST for regular accounts. Send to Codex opens chatgpt.com/codex with the prompt filled in, and you press Send. The environment id is the hex id in the Codex environment URL.</div></label>
+    <input id="ce" type="text" placeholder="environment id" autocomplete="off">
+    <label class="field" for="cb">Branch (optional)</label><input id="cb" type="text" placeholder="branch name" autocomplete="off">
+    <label class="field" for="cpx">Prompt<div class="hint">Leave blank for the default. Long posts are shortened so the link stays under about 6,000 characters.</div></label>
+    <textarea id="cpx" data-prompt="codexPrompt"></textarea>
   </div>
 </div>
 

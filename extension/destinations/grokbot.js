@@ -1,7 +1,7 @@
 // Grok Bot (or any webhook) destination.
 self.STGB_DESTINATIONS = self.STGB_DESTINATIONS || {};
 self.STGB_DESTINATIONS.grokbot = {
-  label: 'Grok Bot / webhook',
+  label: 'Send to Grok Bot',
   toast: 'Sent to Grok Bot',
   async send(post, s) {
     if (!s.webhookUrl) return {ok: false, error: 'Set up first', needsSetup: true};
