@@ -213,7 +213,7 @@ chrome.runtime.onMessage.addListener((msg, _s, reply) => {
       const ok = !!r.ok;
       reply({ok, error: ok ? '' : (r.error || 'failed'), needsSetup: !!r.needsSetup, brand, title: (ok ? 'Sent to ' : "Couldn't send to ") + name});
     } catch (e) {
-      reply({ok: false, error: 'Network', brand, title: "Couldn't send to " + name});
+      reply({ok: false, error: brand === 'grokbot' ? 'The webhook did not answer.' : 'Network', brand, title: "Couldn't send to " + name});
     }
   })();
   return true;
