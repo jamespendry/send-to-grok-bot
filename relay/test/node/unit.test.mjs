@@ -1,4 +1,5 @@
 import assert from "node:assert/strict";
+import { execFileSync } from "node:child_process";
 import { webcrypto } from "node:crypto";
 import { readFileSync } from "node:fs";
 import { createRequire } from "node:module";
@@ -425,28 +426,182 @@ test("service worker scripts share one scope and an empty webhook stays in the m
   assert.equal(context.menuItems({ enabled: ["chatgpt"] })[0].needsSetup, false);
 });
 
-test("the share sheet shortcut posts one relay code and names each destination", () => {
-  const file = read("../shortcuts/Send to Grok Bot.shortcut");
-  assert.match(file, /Send to Grok Bot/);
-  for (const name of ["Grok Bot", "Claude", "ChatGPT", "Codex"]) assert.ok(file.includes(name), name);
-  for (const id of ["grokbot", "claude", "chatgpt", "codex"]) assert.ok(file.includes(`<string>${id}</string>`), id);
-  assert.match(file, /https:\/\/relay\.sendtogrokbot\.com\/v1\/send/);
-  assert.match(file, /WFWorkflowImportQuestions/);
-  assert.match(file, /WFTextActionText/);
-  assert.match(file, /ActionExtension/);
-  assert.match(file, /<string>Authorization<\/string>/);
-  assert.match(file, /application\/json/);
-  assert.match(file, /<string>notice<\/string>/);
-  assert.match(file, /<string>openUrl<\/string>/);
-  assert.match(file, /<string>shortcut<\/string>/);
-  assert.match(file, /Bearer \uFFFC/);
+test("a Grok webhook is tried once more when the network fails, and not on a refusal", async () => {
+  let calls = 0;
+  let mode = "flaky";
+  const context = {
+    console,
+    chrome: { permissions: { contains() { return Promise.resolve(true); } } },
+    fetch() {
+      calls += 1;
+      if (mode === "flaky" && calls === 1) return Promise.reject(new TypeError("offline"));
+      if (mode === "refused") return Promise.resolve({ ok: false, status: 401 });
+      return Promise.resolve({ ok: true, status: 200 });
+    },
+    stgbWebhookPattern() { return "https://hooks.example.com/*"; }
+  };
+  context.globalThis = context;
+  context.self = context;
+  vm.createContext(context);
+  vm.runInContext(read("../extension/destinations/grokbot.js"), context, { filename: "grokbot.js" });
+  const settings = { webhookUrl: "https://hooks.example.com/hook", senderKey: "k" };
+  const sent = await context.STGB_DESTINATIONS.grokbot.send({ text: "hi" }, settings);
+  assert.equal(calls, 2);
+  assert.equal(sent.ok, true);
+  calls = 0;
+  mode = "refused";
+  const denied = await context.STGB_DESTINATIONS.grokbot.send({ text: "hi" }, settings);
+  assert.equal(calls, 1);
+  assert.equal(denied.ok, false);
+  assert.match(denied.error, /refused the key/);
+});
+
+test("one ready destination is sent on the click, and two destinations stay a menu", async () => {
+  const stored = { enabled: ["grokbot"], webhookUrl: "https://hooks.example.com/hook", senderKey: "k" };
+  const fetches = [];
+  let listener;
+  const context = {
+    console, URL, TextEncoder, TextDecoder, btoa, atob, Uint8Array,
+    crypto: webcrypto,
+    fetch(url, init) {
+      fetches.push({ url, body: init && init.body });
+      return Promise.resolve({ ok: true, status: 200 });
+    }
+  };
+  context.globalThis = context;
+  context.self = context;
+  context.importScripts = () => {};
+  context.chrome = {
+    runtime: {
+      onMessage: { addListener(fn) { listener = fn; } },
+      onInstalled: { addListener() {} },
+      openOptionsPage() {},
+      lastError: null
+    },
+    action: { onClicked: { addListener() {} } },
+    storage: {
+      local: {
+        get(_keys, cb) { cb({ ...stored }); },
+        set(_obj, cb) { if (cb) cb(); },
+        remove(_keys, cb) { if (cb) cb(); }
+      },
+      sync: {
+        get(_keys, cb) { cb({}); },
+        remove(_keys, cb) { if (cb) cb(); }
+      },
+      session: { set() { return Promise.resolve(); } }
+    },
+    permissions: {
+      contains() { return Promise.resolve(true); },
+      request() {}
+    }
+  };
+  vm.createContext(context);
+  for (const file of ["hosts.js", "prompts.js", "destinations/grokbot.js", "destinations/claude.js", "destinations/chatgpt.js", "destinations/codex.js", "relay.js", "background.js"]) {
+    vm.runInContext(read("../extension/" + file), context, { filename: file });
+  }
+  const post = { stgbAction: "send", url: "https://x.com/a/status/1", text: "hi", author: "a" };
+  const sent = await new Promise(resolve => listener(post, {}, resolve));
+  assert.equal(fetches.length, 1);
+  assert.equal(fetches[0].url, "https://hooks.example.com/hook");
+  assert.equal(sent.ok, true);
+  assert.equal(sent.title, "Sent to Grok Bot");
+  assert.equal(sent.brand, "grokbot");
+  const body = JSON.parse(fetches[0].body);
+  assert.equal(body.text, "hi");
+  assert.equal(body.source, "x");
+  stored.enabled = ["grokbot", "claude"];
+  const menu = await new Promise(resolve => listener({ ...post, url: "https://x.com/a/status/2" }, {}, resolve));
+  assert.equal(fetches.length, 1);
+  assert.equal(menu.ok, true);
+  assert.equal(menu.items.map(item => item.brand).join(","), "grokbot,claude");
+  assert.match(read("../extension/content.js"), /stgbAction: 'send'/);
+  assert.match(read("../extension/content.js"), /showToast\(brand, title, ''\);\n\s*setState\(btn, 'ok'/);
+});
+
+test("the share sheet shortcut is a plist the Shortcuts app can import", () => {
+  const filePath = join(root, "../shortcuts/Send to Grok Bot.shortcut");
+  const file = readFileSync(filePath, "utf8");
+  assert.match(file, /^<\?xml version="1\.0"/);
   assert.doesNotMatch(file, /rk_[A-Za-z0-9_-]{20}/);
   assert.doesNotMatch(file, /icloud\.com\/shortcuts\/[0-9a-f]{8}/);
+  const parsed = JSON.parse(execFileSync("python3", ["-c", `
+import json, plistlib, sys
+pl = plistlib.loads(open(sys.argv[1], "rb").read())
+actions = pl["WFWorkflowActions"]
+def ident(a):
+    return a.get("WFWorkflowActionIdentifier", "").rsplit(".", 1)[-1]
+def strings(obj, out):
+    if isinstance(obj, dict):
+        if isinstance(obj.get("string"), str):
+            out.append(obj["string"])
+        if obj.get("Type") == "Variable" and "VariableName" in obj:
+            out.append("var:" + obj["VariableName"])
+        for value in obj.values():
+            strings(value, out)
+    elif isinstance(obj, list):
+        for value in obj:
+            strings(value, out)
+post = actions[21]["WFWorkflowActionParameters"]
+tokens = []
+strings(post, tokens)
+question = pl["WFWorkflowImportQuestions"][0]
+print(json.dumps({
+    "name": pl.get("WFWorkflowName"),
+    "client": pl.get("WFWorkflowClientVersion"),
+    "minimum": pl.get("WFWorkflowMinimumClientVersion"),
+    "types": pl.get("WFWorkflowTypes"),
+    "inputs": pl.get("WFWorkflowInputContentItemClasses"),
+    "hasInput": pl.get("WFWorkflowHasShortcutInputVariables"),
+    "question": {"index": question.get("ActionIndex"), "key": question.get("ParameterKey"), "text": question.get("Text"), "default": question.get("DefaultValue")},
+    "actions": [ident(a) for a in actions],
+    "menu": actions[7]["WFWorkflowActionParameters"].get("WFMenuItems"),
+    "prompt": actions[7]["WFWorkflowActionParameters"].get("WFMenuPrompt"),
+    "url": post.get("WFURL"),
+    "method": post.get("WFHTTPMethod"),
+    "bodyType": post.get("WFHTTPBodyType"),
+    "tokens": tokens,
+    "secret": actions[0]["WFWorkflowActionParameters"].get("WFTextActionText"),
+    "inputType": actions[2]["WFWorkflowActionParameters"]["WFInput"]["Value"]["Type"],
+    "notify": actions[28]["WFWorkflowActionParameters"].get("WFNotificationActionTitle"),
+    "missing": actions[33]["WFWorkflowActionParameters"].get("WFNotificationActionBody"),
+}))
+`, filePath], { encoding: "utf8" }));
+  assert.equal(parsed.name, "Send to Grok Bot");
+  assert.ok(parsed.client);
+  assert.ok(parsed.minimum >= 900);
+  assert.deepEqual(parsed.types, ["ActionExtension"]);
+  for (const kind of ["WFURLContentItem", "WFStringContentItem", "WFSafariWebPageContentItem"]) {
+    assert.ok(parsed.inputs.includes(kind), kind);
+  }
+  assert.equal(parsed.hasInput, true);
+  assert.equal(parsed.inputType, "ExtensionInput");
+  assert.equal(parsed.question.index, 0);
+  assert.equal(parsed.question.key, "WFTextActionText");
+  assert.equal(parsed.question.default, "");
+  assert.match(parsed.question.text, /stgbr1/);
+  assert.equal(parsed.secret, "");
+  assert.equal(parsed.actions.length, 35);
+  assert.equal(parsed.actions[0], "gettext");
+  assert.equal(parsed.actions[2], "link");
+  assert.equal(parsed.prompt, "Send this post to");
+  assert.deepEqual(parsed.menu, ["Grok Bot", "Claude", "ChatGPT", "Codex"]);
+  for (const id of ["grokbot", "claude", "chatgpt", "codex"]) assert.ok(parsed.actions.includes("gettext"), id);
+  assert.equal(parsed.url, "https://relay.sendtogrokbot.com/v1/send");
+  assert.equal(parsed.method, "POST");
+  assert.equal(parsed.bodyType, "JSON");
+  for (const token of ["Authorization", "Bearer \uFFFC", "var:Relay Code", "application/json", "destination", "var:Destination", "url", "var:Post URL", "source", "shortcut"]) {
+    assert.ok(parsed.tokens.includes(token), token);
+  }
+  assert.equal(parsed.actions[24], "getvalueforkey");
+  assert.equal(parsed.actions[28], "notification");
+  assert.equal(parsed.notify, "Send to Grok Bot");
+  assert.equal(parsed.missing, "No post link was shared.");
   const steps = read("../shortcuts/BUILD.md");
-  assert.match(steps, /Copy iCloud Link/);
+  assert.match(steps, /https:\/\/sendtogrokbot\.com\/send-to-grok-bot\.shortcut/);
   assert.match(steps, /Allow Untrusted Shortcuts/);
-  assert.match(steps, /docs\/mobile\.html/);
   assert.match(steps, /stgbr1/);
+  assert.match(steps, /Add Shortcut/);
 });
 
 test("pasting a webhook and header on /connect saves inside the paste gesture", async () => {
@@ -535,7 +690,7 @@ test("the connect site is rooted at docs and hands the code to the extension", a
   assert.match(read("../docs/_redirects"), /\/\s+\/index\.html\s+200/);
   assert.match(read("../_redirects"), /\/\s+\/docs\/index\.html\s+200/);
   assert.match(read("../docs/_redirects"), /\/connect\s+\/connect\.html\s+200/);
-  assert.match(read("../extension/manifest.json"), /"version": "1\.2\.6"/);
+  assert.match(read("../extension/manifest.json"), /"version": "1\.2\.7"/);
   assert.match(read("../extension/options.html"), /id="more"/);
   assert.match(read("../extension/options.html"), /More options/);
   assert.match(read("../extension/options.html"), /id="cc"/);
@@ -551,10 +706,13 @@ test("the connect site is rooted at docs and hands the code to the extension", a
   assert.match(read("../README.md"), /npx wrangler deploy --config site\/wrangler\.toml/);
   const mobile = read("../docs/mobile.html");
   assert.match(mobile, /id="install-link"/);
-  assert.match(mobile, /not published yet/);
+  assert.match(mobile, /https:\/\/sendtogrokbot\.com\/send-to-grok-bot\.shortcut/);
+  assert.match(mobile, /Add Shortcut/);
   assert.match(mobile, /stgbr1/);
   assert.match(mobile, /https:\/\/relay\.sendtogrokbot\.com/);
+  assert.doesNotMatch(mobile, /not published yet/);
   assert.doesNotMatch(mobile, /icloud\.com\/shortcuts\/[0-9a-f]{8}/);
+  assert.match(read("../scripts/build-site.sh"), /send-to-grok-bot\.shortcut/);
   assert.doesNotMatch(mobile, /rk_[A-Za-z0-9_-]{20}/);
   const history = read("../docs/history.html");
   assert.match(history, /https:\/\/relay\.sendtogrokbot\.com\/v1\/history/);

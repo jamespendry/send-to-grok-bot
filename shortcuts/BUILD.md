@@ -1,15 +1,24 @@
 # Publish the iPhone shortcut
 
-The shortcut is an unsigned Shortcuts file: `shortcuts/Send to Grok Bot.shortcut`. Apple does not let a repository mint the iCloud install link. You import or rebuild the shortcut on a phone or a Mac, then Shortcuts creates the link.
+The shortcut is an unsigned Shortcuts file: `shortcuts/Send to Grok Bot.shortcut`. The name has to stay **Send to Grok Bot**. That is the label in the X share sheet.
 
-The name has to stay **Send to Grok Bot**. That is the label in the X share sheet.
+Apple does not let this repository mint an iCloud link. The install link is the file itself, served from the site:
 
-## Install the file
+https://sendtogrokbot.com/send-to-grok-bot.shortcut
 
-1. Copy `shortcuts/Send to Grok Bot.shortcut` onto the iPhone (AirDrop, Mail, or the Files app).
-2. Tap the file. Shortcuts asks to add **Send to Grok Bot**.
-3. If iOS refuses it, open Settings, tap Shortcuts, and turn on **Allow Untrusted Shortcuts**. Tap the file again.
-4. When it asks, paste the relay code from https://relay.sendtogrokbot.com. The code starts with `stgbr1.`. Paste it once. Do not paste a webhook URL or a key.
+`scripts/build-site.sh` copies the shortcut into the site. The site sends it as a download (`docs/_headers`). Deploy with the commands in the repository README. Until that deploy, the link 404s.
+
+## What you do on the iPhone
+
+1. On a computer, open https://relay.sendtogrokbot.com and copy the code. It starts with `stgbr1.`. Save Grok Bot or Claude on that page if you want those. ChatGPT and Codex need nothing saved. This is the only code.
+2. On the iPhone, tap https://sendtogrokbot.com/send-to-grok-bot.shortcut.
+3. Tap the downloaded file, then tap Add Shortcut.
+4. When Shortcuts asks, paste the code. Paste it once. Do not paste a webhook URL or a key.
+5. If iOS says the shortcut is untrusted, open Settings, tap Shortcuts, and turn on **Allow Untrusted Shortcuts**. Tap the link again. If that switch is missing, open the downloaded file from the Files app and tap Add Shortcut.
+6. In the X app, open a post and tap Share. Tap **Send to Grok Bot**. Pick Grok Bot, Claude, ChatGPT, or Codex.
+7. A notification names what happened. ChatGPT and Codex then open with the post filled in. You press Send in that app. Grok Bot and Claude are sent for you.
+
+The same page is https://sendtogrokbot.com/mobile.
 
 ## If the file will not import
 
@@ -46,18 +55,13 @@ Build the same shortcut by hand. Add the actions in this order. Names in bold ar
 22. Add **If**. `Open URL` **has any value**. Inside it, add **Open URLs** and pass the `Open URL` variable.
 23. In the Otherwise of the first If, add **Show Notification**. Title `Send to Grok Bot`. Body: `No post link was shared.`
 
-## Copy the iCloud link
+## A signed iCloud link, later
+
+iOS sometimes refuses an unsigned file, and `shortcuts://import-shortcut` only accepts an iCloud link. This repository cannot create that link. On a Mac, after the shortcut imports:
 
 1. Open the shortcut in Shortcuts.
 2. Tap the Share button.
 3. Tap **Copy iCloud Link**.
-4. The link looks like `https://www.icloud.com/shortcuts/` followed by a code Apple assigns. There is no way to know that code before this step.
-5. In `docs/mobile.html`, replace the paragraph whose id is `install-link` with a link to that URL:
-
-```html
-<p id="install-link"><a href="PASTE_THE_ICLOUD_LINK">Install Send to Grok Bot</a></p>
-```
-
-6. Deploy the site again with the commands in the repository README. Until that link is pasted, the mobile page says the install link is not published yet.
+4. Replace the href of `#install-link` in `docs/mobile.html` with that `https://www.icloud.com/shortcuts/` URL, then deploy the site again.
 
 Do not put a relay code, a webhook, or a token in the shortcut file in this repository. Each person pastes their own code when they add the shortcut.

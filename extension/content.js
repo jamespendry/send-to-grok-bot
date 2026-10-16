@@ -431,25 +431,30 @@
     }
     return post;
   }
+  function readArticle(article) {
+    try { return extract(article); } catch (_) { return readPost(article); }
+  }
+  function applyResult(btn, item, r) {
+    if (r && r.duplicate) { setState(btn, 'send', 'Send'); return; }
+    const brand = (r && r.brand) || (item && item.brand) || 'grokbot';
+    if (r && r.ok) {
+      const title = r.title || (item && item.label) || 'Sent';
+      showToast(brand, title, '');
+      setState(btn, 'ok', title);
+      return;
+    }
+    const reason = (r && r.error) || 'failed';
+    const title = (r && r.title) || ("Couldn't send to " + ((item && item.label) || 'Grok Bot').replace(/^Send to /, ''));
+    showToast(brand, title, reason);
+    setState(btn, 'err', title);
+    setTimeout(() => setState(btn, 'send', 'Send'), 5000);
+  }
   function sendTo(btn, item, article) {
-    let post;
-    try { post = extract(article); } catch (_) { post = readPost(article); }
+    const post = readArticle(article);
     closeMenu();
     if (btn.classList.contains('stgb-busy') || tooSoon(post.url, item.brand)) return;
     setState(btn, 'busy', 'Sending…');
-    chrome.runtime.sendMessage({stgbDestination: item.brand, ...post}, r => {
-      if (r && r.duplicate) { setState(btn, 'send', 'Send'); return; }
-      if (r && r.ok) {
-        setState(btn, 'ok', r.title || item.label);
-        showToast(item.brand, r.title || ('Sent to ' + item.label.replace(/^Send to /, '')), '');
-      } else {
-        const reason = (r && r.error) || 'failed';
-        const title = (r && r.title) || ("Couldn't send to " + item.label.replace(/^Send to /, ''));
-        setState(btn, 'err', title);
-        showToast(item.brand, title, reason);
-        setTimeout(() => setState(btn, 'send', 'Send'), 5000);
-      }
-    });
+    chrome.runtime.sendMessage({stgbDestination: item.brand, ...post}, r => applyResult(btn, item, r));
   }
   function bindSend(btn, article) {
     btn.dataset.stgbBound = '1';
@@ -462,18 +467,21 @@
     btn.addEventListener('click', e => {
       e.preventDefault(); e.stopPropagation(); e.stopImmediatePropagation();
       if (menuEl && menuEl.dataset.for === btn.dataset.stgbId) { closeMenu(); return; }
-      chrome.runtime.sendMessage({stgbAction: 'list'}, r => {
+      if (btn.classList.contains('stgb-busy')) return;
+      const post = readArticle(article);
+      setState(btn, 'busy', 'Sending…');
+      chrome.runtime.sendMessage({stgbAction: 'send', ...post}, r => {
         if (chrome.runtime.lastError || !r) {
+          setState(btn, 'send', 'Send');
           showToast('grokbot', 'Send to Grok Bot', 'Reload the extension, then click the post again.');
           return;
         }
-        const items = r.items || [];
-        if (!items.length) {
-          showToast('grokbot', 'Choose a destination', r.message || 'Check a destination in settings.');
+        if (r.items && r.items.length > 1) {
+          setState(btn, 'send', 'Send');
+          openMenu(btn, r.items, article);
           return;
         }
-        if (items.length === 1) { sendTo(btn, items[0], article); return; }
-        openMenu(btn, items, article);
+        applyResult(btn, (r.items && r.items[0]) || null, r);
       });
     }, true);
   }

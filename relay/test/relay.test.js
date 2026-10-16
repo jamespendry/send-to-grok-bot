@@ -243,6 +243,36 @@ describe("config", () => {
 });
 
 describe("send", () => {
+  it("accepts the shortcut POST with a full stgbr1 code and a mock webhook", async () => {
+    const key = relayKey();
+    const code = connectCode(key);
+    const ip = nextIp();
+    await saveGrok(key, ip);
+    const outbound = mockFetch(200, { ok: true });
+    const res = await api("/v1/send", {
+      method: "POST",
+      key: code,
+      ip,
+      outbound,
+      body: {
+        destination: "grokbot",
+        url: "https://x.com/jack/status/20",
+        source: "shortcut"
+      }
+    });
+    expect(res.status).toBe(200);
+    expect(res.json.ok).toBe(true);
+    expect(res.json.notice).toBe("Sent to Grok Bot");
+    expect(res.json.destination).toBe("grokbot");
+    expect(outbound.calls).toHaveLength(1);
+    expect(outbound.calls[0].url).toBe("https://hooks.example/hook");
+    expect(outbound.calls[0].authorization).toBe("Bearer whsec_test_key");
+    const forwarded = JSON.parse(outbound.calls[0].body);
+    expect(forwarded.source).toBe("shortcut");
+    expect(forwarded.url).toBe("https://x.com/jack/status/20");
+    expect(forwarded.destination).toBeUndefined();
+  });
+
   it("forwards a Grok Bot webhook with the bearer key and without the destination field", async () => {
     const key = relayKey();
     const ip = nextIp();

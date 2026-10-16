@@ -32,9 +32,9 @@ From the repo root:
 scripts/package.sh
 ```
 
-That writes `dist/send-to-grok-bot-1.2.6.zip`. The manifest is at the top of the zip. The zip does not contain `store/`, the README, or screenshots. Do not add a `.pem` key.
+That writes `dist/send-to-grok-bot-1.2.7.zip`. The manifest is at the top of the zip. The script checks the manifest, the file list, the zip size, and that the package has no remote code. The zip does not contain `store/`, the README, or screenshots. Do not add a `.pem` key.
 
-Version in this upload is `1.2.6`.
+Version in this upload is `1.2.7`.
 
 ## 4. Create the item and upload
 
@@ -87,17 +87,17 @@ This extension is not for sale. Do not turn on payments.
 Paste this so the reviewer can try the extension without your tokens:
 
 ```
-Load the extension and open its options from the toolbar icon.
-The notice at the top says what is sent. Click Save after checking a destination.
+Load the extension. Open https://sendtogrokbot.com/connect if you are trying Grok Bot.
+With one destination on, the arrow on a post sends on the first click. A menu appears only when two or more destinations are on.
 
 Check Send to Claude and leave the routine fields blank, then Save.
 Chrome should not ask for access to a website for this path.
-Open https://x.com, click the Send button on a post (the arrow in the action bar), and choose Send to Claude.
+Open https://x.com and click the Send button on a post (the arrow in the action bar).
 A claude.ai tab opens with the post in the prompt. Nothing is sent to Anthropic until you press Send on that site.
 
-Optional: check Send to Grok Bot, paste an https webhook you control, and click Save.
-Chrome asks to read and change data only on that host. Choose Allow.
-Click Send to Grok Bot on a post. The webhook receives version 2 JSON, including source, url, text, author, digest, and sentAt, plus media and thread fields when the page shows them.
+Optional: on the connect page, paste an https webhook you control and a line that says Authorization: Bearer, then your key.
+Chrome asks to read and change data only on that host. Choose Allow. The page says to open x.com and click the arrow.
+Click the arrow on a post. The webhook receives version 2 JSON, including source, url, text, author, digest, and sentAt, plus media and thread fields when the page shows them.
 
 ChatGPT with the agent fields blank opens chatgpt.com the same way Claude opens a tab.
 Codex opens https://chatgpt.com/codex with the prompt filled in.
@@ -114,7 +114,7 @@ Do not use a real API token. The tab paths are enough to see the extension work.
 
 Most extensions are reviewed within a few days. Some take up to a few weeks. There is no paid faster queue.
 
-This submission is a new item from a new publisher, and the manifest still contains the optional pattern `https://*/*`. Google's review notes say broad host patterns take longer to review, because the same pattern can be used to read every site. The code does not do that: Save asks only for the one host you typed, or for `api.anthropic.com` or `api.chatgpt.com` when those destinations need a request. That justification is in the Privacy practices tab. Expect a person to read it.
+This submission is a new item from a new publisher, and the manifest still contains the optional pattern `https://*/*`. Google's review notes say broad host patterns take longer to review, because the same pattern can be used to read every site. The code does not do that: pasting a webhook on the connect page, or clicking Save, asks only for the one host you typed, or for `api.anthropic.com` or `api.chatgpt.com` when those destinations need a request. That justification is in the Privacy practices tab. Expect a person to read it.
 
 If the item is still pending after three weeks, contact Chrome Web Store developer support from the dashboard and ask them to look.
 

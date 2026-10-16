@@ -18,7 +18,7 @@ Use the same sentence as the summary. It matches the `description` field in the 
 
 Send to Grok Bot adds one button to the action bar of a post on X. It matches the size and place of Share.
 
-Click it and pick a destination you have set up.
+Click it. If one destination is on, that click sends the post. If more than one is on, a menu opens and you pick one.
 
 Send to Grok Bot posts the post to an https webhook you provide: text, link, author, and, when the page shows them, the thread, quote, links, and media. Any JSON webhook works, including your own server. Claude, ChatGPT, and Codex receive that same post.
 
@@ -30,9 +30,9 @@ Send to Codex needs no setup. It opens the Codex cloud task composer with the pr
 
 The reply starts with a one-line takeaway. General is the default. Research, Job hunt, Buy or skip, Learn later, and Content ideas are on the options page, and the one you pick is sent with the post.
 
-Only the post you click is sent, and only to the destination you pick. Webhook keys and API tokens stay in this browser. The extension has no analytics and does not sell data.
+Only the post you click is sent, and only to the destination you have on, or the one you pick when more than one is on. Webhook keys and API tokens stay in this browser. The extension has no analytics and does not sell data.
 
-You choose which destinations appear. If none are set up, the options page opens.
+You choose which destinations appear. If none are set up, the options page opens. Pasting a webhook on sendtogrokbot.com/connect asks Chrome for that one host.
 
 Not affiliated with X, xAI, Anthropic, or OpenAI.
 
