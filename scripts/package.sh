@@ -17,6 +17,7 @@ files=(
   connect.js
   logos.js
   options.html
+  options.css
   options.js
   prompts.js
   relay.js

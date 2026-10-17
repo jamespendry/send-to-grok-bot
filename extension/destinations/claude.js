@@ -41,10 +41,11 @@ function claudePostBlock(post, text) {
   return `X post to research\nURL: ${post.url}\nAuthor: @${post.author || 'unknown'}\nSent at: ${post.sentAt}\n\n"""\n${text}\n"""`;
 }
 
-// The routine's saved prompt is General. Prompt: carries the preset the person picked,
-// so the same routine follows Research, Job hunt, and the rest without being edited.
+// The task's saved prompt (STGB_PROMPTS.CLAUDE_TASK) is short. Prompt: carries the preset the person
+// picked, so the same task follows Research, Job hunt, and the rest without being edited.
 function claudeRoutineText(post) {
   const block = claudePostBlock(post, (post && (post.digest || post.text)) || '');
+  // background.js always sets post.prompt, so every send carries Prompt: for the task to follow.
   const prompt = String((post && post.prompt) || '').trim();
   let text = prompt ? `Prompt:\n${prompt}\n\n${block}` : block;
   if (text.length > CLAUDE_MAX_TEXT) text = text.slice(0, CLAUDE_MAX_TEXT);

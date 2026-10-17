@@ -4,55 +4,88 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Set up Send to Grok Bot</title>
-<link rel="stylesheet" href="/site.css">
+<meta name="description" content="Pick your AI and set up Send to Grok Bot in about two minutes.">
+<meta name="theme-color" content="#ffffff" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#000000" media="(prefers-color-scheme: dark)">
+<meta property="og:title" content="Set up Send to Grok Bot">
+<meta property="og:description" content="Pick your AI and set up Send to Grok Bot in about two minutes.">
+<meta property="og:image" content="https://sendtogrokbot.com/assets/promo/marquee-1400x560.png">
+<meta name="twitter:card" content="summary_large_image">
+<link rel="icon" href="/assets/icons/icon32.png" sizes="32x32">
+<link rel="icon" href="/logo.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="/assets/icons/icon128.png">
+<link rel="stylesheet" href="/assets/site.css">
+<script src="/assets/site.js" defer></script>
 </head>
 <body>
-<main>
-<nav>
-  <a href="/">Home</a>
-  <a href="/setup/">Setup</a>
-  <a href="/setup/grok">Grok Bot</a>
-  <a href="/setup/claude">Claude</a>
-  <a href="/mobile">Mobile</a>
-  <a href="/connect">Connect</a>
-  <a href="/history">History</a>
-  <a href="/privacy">Privacy</a>
-</nav>
-<h1>Set up Send to Grok Bot</h1>
-<p>Send to Grok Bot adds one button on an X post. You click it and pick where the post should go. It is free. There is nothing to buy and no account to create for the extension.</p>
+<header class="top"><div class="wrap">
+  <a class="brand" href="/"><img src="/assets/icons/icon48.png" alt="" width="28" height="28"><span>Send to Grok Bot</span></a>
+  <nav aria-label="Main">
+    <a href="/setup" aria-current="page">Setup</a>
+    <a href="/mobile" class="hide-sm">iPhone</a>
+    <a class="btn small" data-chrome-store href="https://github.com/jamespendry/send-to-grok-bot#readme">Add to Chrome</a>
+  </nav>
+</div></header>
 
-<h2>Have a Grok Bot do the Grok setup</h2>
-<p>Paste this one line into Grok Bot:</p>
-<p class="line">Set up Send to Grok Bot for me: https://github.com/jamespendry/send-to-grok-bot</p>
-<p>It creates the routine, then sends one message: install the extension, open the sidebar links named Webhook URL and Authorization header, copy both, and paste them at <a href="/connect">sendtogrokbot.com/connect</a>. The steps are on the <a href="/setup/grok">Grok Bot</a> page.</p>
+<main class="narrow page">
+  <h1>Set up in 2 minutes</h1>
+  <p class="intro" style="margin-top:12px">Send to Grok Bot adds one button on an X post. You click it and pick where the post goes. It is free, with nothing to buy and no account to create.</p>
 
-<h2>Pick where posts go</h2>
-<ul>
-  <li><a href="/setup/grok">Grok Bot</a> creates the routine. You paste the webhook URL and the Authorization header together on the connect page.</li>
-  <li><a href="/setup/claude">Claude</a> can open a tab with no setup, or run a task. The task cannot be created for you. The page has the clicks, in order.</li>
-  <li>ChatGPT needs no setup. In the extension, check Send to ChatGPT and click Save. Clicking a post opens ChatGPT with the post filled in. You press Send.</li>
-  <li>Codex needs no setup. Check Send to Codex and click Save. Clicking a post opens Codex with the post filled in. You press Send.</li>
-</ul>
+  <ol class="steps num">
+    <li>
+      <h2>Add the extension to Chrome</h2>
+      <p class="muted">A Send button appears next to Share on every post on x.com. Until it is in the Chrome Web Store, the button below opens the install steps: turn on Developer mode and load the folder named extension.</p>
+      <div class="actions" style="margin-top:14px"><a class="btn" data-chrome-store href="https://github.com/jamespendry/send-to-grok-bot#readme">Add to Chrome</a></div>
+    </li>
+    <li>
+      <h2>Pick your AI</h2>
+      <p class="muted" style="margin-bottom:14px">Choose one to start. Each takes you to its own short page.</p>
+      <div class="rows">
+        <a class="row" href="/setup/grok">
+          <span class="logo grokbot"><svg><use href="/assets/logos.svg#grokbot"/></svg></span>
+          <span class="text"><b>Grok Bot</b><span>Paste one line into Grok Bot, then paste what it gives you.</span></span>
+          <svg class="chev" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" d="M9 6l6 6-6 6"/></svg>
+        </a>
+        <a class="row" href="/setup/claude">
+          <span class="logo claude"><svg><use href="/assets/logos.svg#claude"/></svg></span>
+          <span class="text"><b>Claude</b><span>Four short steps on claude.ai. Replies on its own.</span></span>
+          <svg class="chev" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" d="M9 6l6 6-6 6"/></svg>
+        </a>
+        <a class="row" href="/setup/chatgpt">
+          <span class="logo chatgpt"><svg><use href="/assets/logos.svg#chatgpt"/></svg></span>
+          <span class="text"><b>ChatGPT <span class="tag">No setup</span></b><span>Check one box. Posts open in ChatGPT, ready to send.</span></span>
+          <svg class="chev" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" d="M9 6l6 6-6 6"/></svg>
+        </a>
+        <a class="row" href="/setup/codex">
+          <span class="logo codex"><svg><use href="/assets/logos.svg#codex"/></svg></span>
+          <span class="text"><b>Codex <span class="tag">No setup</span></b><span>Check one box. Posts open as a Codex task.</span></span>
+          <svg class="chev" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" d="M9 6l6 6-6 6"/></svg>
+        </a>
+      </div>
+    </li>
+  </ol>
 
-<h2>How replies are written</h2>
-<p>Every send starts with a one-line takeaway. The default, General, classifies the post first:</p>
-<ul>
-  <li>Tool, repo, or app: what it does, whether it is worth installing, and how to try it.</li>
-  <li>Thread or long article: a 3-line summary, then the key takeaway.</li>
-  <li>News: what happened, why it matters, and what to watch.</li>
-  <li>Video: a description from the captions, thumbnail, and text. It does not claim to have watched.</li>
-  <li>Tip, prompt, or how-to: one step you can save.</li>
-  <li>Job, company, or founder: who they are, the stage, and who to follow.</li>
-  <li>Product or deal: worth buying or not.</li>
-  <li>Meme, opinion, or anything else: one line of context, then it stops.</li>
-</ul>
-<p>On the extension's settings page, under Replies, you can switch the preset or edit the text. The choices are General, Research, Job hunt, Buy or skip, Learn later, and Content ideas. The one you pick is sent with the post.</p>
+  <h2>How replies sound</h2>
+  <p>Every reply starts with a one-line takeaway, then answers in the shape that fits the post. Change the style in the extension settings, under <span class="ui">Replies</span>.</p>
+  <div class="chips reply-chips">
+    <span class="chip">General</span><span class="chip">Research</span><span class="chip">Job hunt</span>
+    <span class="chip">Buy or skip</span><span class="chip">Learn later</span><span class="chip">Content ideas</span>
+  </div>
 
-<h2>On an iPhone</h2>
-<p>Share a post from the X app and pick Grok Bot, Claude, ChatGPT, or Codex. The steps are on the <a href="/mobile">Mobile</a> page. You paste one relay code. You do not copy a webhook address. Recent sends are on <a href="/history">History</a>.</p>
-
-<h2>Install the extension</h2>
-<p>Until it is in the Chrome Web Store, install it from the project folder. Open the repository README and follow the numbered install steps. Developer mode has to be on, and you select the folder named extension.</p>
+  <h2>On iPhone</h2>
+  <p>Share a post from the X app and pick Grok Bot, Claude, ChatGPT, or Codex. You paste one relay code, not a webhook address. <a href="/mobile">Set up iPhone</a>. Recent sends are on <a href="/history">History</a>.</p>
 </main>
+
+<footer><div class="wrap">
+  <span>Free and open source.</span>
+  <a href="https://github.com/jamespendry/send-to-grok-bot">GitHub</a>
+  <a href="/setup">Setup</a>
+  <a href="/mobile">iPhone</a>
+  <a href="/history">History</a>
+  <a href="/connect">Connect</a>
+  <a href="/privacy">Privacy</a>
+  <span class="sp"></span>
+  <span>Not affiliated with X, xAI, Anthropic, or OpenAI.</span>
+</div></footer>
 </body>
 </html>

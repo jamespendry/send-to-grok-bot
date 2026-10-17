@@ -27,7 +27,7 @@ Read this file before you give instructions. The human steps in the README are f
 Chrome shows a button on each X post. The person clicks it and picks a destination you prepared.
 
 - Grok Bot: a webhook routine exists, and the extension has its URL and key.
-- Claude Code: an API task exists under Scheduled tasks, with the default prompt and the network allowlist below, and the extension has its Fire URL and token. Runs show up under that task's History. If they cannot use tasks, Claude opens in a tab and no secret is stored.
+- Claude Code: an API task exists under Scheduled tasks, with the short task prompt from **Copy task prompt** and an API trigger, and the extension has its Fire URL and token. Runs show up under that task's History. If they cannot use tasks, Claude opens in a tab and no secret is stored.
 - ChatGPT or Codex: no setup and no secret. They check the box and click Save. Clicking a post opens that product with the post filled in, and they press Send.
 
 You cannot load an unpacked extension into their Chrome unless you are driving that Chrome window. Assume you are not. The last section is the walkthrough you give them.
@@ -101,31 +101,12 @@ You cannot create a Claude routine from outside claude.ai. Do not claim that you
 
 A routine that runs on its own needs a Claude Pro, Max, Team, or Enterprise plan with Claude Code on the web. The clicks below were checked against the product. Walk one step, then wait. Point them at the extension buttons instead of pasting the prompt or the host list yourself into chat.
 
-1. On claude.ai, in the left sidebar, click Routines. The page is titled Scheduled tasks. Create a task named Send to Claude. In the extension settings, open Send to Claude and click **Copy task prompt**. Paste that into the task. The text is the prompt under the line in [prompts/general.md](prompts/general.md).
-2. On the task page, click the three dots (...) at the top right, next to the Active toggle. Click Edit. Set the Trigger dropdown to API. Copy the Fire URL (`https://api.anthropic.com/v1/claude_code/routines/trig_...`). The round-arrows Regenerate button makes a new token and invalidates the old one. Copy both. They paste both into the one box on the extension, in any order. A routines page link or a bare `trig_` id also works. They do not paste either value into this chat.
+1. On claude.ai, in the left sidebar, click **Scheduled**. Click **New task**, then **Set up manually**. Name it Send to Claude. In the extension settings, open Send to Claude and click **Copy task prompt**, then paste it into the instructions box. Set **Trigger** to **API**. Click **Create**.
+2. Claude shows the **API token** once, in a box with a copy button. Then, on the task page under **Triggers**, the copy button next to **API** copies the **Fire URL** (`https://api.anthropic.com/v1/claude_code/routines/trig_...`). They copy both and paste them into https://sendtogrokbot.com/connect (or the box on the extension settings page), in any order, then click Connect. They do not paste either value into this chat. If they lose the token, they open the task, choose Edit from the menu next to its name, and click Regenerate. The old token stops working.
 
-![The task page. The three dots are at the top right, next to Active. History is the column of past runs.](docs/img/claude-routine-overview.png)
+![The API token box, covered, with its copy button and Done](docs/img/claude-step2-token.png)
 
-![Edit. Trigger is API. The Fire URL is on screen. Regenerate is the round-arrows control on the token.](docs/img/claude-routine-api-trigger.png)
-
-3. Allowed websites are not in the task editor. Do a first test send so a run exists. On the task page, open any past run from the History column. At the top of the main pane, click the down arrow next to the task name, then Edit cloud environment. Set Network access to Custom. In the extension, click **Copy allowed websites** and paste into Allowed domains. Save.
-
-There is no screenshot of that environment screen yet. The file to take is `docs/img/claude-cloud-environment.png`.
-
-The hosts, one per line, are:
-
-```
-api.fxtwitter.com
-fxtwitter.com
-api.vxtwitter.com
-vxtwitter.com
-fixupx.com
-x.com
-twitter.com
-t.co
-video.twimg.com
-pbs.twimg.com
-```
+No network allowlist is needed. The extension sends the whole post, its thread, quote, links, and alt text, plus the reply preset, in the fire text. The task prompt tells Claude to use only that and fetch nothing, so the Default environment works as it is. Leave the environment alone.
 
 If a checkbox offers to keep the usual package-manager sites too, turn it on. The task prompt does not commit or push. If the form will not save without a repository, ask which repo to attach and wait. Do not create a repository unless they ask.
 
@@ -180,6 +161,6 @@ If they already have the folder, skip the download and start at the first step t
 - Developer mode is off: Load unpacked is hidden. That is step 4.
 - The menu on a post is empty and the options page opens: nothing is checked, or Grok Bot is checked without a webhook address.
 - Grok Bot returns anything other than 200: the routine is paused, or the key is not the current one.
-- Claude says the token is invalid: on the task page, click the three dots next to Active, click Edit, click Regenerate, paste that token into the extension's Fire URL and token box, and click Save. Regenerating invalidates the previous token.
-- Claude cannot open the post: Allowed domains is missing or Network access is still not Custom. Repeat the environment step. That control is on a past run, under the down arrow next to the task name, then Edit cloud environment. It is not in the task editor.
+- Claude says the token is invalid: on the task page, open the menu next to the task name, click Edit, click Regenerate, paste that token into the extension's Fire URL and token box, and click Save. Regenerating invalidates the previous token.
+- Claude says it cannot open the post: that is expected. It replies from the text the extension sent. If the reply says the post was empty, send it again from the post's own page so the thread is included.
 - They pasted the code into this chat: tell them to paste it into the options page instead, and do not ask them to paste it again here.

@@ -1,5 +1,5 @@
 # Claude task prompt
 
-Use [prompts/general.md](../prompts/general.md). Paste the text under the line. Do not paste the title.
+In the extension's Send to Claude section, click **Copy task prompt** and paste it into the Claude task. It is short on purpose: the extension sends the reply preset and the whole post with every run, so the task needs no web access and no allowed websites.
 
-The extension's Send to Claude section has a Copy task prompt button and a Copy allowed websites button. The clicks are on [setup/claude.html](setup/claude.html).
+The steps, with screenshots, are on https://sendtogrokbot.com/setup/claude.

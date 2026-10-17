@@ -1,0 +1,202 @@
+/* Native look for the options page: grouped settings cards (Apple System Settings)
+   with X colors. Loaded after the inline <style> in options.html so these rules win.
+   Styling only: no markup, ids, or behavior depend on this file. */
+
+:root {
+  color-scheme: light dark;
+  --bg: #f7f9f9;
+  --card: #fff;
+  --text: #0f1419;
+  --muted: #536471;
+  --hairline: #eff3f4;
+  --border: #cfd9de;
+  --blue: #1d9bf0;
+  --link: #0f75bd;
+  --ring: rgba(29, 155, 240, .28);
+  --field: #fff;
+  --primary-bg: #0f1419;
+  --primary-fg: #fff;
+  --primary-hover: #272c30;
+  --ghost-hover: rgba(15, 20, 25, .06);
+  --notice-bg: #fff;
+  --ok: #00ba7c;
+  --bad: #f4212e;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg: #000;
+    --card: #16181c;
+    --text: #e7e9ea;
+    --muted: #8b98a5;
+    --hairline: #2f3336;
+    --border: #2f3336;
+    --link: #1d9bf0;
+    --ring: rgba(29, 155, 240, .4);
+    --field: #000;
+    --primary-bg: #eff3f4;
+    --primary-fg: #0f1419;
+    --primary-hover: #d7dbdc;
+    --ghost-hover: rgba(239, 243, 244, .08);
+    --notice-bg: #16181c;
+  }
+}
+
+html { background: var(--bg); }
+
+body {
+  font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  background: var(--bg);
+  color: var(--text);
+  max-width: 560px;
+  margin: 0 auto;
+  padding: 40px 16px 64px;
+  font-size: 14px;
+  line-height: 1.4;
+}
+
+h1 { font-size: 26px; font-weight: 800; letter-spacing: -.01em; margin: 0 0 20px; color: var(--text); }
+h2 { font-size: 17px; font-weight: 700; margin: 0 0 12px; color: var(--text); }
+p { color: var(--muted); line-height: 1.45; }
+a, .notice a { color: var(--link); text-decoration: none; }
+a:hover { text-decoration: underline; }
+
+/* Grouped cards */
+.connect,
+.dest,
+.notice,
+#notice {
+  background: var(--card);
+  border: 1px solid var(--hairline);
+  border-radius: 16px;
+  padding: 16px;
+  margin: 0 0 12px;
+}
+.dest:first-of-type { border-top: 1px solid var(--hairline); }
+.notice p, #notice { color: var(--text); }
+.notice { background: var(--notice-bg); }
+.notice p { font-size: 13px; color: var(--muted); }
+.notice .policy { margin-top: 10px; font-weight: 600; }
+#notice[hidden] { display: none; }
+
+/* Destination rows */
+.check { align-items: center; gap: 12px; font-size: 15px; font-weight: 700; color: var(--text); }
+.check input { width: 18px; height: 18px; margin: 0; accent-color: var(--blue); cursor: pointer; }
+.fields {
+  margin: 14px 0 0 30px;
+  padding-top: 14px;
+  border-top: 1px solid var(--hairline);
+}
+.fields[hidden] { display: none; }
+
+label.field { font-size: 13px; font-weight: 600; color: var(--text); margin: 16px 0 6px; }
+label.field:first-child { margin-top: 0; }
+label.field .hint { font-weight: 400; }
+.hint { color: var(--muted); font-size: 13px; line-height: 1.45; }
+p.hint { margin: 0 0 8px; }
+.connect > .hint { margin-top: 8px; margin-bottom: 0; }
+
+/* Inputs */
+input[type="url"],
+input[type="password"],
+input[type="text"],
+textarea,
+select {
+  padding: 10px 12px;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  background: var(--field);
+  color: var(--text);
+  font: inherit;
+  transition: border-color .15s, box-shadow .15s;
+}
+textarea { line-height: 1.45; }
+select {
+  -webkit-appearance: none;
+  appearance: none;
+  padding-right: 36px;
+  cursor: pointer;
+  background-image: linear-gradient(45deg, transparent 50%, var(--muted) 50%), linear-gradient(135deg, var(--muted) 50%, transparent 50%);
+  background-position: calc(100% - 19px) 50%, calc(100% - 14px) 50%;
+  background-size: 5px 5px, 5px 5px;
+  background-repeat: no-repeat;
+}
+::placeholder { color: var(--muted); opacity: .8; }
+input:focus, textarea:focus, select:focus {
+  outline: none;
+  border-color: var(--blue);
+  box-shadow: 0 0 0 3px var(--ring);
+}
+
+/* Buttons */
+button {
+  margin-top: 0;
+  min-height: 36px;
+  padding: 8px 20px;
+  border: 1px solid transparent;
+  border-radius: 9999px;
+  background: var(--primary-bg);
+  color: var(--primary-fg);
+  font: inherit;
+  font-weight: 700;
+  cursor: pointer;
+  transition: background-color .15s;
+}
+button:hover { background: var(--primary-hover); }
+button:focus-visible { outline: none; box-shadow: 0 0 0 3px var(--ring); }
+button.secondary {
+  background: transparent;
+  color: var(--text);
+  border-color: var(--border);
+}
+button.secondary:hover { background: var(--ghost-hover); }
+.row { margin: 4px 0 4px; }
+#s { margin-top: 8px; padding: 10px 28px; }
+
+/* Status text */
+#m { margin-left: 12px; font-weight: 600; color: var(--ok); }
+#m.bad { color: var(--bad); }
+#cm, #claudeHint { margin-top: 8px; font-size: 13px; }
+#cm.ok, #claudeHint.ok { color: var(--ok); }
+#cm.err, #claudeHint.err { color: var(--bad); }
+
+/* Disclosures, Apple style: no marker, trailing chevron that turns on open */
+summary { list-style: none; cursor: pointer; display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+summary::-webkit-details-marker { display: none; }
+summary::after {
+  content: "";
+  flex: none;
+  width: 7px;
+  height: 7px;
+  margin-right: 4px;
+  border-right: 2px solid var(--muted);
+  border-bottom: 2px solid var(--muted);
+  transform: rotate(-45deg);
+  transition: transform .2s;
+}
+details[open] > summary::after { transform: rotate(45deg); }
+summary:focus-visible { outline: none; box-shadow: 0 0 0 3px var(--ring); }
+
+#more { margin-top: 12px; border-top: 0; padding-top: 0; }
+#more > summary {
+  background: var(--card);
+  border: 1px solid var(--hairline);
+  border-radius: 16px;
+  padding: 14px 16px;
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--text);
+}
+#more[open] > summary { margin-bottom: 16px; }
+#more > p { padding: 0 4px; margin: 0 0 12px; font-size: 13px; }
+
+.fields details { margin-top: 14px; }
+.fields details > summary {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--link);
+  justify-content: flex-start;
+}
+.fields details > summary::after { border-color: var(--link); width: 6px; height: 6px; }
+.fields details[open] > summary { margin-bottom: 4px; }

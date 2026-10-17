@@ -1,3 +1,17 @@
+/*
+  X-Content-Type-Options: nosniff
+  Referrer-Policy: no-referrer
+  X-Frame-Options: DENY
+  Permissions-Policy: camera=(), microphone=(), geolocation=()
+
+/assets/*
+  Cache-Control: public, max-age=3600
+
+/connect
+  Cache-Control: no-store
+/connect.html
+  Cache-Control: no-store
+
 /send-to-grok-bot.shortcut
   Content-Type: application/octet-stream
   Content-Disposition: attachment; filename="Send to Grok Bot.shortcut"

@@ -333,8 +333,12 @@ test("preset files match the extension prompt text", () => {
   assert.equal(prompts.resolve({}).id, "general");
   assert.equal(prompts.resolve({ promptPreset: "job-hunt" }).text, prompts.text("job-hunt"));
   assert.equal(prompts.resolve({ promptPreset: "general", promptText: "My own words" }).id, "custom");
+  // The Claude task reads only the fire text, so the guide has no allowlist step.
   const claudePage = read("../docs/setup/claude.html");
-  for (const host of prompts.ALLOWED_SITES.split("\n")) assert.ok(claudePage.includes(host), host);
+  assert.match(claudePage, /STGB_PROMPTS\.CLAUDE_TASK/);
+  assert.doesNotMatch(claudePage, /Allowed domains|Network access/);
+  assert.match(prompts.CLAUDE_TASK, /routine-fire-payload/);
+  assert.match(prompts.CLAUDE_TASK, /Do not open web pages or fetch anything/);
   assert.equal(prompts.ALLOWED_SITES.split("\n").length, 10);
 });
 

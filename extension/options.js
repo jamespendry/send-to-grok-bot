@@ -318,8 +318,7 @@ $('claudePaste').addEventListener('input', () => {
   applyClaudePaste(value, quiet);
 });
 $('claudePaste').addEventListener('blur', () => applyClaudePaste($('claudePaste').value, false));
-$('copyPrompt').onclick = () => copyText(globalThis.STGB_PROMPTS.text('general'), $('copyPrompt'));
-$('copySites').onclick = () => copyText(globalThis.STGB_PROMPTS.ALLOWED_SITES, $('copySites'));
+$('copyPrompt').onclick = () => copyText(globalThis.STGB_PROMPTS.CLAUDE_TASK, $('copyPrompt'));
 const ready = load();
 $('cc').addEventListener('paste', event => {
   if (!settingsLoaded) {

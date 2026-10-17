@@ -4,46 +4,61 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Connect Send to Grok Bot</title>
-<link rel="stylesheet" href="/site.css">
+<meta name="description" content="Connect your AI to the Send to Grok Bot extension.">
+<meta name="theme-color" content="#ffffff" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#000000" media="(prefers-color-scheme: dark)">
+<meta property="og:title" content="Connect Send to Grok Bot">
+<meta property="og:description" content="Connect your AI to the Send to Grok Bot extension.">
+<meta property="og:image" content="https://sendtogrokbot.com/assets/promo/marquee-1400x560.png">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="robots" content="noindex">
+<link rel="icon" href="/assets/icons/icon32.png" sizes="32x32">
+<meta name="robots" content="noindex">
+<link rel="icon" href="/logo.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="/assets/icons/icon128.png">
+<link rel="stylesheet" href="/assets/site.css">
+<script src="/assets/site.js" defer></script>
 </head>
 <body>
-<main>
-<nav>
-  <a href="/">Home</a>
-  <a href="/setup/">Setup</a>
-  <a href="/setup/grok">Grok Bot</a>
-  <a href="/setup/claude">Claude</a>
-  <a href="/mobile">Mobile</a>
-  <a href="/connect">Connect</a>
-  <a href="/history">History</a>
-  <a href="/privacy">Privacy</a>
-</nav>
-<h1>Connect</h1>
-<section class="hero-step" id="step-install">
-  <h2>Step 1. Install the extension</h2>
-  <p id="installed" hidden>Installed.</p>
-  <div id="install-steps">
-    <p>It is not in the Chrome Web Store yet.</p>
-    <ol>
-      <li>Download the zip from <a href="https://github.com/jamespendry/send-to-grok-bot">github.com/jamespendry/send-to-grok-bot</a>.</li>
-      <li>Unzip it. Find the folder named extension. That folder contains manifest.json.</li>
-      <li>In the address bar, type chrome://extensions and press Enter.</li>
-      <li>Turn on Developer mode.</li>
-      <li>Click Load unpacked and select the extension folder.</li>
-      <li>Come back to this page.</li>
-    </ol>
-  </div>
-</section>
-<section class="hero-step" id="step-paste">
-  <h2>Step 2. Paste here</h2>
-  <p data-stgb-extra>Open the sidebar links named Webhook URL and Authorization header. Copy both. Paste them in this box, together.</p>
-  <p class="muted" data-stgb-extra>This page stays in your browser. Pasting saves into the extension on this computer. It does not upload the address or the header.</p>
-  <label for="paste">Paste here</label>
-  <textarea id="paste" spellcheck="false" autocomplete="off" placeholder="Webhook URL and Authorization header, together"></textarea>
-  <span id="msg" role="status"></span>
-</section>
-<p class="muted" data-stgb-extra>If Chrome asks to allow a site, choose Allow. Then open x.com and click the arrow on a post.</p>
-<p class="muted" data-stgb-extra>ChatGPT and Codex need none of this. Check the box in the extension and click Save. A post opens with the text filled in, and you press Send.</p>
+<header class="top"><div class="wrap">
+  <a class="brand" href="/"><img src="/assets/icons/icon48.png" alt="" width="28" height="28"><span>Send to Grok Bot</span></a>
+  <nav aria-label="Main">
+    <a href="/setup">Setup</a>
+    <a href="/mobile" class="hide-sm">iPhone</a>
+    <a class="btn small" data-chrome-store href="https://github.com/jamespendry/send-to-grok-bot#readme">Add to Chrome</a>
+  </nav>
+</div></header>
+
+<main class="narrow page">
+  <h1>Connect</h1>
+  <p class="intro" style="margin-top:12px" data-stgb-extra>Two steps. Install the extension, then paste what your setup page told you to copy.</p>
+
+  <ol class="steps plain">
+    <li class="hero-step" id="step-install">
+      <h2 class="step-title">Step 1. Install the extension</h2>
+      <p id="installed" class="note done" hidden><b>Installed.</b> Go to step 2.</p>
+      <div id="install-steps">
+        <p class="muted">It is not in the Chrome Web Store yet, so it takes five short steps:</p>
+        <ol>
+          <li>Download the zip from <a href="https://github.com/jamespendry/send-to-grok-bot/archive/refs/heads/main.zip">GitHub</a> and unzip it.</li>
+          <li>In Chrome's address bar, type <span class="mono">chrome://extensions</span> and press Enter.</li>
+          <li>Turn on <span class="ui">Developer mode</span>, at the top right.</li>
+          <li>Click <span class="ui">Load unpacked</span> and pick the folder named <span class="ui">extension</span>.</li>
+          <li>Come back to this page and refresh it.</li>
+        </ol>
+      </div>
+    </li>
+    <li class="hero-step" id="step-paste">
+      <h2 class="step-title">Step 2. Paste here</h2>
+      <p class="muted" data-stgb-extra>Paste with Command+V (Mac) or Ctrl+V (Windows). Pasting saves it to the extension right away. There is no button to click.</p>
+      <label class="field-label" for="paste">Paste here</label>
+      <textarea id="paste" spellcheck="false" autocomplete="off" placeholder="Paste here"></textarea>
+      <span id="msg" role="status"></span>
+      <div class="note"><b>Grok Bot:</b> paste the Webhook URL and the Authorization header together.<br><b>Claude:</b> paste the API token, then the Fire URL. One at a time is fine.<br>If Chrome asks to allow a site, choose <b>Allow</b>.</div>
+    </li>
+  </ol>
+
+  <p class="muted" data-stgb-extra>This page stays in your browser. Pasting saves into the extension on this computer and nowhere else. ChatGPT and Codex need none of this.</p>
 </main>
 <script src="/connect.js"></script>
 <script>
@@ -87,5 +102,17 @@
   });
 })();
 </script>
+
+<footer><div class="wrap">
+  <span>Free and open source.</span>
+  <a href="https://github.com/jamespendry/send-to-grok-bot">GitHub</a>
+  <a href="/setup">Setup</a>
+  <a href="/mobile">iPhone</a>
+  <a href="/history">History</a>
+  <a href="/connect">Connect</a>
+  <a href="/privacy">Privacy</a>
+  <span class="sp"></span>
+  <span>Not affiliated with X, xAI, Anthropic, or OpenAI.</span>
+</div></footer>
 </body>
 </html>
