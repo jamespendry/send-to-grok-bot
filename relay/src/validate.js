@@ -61,6 +61,8 @@ export function claudeText(post) {
   const text = digest || (typeof post.text === "string" ? post.text : "");
   const author = post.author || "unknown";
   let body = `X post to research\nURL: ${post.url}\nAuthor: @${author}\nSent at: ${post.sentAt}\n\n"""\n${text}\n"""`;
+  const prompt = typeof post.prompt === "string" ? post.prompt.trim() : "";
+  if (prompt) body = `Prompt:\n${prompt}\n\n${body}`;
   if (body.length > 65536) body = body.slice(0, 65536);
   return body;
 }
@@ -96,8 +98,10 @@ function plainCopy(value, depth) {
 
 export function parseSendBody(body) {
   if (!body || typeof body !== "object" || Array.isArray(body)) return { error: "The body needs to be a JSON object." };
-  const destination = body.destination === "grokbot" || body.destination === "claude" ? body.destination : "";
-  if (!destination) return { error: "Choose a destination: grokbot or claude." };
+  const destination = body.destination === "grokbot" || body.destination === "claude" || body.destination === "chatgpt" || body.destination === "codex"
+    ? body.destination
+    : "";
+  if (!destination) return { error: "Choose a destination: grokbot, claude, chatgpt, or codex." };
   const url = typeof body.url === "string" ? body.url.trim() : "";
   if (!/^https?:\/\/\S{1,2000}$/.test(url)) return { error: "The post needs an http or https URL." };
   const text = typeof body.text === "string" ? body.text : "";

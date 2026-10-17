@@ -1,5 +1,5 @@
-# Claude Code routine prompt
+# Claude task prompt
 
-Use the shared prompt in [prompts/default-routine-prompt.md](../prompts/default-routine-prompt.md).
+Use [prompts/general.md](../prompts/general.md). Paste the text under the line. Do not paste the title.
 
-Paste the text under the line in that file into the routine's instructions. Do not paste the title or this note. The same prompt is what a Grok Bot webhook routine should use.
+The extension's Send to Claude section has a Copy task prompt button and a Copy allowed websites button. The clicks are on [setup/claude.html](setup/claude.html).

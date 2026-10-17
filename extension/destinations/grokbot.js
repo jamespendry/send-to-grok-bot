@@ -12,7 +12,13 @@ self.STGB_DESTINATIONS.grokbot = {
     }
     const headers = {'Content-Type': 'application/json'};
     if (s.senderKey) { headers['Authorization'] = 'Bearer ' + s.senderKey; headers['X-Sender-Key'] = s.senderKey; }
-    const r = await fetch(s.webhookUrl, {method: 'POST', headers, body: JSON.stringify(post)});
-    return {ok: r.ok, error: r.ok ? '' : 'HTTP ' + r.status};
+    const body = JSON.stringify(post);
+    const postOnce = () => fetch(s.webhookUrl, {method: 'POST', headers, body});
+    let r;
+    try { r = await postOnce(); }
+    catch (_) { r = await postOnce(); }
+    if (r.ok) return {ok: true, error: ''};
+    if (r.status === 401 || r.status === 403) return {ok: false, error: 'The webhook refused the key. Copy the Authorization header again.'};
+    return {ok: false, error: 'The webhook did not accept the post.'};
   }
 };

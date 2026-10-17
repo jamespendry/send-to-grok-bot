@@ -1,0 +1,14 @@
+{
+  "name": "send-to-grok-bot",
+  "version": "1.0.0",
+  "description": "Creates the Send to Grok Bot webhook routine, then one message to paste the Webhook URL and Authorization header at sendtogrokbot.com/connect, and replies to an X post using the preset sent with that post.",
+  "author": {
+    "name": "James Pendry"
+  },
+  "homepage": "https://sendtogrokbot.com",
+  "repository": "https://github.com/jamespendry/send-to-grok-bot",
+  "license": "MIT",
+  "keywords": ["x", "grok-bot", "webhook", "posts"],
+  "logo": "assets/logo.svg",
+  "skills": "./skills/"
+}

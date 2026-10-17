@@ -272,7 +272,205 @@
     return interpret(obj);
   }
 
-  const api = {PREFIX: PREFIX, encodeConnectionCode: encodeConnectionCode, decodeConnectionCode: decodeConnectionCode};
+  function asCode(input) {
+    try {
+      const decoded = decodeConnectionCode(encodeConnectionCode(input));
+      if (!decoded.ok) return decoded;
+      return Object.assign({kind: 'code', plain: decoded.summary}, decoded);
+    } catch (e) {
+      return {ok: false, error: (e && e.message) || 'Could not read that.'};
+    }
+  }
+
+  function stripSecret(v) {
+    return String(v || '')
+      .replace(/^authorization\s*:\s*/i, '')
+      .replace(/^bearer\s+/i, '')
+      .replace(/^["']|["']$/g, '')
+      .replace(/[),.;]+$/g, '')
+      .trim();
+  }
+
+  function cleanUrl(v) {
+    return String(v || '').replace(/[),.;>\]]+$/g, '');
+  }
+
+  function claudeShapeOk(url) {
+    if (!url) return '';
+    const probe = asCode({destination: 'claude', mode: 'routine', url: url, token: 'sk-ant-oat01-probevalue'});
+    return probe.ok ? '' : probe.error;
+  }
+
+  function parseSetupPaste(raw) {
+    const original = String(raw == null ? '' : raw).replace(/[\u200b-\u200d\ufeff]/g, '').trim();
+    if (!original) return {ok: false, error: 'Paste a connect link, or the address and the secret, first.'};
+
+    if (/stgb1\./i.test(original)) {
+      const decoded = decodeConnectionCode(original);
+      if (decoded.ok) return Object.assign({kind: 'code', plain: decoded.summary}, decoded);
+      if (/stgb1\.[A-Za-z0-9_-]{8,}/i.test(original.replace(/\s+/g, ''))) return decoded;
+    }
+
+    if (/stgbr1\./i.test(original)) {
+      const flat = original.replace(/\s+/g, '');
+      const at = flat.toLowerCase().indexOf('stgbr1.');
+      const code = flat.slice(at);
+      if (code.length <= 'stgbr1.'.length) return {ok: false, error: 'That relay link is damaged. Copy it again.'};
+      return {ok: true, kind: 'relay', code: code, plain: 'Relay. This points at a relay you already set up.'};
+    }
+
+    const urls = (original.match(/https?:\/\/[^\s<>"']+/gi) || []).map(cleanUrl);
+    const claudeUrls = urls.filter(function (u) {
+      return /api\.anthropic\.com\/v1\/claude_code\/routines\/trig_[A-Za-z0-9_-]+\/fire/i.test(u)
+        || /claude\.ai\/code\/routines\/trig_[A-Za-z0-9_-]+/i.test(u);
+    });
+    const trig = original.match(/\b(trig_[A-Za-z0-9_-]+)\b/);
+    const sk = original.match(/\b(sk-ant-[A-Za-z0-9_-]{8,})\b/);
+    const auth = original.match(/authorization\s*:\s*(\S+(?:\s+\S+)?)/i);
+    const bearer = original.match(/(?:^|[\s])bearer\s+(\S+)/i);
+    let headerKey = auth ? stripSecret(auth[1]) : (bearer ? stripSecret(bearer[1]) : '');
+    if (/^bearer$/i.test(headerKey)) headerKey = '';
+
+    const skipHost = {
+      'x.com': 1, 'twitter.com': 1, 't.co': 1, 'claude.ai': 1, 'chatgpt.com': 1,
+      'api.anthropic.com': 1, 'api.chatgpt.com': 1, 'sendtogrokbot.com': 1,
+      'fxtwitter.com': 1, 'api.fxtwitter.com': 1, 'vxtwitter.com': 1, 'api.vxtwitter.com': 1,
+      'fixupx.com': 1, 'pbs.twimg.com': 1, 'video.twimg.com': 1
+    };
+    const webhooks = urls.filter(function (u) {
+      if (claudeUrls.indexOf(u) !== -1) return false;
+      let host = '';
+      try { host = new URL(u).hostname.replace(/^www\./, ''); }
+      catch (_) { return false; }
+      return !skipHost[host];
+    });
+
+    const used = {};
+    urls.forEach(function (u) { used[u] = 1; });
+    if (sk) used[sk[1]] = 1;
+    if (headerKey) used[headerKey] = 1;
+    if (trig) used[trig[1]] = 1;
+    const leftovers = [];
+    original.split(/\r?\n/).forEach(function (line) {
+      const cleaned = stripSecret(line.trim());
+      if (!cleaned || cleaned.length < 8 || /\s/.test(cleaned)) return;
+      if (/^https?:\/\//i.test(cleaned) || /^trig_/i.test(cleaned)) return;
+      if (/^(post|get|webhook|header|url|method)$/i.test(cleaned)) return;
+      if (used[cleaned]) return;
+      leftovers.push(cleaned);
+    });
+
+    const claudeUrl = claudeUrls[0] || (trig ? trig[1] : '');
+    let claudeToken = sk ? sk[1] : '';
+    const looksClaude = !!(claudeUrl || claudeToken);
+    if (looksClaude && webhooks.length) {
+      return {ok: false, error: 'That paste has a Claude routine and another address. Paste one at a time.'};
+    }
+    if (looksClaude) {
+      if (!claudeToken && headerKey && !/^https?:/i.test(headerKey)) claudeToken = headerKey;
+      if (!claudeToken && leftovers.length === 1) claudeToken = leftovers[0];
+      if (claudeUrls.length > 1) return {ok: false, error: 'That paste has more than one Claude address. Paste one.'};
+      if (claudeUrl && claudeToken) return asCode({destination: 'claude', mode: 'routine', url: claudeUrl, token: claudeToken});
+      if (claudeUrl) {
+        const problem = claudeShapeOk(claudeUrl);
+        if (problem) return {ok: false, error: problem};
+        return {ok: true, kind: 'claude', url: claudeUrl, token: '', plain: 'Claude. The routine address is here. Add the secret from the same screen.'};
+      }
+      if (claudeToken.length > 2000) return {ok: false, error: 'The secret is too long.'};
+      if (placeholder(claudeToken)) return {ok: false, error: 'That secret looks like an example. Use the real one from the routine page.'};
+      return {ok: true, kind: 'claude', url: '', token: claudeToken, plain: 'Claude. The secret is here. Add the routine address from the same screen.'};
+    }
+
+    if (webhooks.length > 1) return {ok: false, error: 'That paste has more than one address. Paste one.'};
+    if (webhooks.length === 1) {
+      let key = headerKey;
+      if (!key && leftovers.length === 1) key = leftovers[0];
+      if (key && placeholder(key)) return {ok: false, error: 'That key looks like an example. Use the real one from the routine page.'};
+      const input = {destination: 'grokbot', mode: 'webhook', url: webhooks[0]};
+      if (key) input.key = key;
+      return asCode(input);
+    }
+
+    if (headerKey || leftovers.length) return {ok: false, error: 'Paste the address as well as the secret.'};
+    return {ok: false, error: 'Paste the webhook URL and the Authorization header.'};
+  }
+
+  function planConnect(current, parsed) {
+    if (!parsed || !parsed.ok) return {ok: false, error: (parsed && parsed.error) || 'Paste a connect link first.'};
+    const src = current && typeof current === 'object' ? current : {};
+    const next = {};
+    for (const key of Object.keys(src)) next[key] = src[key];
+    const enabled = Array.isArray(next.enabled) ? next.enabled.slice() : [];
+    function enable(dest) {
+      if (enabled.indexOf(dest) === -1) enabled.push(dest);
+    }
+    const removeKeys = [];
+    let message = '';
+
+    if (parsed.kind === 'relay') {
+      if (typeof STGB_RELAY !== 'undefined' && STGB_RELAY.decodeConnectCode) {
+        const checked = STGB_RELAY.decodeConnectCode(parsed.code);
+        if (!checked.ok) return {ok: false, error: checked.error};
+      }
+      next.useRelay = true;
+      next.relayCode = parsed.code;
+      if (!enabled.length) enabled.push('grokbot', 'claude');
+      message = 'Saved the relay on this computer.';
+    } else if (parsed.kind === 'code') {
+      if (parsed.destination === 'grokbot' && !(parsed.fields && String(parsed.fields.senderKey || '').trim())) {
+        return {ok: false, error: 'Paste the webhook URL and the Authorization header.'};
+      }
+      enable(parsed.destination);
+      const fields = parsed.fields || {};
+      for (const key of Object.keys(fields)) next[key] = fields[key];
+      const prompt = fields.claudePrompt || fields.chatgptPrompt || fields.codexPrompt || '';
+      if (prompt) {
+        next.promptPreset = 'custom';
+        next.promptText = prompt;
+        delete next.claudePrompt;
+        delete next.chatgptPrompt;
+        delete next.codexPrompt;
+        removeKeys.push('claudePrompt', 'chatgptPrompt', 'codexPrompt');
+      }
+      message = parsed.message;
+    } else if (parsed.kind === 'claude') {
+      enable('claude');
+      if (parsed.url) next.claudeFireUrl = parsed.url;
+      if (parsed.token) next.claudeToken = parsed.token;
+      const haveUrl = !!next.claudeFireUrl;
+      const haveToken = !!next.claudeToken;
+      message = 'Saved Send to Claude on this computer.';
+      if (haveUrl && haveToken) message += ' Clicking a post starts the Claude routine.';
+      else if (!haveUrl) message += ' Paste the routine address as well.';
+      else message += ' Paste the secret as well.';
+    } else {
+      return {ok: false, error: 'Paste the webhook URL and the Authorization header.'};
+    }
+
+    next.enabled = enabled;
+    let origins = [];
+    if (typeof stgbNeededOrigins === 'function') {
+      try { origins = stgbNeededOrigins(next); }
+      catch (_) { origins = []; }
+    }
+    return {ok: true, settings: next, removeKeys: removeKeys, origins: origins, message: message, plain: parsed.plain || message};
+  }
+
+  function finishMessage(parsed, plan) {
+    if (parsed && parsed.destination === 'grokbot' && parsed.fields && String(parsed.fields.senderKey || '').trim()) {
+      return 'Now open x.com and click the arrow.';
+    }
+    return (plan && plan.message) || '';
+  }
+
+  const api = {
+    PREFIX: PREFIX,
+    encodeConnectionCode: encodeConnectionCode,
+    decodeConnectionCode: decodeConnectionCode,
+    parseSetupPaste: parseSetupPaste,
+    planConnect: planConnect,
+    finishMessage: finishMessage
+  };
   if (typeof module !== 'undefined' && module.exports) module.exports = api;
   root.STGB_CONNECT = api;
 })(typeof globalThis !== 'undefined' ? globalThis : this);

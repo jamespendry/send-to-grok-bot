@@ -1,0 +1,116 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Set up Claude</title>
+<link rel="stylesheet" href="/site.css">
+</head>
+<body>
+<main>
+<nav>
+  <a href="/">Home</a>
+  <a href="/setup/">Setup</a>
+  <a href="/setup/grok">Grok Bot</a>
+  <a href="/setup/claude">Claude</a>
+  <a href="/mobile">Mobile</a>
+  <a href="/connect">Connect</a>
+  <a href="/history">History</a>
+  <a href="/privacy">Privacy</a>
+</nav>
+<h1>Claude</h1>
+<p>Two ways. The first needs no setup.</p>
+<ul>
+  <li>Open Claude in a tab. In the extension, check Send to Claude, leave the box empty, and click Save. Clicking a post opens Claude with the post filled in. You press Send.</li>
+  <li>A routine runs on its own. Claude will not let another tool create that task, so the clicks below are yours. You need Claude Pro, Max, Team, or Enterprise, with Claude Code on the web.</li>
+</ul>
+
+<h2>1. Create the task</h2>
+<ol>
+  <li>On claude.ai, in the left sidebar, click Routines. The page is titled Scheduled tasks.</li>
+  <li>Create a task and name it Send to Claude.</li>
+  <li>Paste the task prompt. In the extension settings, open Send to Claude and click Copy task prompt. The same text is in the box below.</li>
+</ol>
+<div class="row">
+  <button id="copyPrompt" class="secondary" type="button">Copy task prompt</button>
+</div>
+<pre id="prompt">Open the extension settings and click Copy task prompt.</pre>
+
+<figure class="missing">
+  <figcaption>Screenshot needed: docs/img/claude-scheduled-tasks.png. claude.ai left sidebar with Routines, and the page titled Scheduled tasks. Blur names and account details.</figcaption>
+</figure>
+
+<h2>2. Copy the Fire URL and the token</h2>
+<ol>
+  <li>On the task page, click the three dots (...) at the top right, next to the Active toggle.</li>
+  <li>Click Edit.</li>
+  <li>Set the Trigger dropdown to API.</li>
+  <li>Copy the Fire URL. It looks like https://api.anthropic.com/v1/claude_code/routines/trig_…</li>
+  <li>Copy the token. The round-arrows Regenerate button makes a new token and the old one stops working.</li>
+</ol>
+<p>In the extension, open Send to Claude and paste both into the one box, in any order. Click Save. If Chrome asks to allow api.anthropic.com, choose Allow.</p>
+
+<figure>
+  <img src="/img/claude-routine-overview.png" alt="The task page. History is on the left. The Active toggle and the three-dots button are at the top right.">
+  <figcaption>The task page. The three dots sit at the top right, next to Active. History is the column on the left.</figcaption>
+</figure>
+<figure>
+  <img src="/img/claude-routine-api-trigger.png" alt="Edit scheduled task. Trigger is API. The Fire URL has a copy button. Token has a Regenerate button.">
+  <figcaption>Edit. Trigger is API. Copy the Fire URL. Regenerate makes a new token.</figcaption>
+</figure>
+
+<h2>3. Allow the websites</h2>
+<p>This is not in the task editor. Do a first test send so a run exists, then:</p>
+<ol>
+  <li>On the task page, in the History column, open any past run.</li>
+  <li>At the top of the main pane, click the down arrow next to the task name.</li>
+  <li>Click Edit cloud environment.</li>
+  <li>Set Network access to Custom.</li>
+  <li>Paste the list into Allowed domains. In the extension, click Copy allowed websites. The same list is below.</li>
+  <li>Click Save.</li>
+</ol>
+<div class="row">
+  <button id="copySites" class="secondary" type="button">Copy allowed websites</button>
+</div>
+<pre id="sites">api.fxtwitter.com
+fxtwitter.com
+api.vxtwitter.com
+vxtwitter.com
+fixupx.com
+x.com
+twitter.com
+t.co
+video.twimg.com
+pbs.twimg.com</pre>
+
+<figure class="missing">
+  <figcaption>Screenshot needed: docs/img/claude-cloud-environment.png. A past run open, the down arrow next to the task name, Edit cloud environment, Network access set to Custom, and Allowed domains. Blur anything that is not those controls.</figcaption>
+</figure>
+
+<p>After this, a send shows up under History on the task page. Leave the task Active. To replace a token, open the three dots, click Edit, click Regenerate, paste the new token into the extension, and click Save.</p>
+</main>
+<script src="/prompts.js"></script>
+<script>
+(function () {
+  var prompt = document.getElementById('prompt');
+  if (globalThis.STGB_PROMPTS) prompt.textContent = globalThis.STGB_PROMPTS.text('general');
+  function copyFrom(id, button) {
+    var text = document.getElementById(id).textContent;
+    var original = button.textContent;
+    navigator.clipboard.writeText(text).then(function () {
+      button.textContent = 'Copied';
+      setTimeout(function () { button.textContent = original; }, 1500);
+    }, function () {
+      button.textContent = 'Select the box and copy it';
+    });
+  }
+  document.getElementById('copyPrompt').addEventListener('click', function () {
+    copyFrom('prompt', this);
+  });
+  document.getElementById('copySites').addEventListener('click', function () {
+    copyFrom('sites', this);
+  });
+})();
+</script>
+</body>
+</html>

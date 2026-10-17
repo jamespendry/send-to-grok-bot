@@ -68,8 +68,8 @@ const PAGE = `<!doctype html>
   <ol>
     <li>Copy the connect code. This browser just created it. Keep it somewhere private. Anyone with it can send through your destinations. If you lose it, the saved destinations cannot be read back, and you start again.</li>
     <li>Add a Grok Bot webhook, a Claude routine, or both. When you come back, leave a key box blank to keep the saved key. Clear an address and save to remove that destination.</li>
-    <li>Click Save destinations. The code does not work until you save.</li>
-    <li>In the extension options, check Relay, paste the code, and click Save. ChatGPT and Codex stay on this computer, because those open a tab.</li>
+    <li>Click Save destinations. Saving turns on Grok Bot and Claude. ChatGPT and Codex on a phone only need the code.</li>
+    <li>In the extension options, check Relay, paste the code, and click Save. The iPhone shortcut asks for this same code.</li>
   </ol>
   <section>
     <h2>Connect code</h2>
@@ -80,7 +80,7 @@ const PAGE = `<!doctype html>
       <span id="copyMsg"></span>
     </div>
     <label for="key">Relay key</label>
-    <p class="hint">A Shortcut uses this key as a Bearer token. The extension wants the whole code, not just the key.</p>
+    <p class="hint">The extension and the iPhone shortcut both paste the whole code above. You do not copy this key.</p>
     <input id="key" type="text" readonly spellcheck="false" translate="no" autocomplete="off">
   </section>
   <section>

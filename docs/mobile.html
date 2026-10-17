@@ -1,0 +1,70 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Send to Grok Bot on iPhone</title>
+<link rel="stylesheet" href="/site.css">
+</head>
+<body>
+<main>
+<nav>
+  <a href="/">Home</a>
+  <a href="/setup/">Setup</a>
+  <a href="/setup/grok">Grok Bot</a>
+  <a href="/setup/claude">Claude</a>
+  <a href="/mobile">Mobile</a>
+  <a href="/connect">Connect</a>
+  <a href="/history">History</a>
+  <a href="/privacy">Privacy</a>
+</nav>
+<h1>Send to Grok Bot on iPhone</h1>
+<p>Tap one link. Paste one code. Then share a post from the X app.</p>
+
+<h2>1. Copy the code</h2>
+<ol>
+  <li>On a computer, open <a href="https://relay.sendtogrokbot.com">relay.sendtogrokbot.com</a>.</li>
+  <li>Copy the code. It starts with <code>stgbr1.</code> This is the only code. Do not copy a webhook address.</li>
+  <li>If you want Grok Bot or Claude, save that destination on the same page. ChatGPT and Codex need nothing saved.</li>
+</ol>
+
+<h2>2. Add the shortcut</h2>
+<p id="install-link"><a href="https://sendtogrokbot.com/send-to-grok-bot.shortcut">Install Send to Grok Bot</a></p>
+<ol>
+  <li>On the iPhone, tap Install Send to Grok Bot.</li>
+  <li>Tap the downloaded file, then tap Add Shortcut.</li>
+  <li>When Shortcuts asks, paste the code. Paste it once.</li>
+</ol>
+<p>If iOS says the shortcut is untrusted, open Settings, tap Shortcuts, and turn on Allow Untrusted Shortcuts. Tap the link again. If Settings has no such switch, open the downloaded file from the Files app and tap Add Shortcut.</p>
+
+<h2>3. Send a post</h2>
+<ol>
+  <li>In the X app, open a post and tap Share.</li>
+  <li>Tap <strong>Send to Grok Bot</strong>.</li>
+  <li>Pick Grok Bot, Claude, ChatGPT, or Codex.</li>
+</ol>
+<p>A notification names the destination. ChatGPT and Codex then open with the post filled in. You press Send in that app. Grok Bot and Claude are sent for you, using what you saved on the relay.</p>
+<p>If Share does not list the shortcut, tap More on the share sheet and turn on Send to Grok Bot.</p>
+<p>The last 50 sends are on <a href="/history">History</a>. Paste the same code there. That page does not save the code.</p>
+
+<h2>Build it yourself</h2>
+<p>Use this only when the install link above is still missing. In the Shortcuts app, create a shortcut named <strong>Send to Grok Bot</strong>, turn on Show in Share Sheet, and add these actions in order.</p>
+<ol>
+  <li><strong>Text.</strong> Paste the relay code. This stays the first action.</li>
+  <li><strong>Set Variable</strong> named Relay Code.</li>
+  <li><strong>Get URLs from Input.</strong> Input is Shortcut Input. Then <strong>Set Variable</strong> named Links.</li>
+  <li><strong>If</strong> Links has any value.</li>
+  <li>Inside that If: <strong>Get Item from List</strong>, First Item, from Links. <strong>Set Variable</strong> named Post URL.</li>
+  <li><strong>Choose from Menu.</strong> The lines are Grok Bot, Claude, ChatGPT, and Codex.</li>
+  <li>Under each line, add <strong>Text</strong> with exactly <code>grokbot</code>, <code>claude</code>, <code>chatgpt</code>, or <code>codex</code>, then <strong>Set Variable</strong> named Destination.</li>
+  <li>Below End Menu, add <strong>Get Contents of URL</strong>. URL <code>https://relay.sendtogrokbot.com/v1/send</code>. Method POST. Header <code>Authorization</code> is <code>Bearer </code> plus the Relay Code variable. Header <code>Content-Type</code> is <code>application/json</code>. JSON body: <code>destination</code> is Destination, <code>url</code> is Post URL, <code>source</code> is <code>shortcut</code>.</li>
+  <li><strong>Get Dictionary from Input</strong>, then <strong>Set Variable</strong> named Response.</li>
+  <li><strong>Get Dictionary Value</strong> for <code>notice</code>, from Response. <strong>Set Variable</strong> named Notice.</li>
+  <li><strong>Get Dictionary Value</strong> for <code>openUrl</code>, from Response. <strong>Set Variable</strong> named Open URL.</li>
+  <li><strong>Show Notification.</strong> Title Send to Grok Bot. Body is Notice.</li>
+  <li><strong>If</strong> Open URL has any value, <strong>Open URLs</strong> with Open URL.</li>
+  <li>In the Otherwise of the first If, show a notification: No post link was shared.</li>
+</ol>
+</main>
+</body>
+</html>

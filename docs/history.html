@@ -1,0 +1,91 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Recent sends</title>
+<link rel="stylesheet" href="/site.css">
+</head>
+<body>
+<main>
+<nav>
+  <a href="/">Home</a>
+  <a href="/setup/">Setup</a>
+  <a href="/setup/grok">Grok Bot</a>
+  <a href="/setup/claude">Claude</a>
+  <a href="/mobile">Mobile</a>
+  <a href="/connect">Connect</a>
+  <a href="/history">History</a>
+  <a href="/privacy">Privacy</a>
+</nav>
+<h1>Recent sends</h1>
+<p>The last 50 posts you sent through the relay. Each line is the time, the destination, the author, the result, and the post link. The post text is not stored.</p>
+<p class="muted">Paste the relay code from <a href="https://relay.sendtogrokbot.com">relay.sendtogrokbot.com</a>. It starts with <code>stgbr1.</code> This page sends that code only to the relay, and it does not save it on this computer. Open this page on sendtogrokbot.com.</p>
+<form id="form" autocomplete="off">
+  <label for="code">Relay code</label>
+  <textarea id="code" spellcheck="false" autocomplete="off" placeholder="stgbr1."></textarea>
+  <button id="show" type="submit">Show sends</button>
+  <span id="msg" role="status"></span>
+</form>
+<div id="list" class="history"></div>
+</main>
+<script>
+(function () {
+  var input = document.getElementById('code');
+  var msg = document.getElementById('msg');
+  var list = document.getElementById('list');
+  var names = { grokbot: 'Grok Bot', claude: 'Claude', chatgpt: 'ChatGPT', codex: 'Codex' };
+
+  function say(text, bad) {
+    msg.textContent = text || '';
+    msg.className = bad ? 'err' : '';
+  }
+
+  function line(item) {
+    var when = item.sentAt || '';
+    var date = new Date(when);
+    if (!isNaN(date.getTime())) when = date.toLocaleString();
+    var dest = names[item.destination] || item.destination || 'Send';
+    var result = item.ok ? 'Sent' : ('Failed' + (item.error ? ': ' + item.error : ''));
+    var who = item.author ? ' @' + item.author : '';
+    var url = item.url ? ' — ' + item.url : '';
+    return when + ' — ' + dest + who + ' — ' + result + url;
+  }
+
+  document.getElementById('form').addEventListener('submit', function (event) {
+    event.preventDefault();
+    var code = input.value.replace(/\s+/g, '');
+    list.replaceChildren();
+    if (!code) {
+      say('Paste the relay code.', true);
+      return;
+    }
+    say('Loading...');
+    fetch('https://relay.sendtogrokbot.com/v1/history', {
+      headers: { 'Authorization': 'Bearer ' + code }
+    }).then(function (res) {
+      return res.json().catch(function () { return null; }).then(function (data) {
+        if (!res.ok || !data || !data.ok) {
+          say((data && data.error) || 'Could not load sends.', true);
+          return;
+        }
+        var items = data.history || [];
+        if (!items.length) {
+          say('No sends yet.');
+          return;
+        }
+        say(items.length === 1 ? '1 send.' : items.length + ' sends.');
+        for (var i = 0; i < items.length; i++) {
+          var p = document.createElement('p');
+          p.textContent = line(items[i]);
+          list.appendChild(p);
+        }
+      });
+    }).catch(function () {
+      say('Could not reach the relay. Open this page on sendtogrokbot.com.', true);
+    });
+  });
+})();
+</script>
+</body>
+</html>

@@ -1,0 +1,10 @@
+# Pretty URLs when this folder is the site root (sendtogrokbot.com).
+/            /index.html         200
+/connect     /connect.html       200
+/setup       /setup/index.html   200
+/setup/      /setup/index.html   200
+/setup/grok  /setup/grok.html    200
+/setup/claude /setup/claude.html 200
+/privacy     /privacy.html       200
+/mobile      /mobile.html        200
+/history     /history.html       200
