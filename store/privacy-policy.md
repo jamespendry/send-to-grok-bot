@@ -64,7 +64,7 @@ The extension complies with the Chrome Web Store User Data Policy, including Lim
 
 ## Contact
 
-James Pendry, publisher of Send to Grok Bot. Use the support contact on the Chrome Web Store listing, or the project repository at https://github.com/jamespendry/send-to-grok-bot.
+James Pendry, publisher of Send to Grok Bot. Email support@sendtogrokbot.com, or open an issue in the project repository at https://github.com/jamespendry/send-to-grok-bot.
 
 This extension is not affiliated with X, xAI, Anthropic, or OpenAI.
 
