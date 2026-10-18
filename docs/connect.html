@@ -54,9 +54,41 @@
       <label class="field-label" for="paste">Paste here</label>
       <textarea id="paste" spellcheck="false" autocomplete="off" placeholder="Paste here"></textarea>
       <span id="msg" role="status"></span>
-      <div class="note"><b>Grok Bot:</b> paste the Webhook URL and the Authorization header together.<br><b>Claude:</b> paste the API token, then the Fire URL. One at a time is fine.<br>If Chrome asks to allow a site, choose <b>Allow</b>.</div>
+      <p class="muted" style="margin-top:12px">Paste one thing at a time. The page says what to paste next. If Chrome asks to allow a site, choose <b>Allow</b>.</p>
     </li>
   </ol>
+
+  <section class="start" aria-labelledby="start-h">
+    <h2 id="start-h">Nothing to paste yet? Start here</h2>
+    <div class="rows">
+      <div class="row start-row">
+        <span class="logo grokbot sm"><svg><use href="/assets/logos.svg#grokbot"/></svg></span>
+        <div class="text">
+          <b>Grok Bot</b>
+          <span>On a computer, send Grok Bot this line. It creates a routine named Send to Grok Bot.</span>
+          <div class="copy">
+            <span class="val" id="grokline">Set up Send to Grok Bot for me: https://github.com/jamespendry/send-to-grok-bot</span>
+            <button type="button" data-copy="#grokline">Copy</button>
+          </div>
+          <span>Then click the routine, copy <b>POST to</b> and paste it above, and copy <b>header</b> and paste it above. <a href="/setup/grok">Show me where</a></span>
+        </div>
+      </div>
+      <div class="row start-row">
+        <span class="logo claude sm"><svg><use href="/assets/logos.svg#claude"/></svg></span>
+        <div class="text">
+          <b>Claude</b>
+          <span>Follow the <a href="/setup/claude">four Claude steps</a>, then paste the API token and the Fire URL above. Or let Claude do it for you.</span>
+        </div>
+      </div>
+      <div class="row start-row">
+        <span class="logo chatgpt sm"><svg><use href="/assets/logos.svg#chatgpt"/></svg></span>
+        <div class="text">
+          <b>ChatGPT or Codex</b>
+          <span>Nothing to paste. Check the box in the extension settings and click Save.</span>
+        </div>
+      </div>
+    </div>
+  </section>
 
   <p class="muted" data-stgb-extra>This page stays in your browser. Pasting saves into the extension on this computer and nowhere else. ChatGPT and Codex need none of this.</p>
 </main>

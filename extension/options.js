@@ -295,7 +295,7 @@ async function load() {
   } catch (_) {}
   const grokOn = brandSet(local.enabled, local.webhookUrl).has('grokbot');
   const grokEmpty = !(local.webhookUrl || '').trim() && !(local.useRelay && (local.relayCode || '').trim());
-  if (!notice && grokOn && grokEmpty) notice = 'Grok Bot is checked, but the webhook is empty. Paste the webhook URL and the Authorization header together in the box above. A webhook saved by version 1.1.0 is kept when it is still in this browser.';
+  if (!notice && grokOn && grokEmpty) notice = 'Grok Bot is checked, but the webhook is empty. Paste the webhook URL and the Authorization header in the box above, one at a time or together. A webhook saved by version 1.1.0 is kept when it is still in this browser.';
   showNotice(notice);
 }
 

@@ -4,6 +4,37 @@
   'use strict';
   document.documentElement.dataset.stgbReady = '1';
 
+  // A /connect#stgb1... link. Read it at document_start and remove it from the
+  // address bar right away, so the code does not linger in the URL or history.
+  let handoff = '';
+  let frameReady = false;
+  function takeHash() {
+    try {
+      const raw = decodeURIComponent((location.hash || '').slice(1)).trim();
+      if (!/^(stgb1|stgbr1)\.[A-Za-z0-9_-]+$/i.test(raw)) return '';
+      history.replaceState(null, '', location.pathname + location.search);
+      return raw;
+    } catch (_) {
+      return '';
+    }
+  }
+  function handTo(code) {
+    if (!code || !frame || !frame.contentWindow) return;
+    frame.contentWindow.postMessage({stgb: 'code', code: code}, 'chrome-extension://' + chrome.runtime.id);
+  }
+  handoff = takeHash();
+  // A second link opened while this page is already open only changes the hash.
+  if (globalThis.addEventListener) {
+    globalThis.addEventListener('hashchange', function () {
+      const code = takeHash();
+      if (!code) return;
+      handoff = code;
+      const heading = document.querySelector('#step-paste h2');
+      if (heading) heading.textContent = 'Finish connecting';
+      if (frameReady) handTo(code);
+    });
+  }
+
   function report(text, ok, pending) {
     const el = document.getElementById('msg');
     if (el) {
@@ -39,7 +70,7 @@
     hide(document.getElementById('step-install'));
     document.querySelectorAll('[data-stgb-extra]').forEach(hide);
     const heading = document.querySelector('#step-paste h2');
-    if (heading) heading.textContent = 'Paste the webhook URL and the Authorization header.';
+    if (heading) heading.textContent = handoff ? 'Finish connecting' : 'Paste what your setup page told you to copy.';
     hide(document.querySelector('label[for="paste"]'));
   }
 
@@ -53,7 +84,12 @@
     frame.id = 'stgb-grant';
     frame.title = 'Paste here';
     frame.src = chrome.runtime.getURL('grant.html');
-    frame.style.cssText = 'display:block;width:100%;height:160px;border:0;border-radius:8px;background:#fff';
+    frame.style.cssText = 'display:block;width:100%;height:160px;border:0;border-radius:12px;background:transparent';
+    frame.setAttribute('allowtransparency', 'true');
+    frame.addEventListener('load', function () {
+      frameReady = true;
+      if (handoff) handTo(handoff);
+    });
     box.hidden = true;
     box.disabled = true;
     box.setAttribute('aria-hidden', 'true');

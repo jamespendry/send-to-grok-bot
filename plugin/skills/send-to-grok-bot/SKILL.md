@@ -2,8 +2,8 @@
 name: send-to-grok-bot
 description: >-
   Create the Send to Grok Bot webhook routine with the General prompt, then
-  send one message: install the extension, copy the Webhook URL and
-  Authorization header from the sidebar, and paste both at
+  send one message: on a computer, add the extension, open the routine from
+  Routines in the bot's info pane, and paste POST to and then header at
   sendtogrokbot.com/connect. Answer an incoming X post using the preset on
   that post. Use when someone says "Set up Send to Grok Bot" or a webhook
   delivery contains an X post.
@@ -16,13 +16,13 @@ user-invocable: true
 
 # Send to Grok Bot
 
-You create one webhook routine and you answer the posts it receives. You cannot read the webhook key. Do not print it. Do not invent the URL. The person copies both values from the sidebar and pastes them at sendtogrokbot.com/connect.
+You create one webhook routine and you answer the posts it receives. You cannot read the webhook key, so you cannot build a connect link. Do not print the key. Do not invent the URL. The person copies the values from the routine's detail pane and pastes them at sendtogrokbot.com/connect.
 
 ## Set up
 
 Do this when they ask you to set up Send to Grok Bot, or they paste a line that points at this project.
 
-1. Create a webhook routine. If a confirm card appears, that confirmation is the only step in your next message. Wait, then continue.
+1. Create a routine whose When to run is When a webhook fires. If a confirm card appears, that confirmation is the only step in your next message. Wait, then continue.
 2. Name it Send to Grok Bot.
 3. The routine instruction is the full text of [routine-prompt.md](routine-prompt.md) in this skill. Paste that file as the instruction. Do not add a title. Do not shorten it. That text is the General preset. It classifies the post and starts with a one-line takeaway, and it follows a `prompt` field when the post includes one.
 4. Leave the routine on. Do not pause it.
@@ -31,11 +31,11 @@ You cannot read the webhook URL or the Authorization header. Do not try. Do not 
 
 After the routine is on, send one message and stop. Use these words:
 
-Install Send to Grok Bot. It is not in the Chrome Web Store yet. Download the zip from https://github.com/jamespendry/send-to-grok-bot and unzip it. Find the folder named extension. It contains manifest.json. In Chrome, open chrome://extensions, turn on Developer mode, and click Load unpacked. Select that extension folder. Then open https://sendtogrokbot.com/connect.
+Your Send to Grok Bot routine is ready. On a computer: 1) Add the extension. The steps are at sendtogrokbot.com/connect. 2) Click my name at the top, then Routines, then Send to Grok Bot. 3) Copy POST to and paste it at sendtogrokbot.com/connect. 4) Copy header and paste it in the same box. Then open x.com and click the arrow on any post.
 
-Open the sidebar links named Webhook URL and Authorization header, copy both, and paste them together at sendtogrokbot.com/connect.
+Do not add a second message. Do not print the key. Do not ask them to paste the key into this chat. If your message can include the links named Webhook URL and Authorization header, they open the same pane.
 
-Do not add a second message. Do not print the key. Do not ask them to paste the key into this chat. The page saves when they paste, if the extension is installed. Success on that page is: Now open x.com and click the arrow.
+Clicking the bot's name at the top of the chat, or Cmd+Shift+I, opens its info pane. The routine is under Routines. Its detail pane shows three copyable fields under Webhook: POST to (the webhook URL), key, and header (the Authorization header). Pasting key instead of header also works. They paste one value at a time, in either order. After POST to, the page says: Webhook URL saved. Now paste the Authorization header. After the second value it says: Now open x.com and click the arrow. The extension is Chrome on a computer, and the paste saves only when it is installed. It is not in the Chrome Web Store yet. The install steps on sendtogrokbot.com/connect are: download the zip, open chrome://extensions, turn on Developer mode, click Load unpacked, and choose the extension folder.
 
 Do not post, follow, or message anyone on X while you set this up. Do not commit a URL or a key.
 
