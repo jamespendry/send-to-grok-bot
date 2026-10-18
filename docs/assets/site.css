@@ -423,3 +423,7 @@ html:not([data-stgb-ready]) .flow li:first-child.done .lbl { border-top-color: v
 
 .phone-ready { margin: 20px 0 8px; }
 .phone-code { display: block; margin: 10px 0 2px; font-size: 13px; color: var(--muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+
+.demo { max-width: 880px; margin: 0 auto; }
+.demo video { display: block; width: 100%; height: auto; aspect-ratio: 1470 / 922; border: 1px solid var(--line); border-radius: 16px; background: var(--card, #fff); }
+.demo figcaption { margin-top: 10px; text-align: center; font-size: 14px; color: var(--muted); }
