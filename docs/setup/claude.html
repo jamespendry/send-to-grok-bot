@@ -21,17 +21,16 @@
 <header class="top"><div class="wrap">
   <a class="brand" href="/"><img src="/assets/icons/icon48.png" alt="" width="28" height="28"><span>Send to Grok Bot</span></a>
   <nav aria-label="Main">
-    <a href="/setup" aria-current="page">Setup</a>
-    <a href="/mobile" class="hide-sm">iPhone</a>
-    <a class="btn small" data-chrome-store href="https://github.com/jamespendry/send-to-grok-bot#readme">Add to Chrome</a>
   </nav>
 </div></header>
 
 <main class="narrow page">
+  <nav class="flow" aria-label="Setup progress"><ol><li class="done"><a href="/install"><span class="num">1</span><span class="lbl">Install</span></a></li><li class="done"><a href="/setup"><span class="num">2</span><span class="lbl">Choose your AI</span></a></li><li class="now" aria-current="step"><span class="num">3</span><span class="lbl">Connect</span></li><li class=""><span class="num">4</span><span class="lbl">Try it</span></li></ol></nav>
+  <div class="note when-missing" style="margin-bottom:20px"><b>Install the extension first.</b> <a href="/install">Go to step 1</a></div>
   <a class="crumb" href="/setup"><svg viewBox="0 0 24 24" aria-hidden="true"><path fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" d="M15 5l-7 7 7 7"/></svg>Setup</a>
   <div class="page-head">
     <span class="logo claude"><svg><use href="/assets/logos.svg#claude"/></svg></span>
-    <h1>Claude</h1>
+    <h1>Connect Claude</h1>
   </div>
   <p class="intro">Two ways to connect Claude. Pick one. After that, Claude replies to every post you send, on its own.</p>
 
@@ -40,7 +39,7 @@
     <a class="path" href="#claude-does-it"><b>Have Claude do it</b><span>Needs Claude in Chrome. You add the extension and click Allow.</span></a>
   </div>
 
-  <div class="note"><b>Either way you need:</b> a paid Claude plan (Pro or Max), and the extension installed. <a href="/install">Install steps</a></div>
+  <div class="note"><b>Either way you need:</b> a paid Claude plan (Pro or Max).</div>
 
   <h2 id="yourself">Do it yourself</h2>
   <ol class="steps num">
@@ -91,7 +90,6 @@
   <h2 id="claude-does-it">Have Claude do it</h2>
   <p>Claude creates the task on claude.ai and connects the extension. It never sees your token. You need Claude in Chrome connected to this browser.</p>
   <ol class="steps num">
-    <li><h2>Install the extension</h2><p class="muted">Claude can't do this part. <a href="/install">Install steps</a></p></li>
     <li><h2>Send Claude this line</h2>
       <div class="copy">
         <span class="val" id="claudeline">Set up Send to Grok Bot for me, with Claude: https://github.com/jamespendry/send-to-grok-bot</span>
@@ -125,7 +123,7 @@
     <summary>Rather skip all of this?</summary>
     <p class="muted">Check <span class="ui">Send to Claude</span> in the extension and leave the Fire URL box empty. Clicking a post opens Claude in a new tab with the post filled in, and you press Send. Works on any plan, including free.</p>
   </details>
-  <div class="next"><a class="btn secondary" href="/setup">Set up another AI</a></div>
+  <div class="big-next"><a class="btn large" href="/try">Next: Try it</a></div>
 </main>
 <script src="/prompts.js"></script>
 <script>
@@ -136,12 +134,12 @@
 
 <footer><div class="wrap">
   <span>Free and open source.</span>
-  <a href="https://github.com/jamespendry/send-to-grok-bot">GitHub</a>
-  <a href="/setup">Setup</a>
+  <a href="/install">Get started</a>
   <a href="/mobile">iPhone</a>
   <a href="/history">History</a>
   <a href="/connect">Connect</a>
   <a href="/privacy">Privacy</a>
+  <a href="https://github.com/jamespendry/send-to-grok-bot">GitHub</a>
   <span class="sp"></span>
   <span>Not affiliated with X, xAI, Anthropic, or OpenAI.</span>
 </div></footer>

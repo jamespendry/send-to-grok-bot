@@ -21,26 +21,20 @@
 <header class="top"><div class="wrap">
   <a class="brand" href="/"><img src="/assets/icons/icon48.png" alt="" width="28" height="28"><span>Send to Grok Bot</span></a>
   <nav aria-label="Main">
-    <a href="/setup" aria-current="page">Setup</a>
-    <a href="/mobile" class="hide-sm">iPhone</a>
-    <a class="btn small" data-chrome-store href="https://github.com/jamespendry/send-to-grok-bot#readme">Add to Chrome</a>
   </nav>
 </div></header>
 
 <main class="narrow page">
+  <nav class="flow" aria-label="Setup progress"><ol><li class="done"><a href="/install"><span class="num">1</span><span class="lbl">Install</span></a></li><li class="done"><a href="/setup"><span class="num">2</span><span class="lbl">Choose your AI</span></a></li><li class="now" aria-current="step"><span class="num">3</span><span class="lbl">Connect</span></li><li class=""><span class="num">4</span><span class="lbl">Try it</span></li></ol></nav>
+  <div class="note when-missing" style="margin-bottom:20px"><b>Install the extension first.</b> <a href="/install">Go to step 1</a></div>
   <a class="crumb" href="/setup"><svg viewBox="0 0 24 24" aria-hidden="true"><path fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" d="M15 5l-7 7 7 7"/></svg>Setup</a>
   <div class="page-head">
     <span class="logo chatgpt"><svg><use href="/assets/logos.svg#chatgpt"/></svg></span>
-    <h1>ChatGPT</h1>
+    <h1>Connect ChatGPT</h1>
   </div>
   <p class="intro">Nothing to set up. Check one box and posts open in ChatGPT, ready to send.</p>
 
   <ol class="steps num">
-    <li>
-      <h2>Install the extension</h2>
-      <p class="muted">Skip this if you already did.</p>
-      <div class="actions" style="margin-top:12px"><a class="btn secondary" href="/install">Install steps</a></div>
-    </li>
     <li>
       <h2>Check the box</h2>
       <p class="muted">Click the Send to Grok Bot icon in Chrome's toolbar to open its settings. Check <span class="ui">Send to ChatGPT</span> and click <span class="ui">Save</span>.</p>
@@ -65,17 +59,17 @@
   <h2>Have a ChatGPT workspace agent?</h2>
   <p>On Business or Enterprise, you can have posts run on an agent instead of opening a tab. In the extension, under Send to ChatGPT, open <span class="ui">Workspace agent</span>, if you already have one, and paste the API trigger ID and access token. Most people can skip this.</p>
 
-  <div class="next"><a class="btn secondary" href="/setup">Set up another AI</a></div>
+  <div class="big-next"><a class="btn large" href="/try">Next: Try it</a></div>
 </main>
 
 <footer><div class="wrap">
   <span>Free and open source.</span>
-  <a href="https://github.com/jamespendry/send-to-grok-bot">GitHub</a>
-  <a href="/setup">Setup</a>
+  <a href="/install">Get started</a>
   <a href="/mobile">iPhone</a>
   <a href="/history">History</a>
   <a href="/connect">Connect</a>
   <a href="/privacy">Privacy</a>
+  <a href="https://github.com/jamespendry/send-to-grok-bot">GitHub</a>
   <span class="sp"></span>
   <span>Not affiliated with X, xAI, Anthropic, or OpenAI.</span>
 </div></footer>

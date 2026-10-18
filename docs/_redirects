@@ -1,6 +1,7 @@
 # Pretty URLs when this folder is the site root (sendtogrokbot.com).
 /                 /index.html           200
 /install          /install.html         200
+/try              /try.html             200
 /connect          /connect.html         200
 /setup            /setup/index.html     200
 /setup/           /setup/index.html     200

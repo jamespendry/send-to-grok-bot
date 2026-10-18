@@ -3,17 +3,32 @@
   "name": "Send to Grok Bot",
   "version": "1.2.7",
   "description": "Adds a native-looking button to X posts that sends the post to Grok Bot, Claude, ChatGPT, or Codex.",
-  "permissions": ["storage"],
-  "host_permissions": ["https://api.fxtwitter.com/*", "https://api.vxtwitter.com/*"],
-  "optional_host_permissions": ["https://*/*"],
+  "permissions": [
+    "storage"
+  ],
+  "host_permissions": [
+    "https://api.fxtwitter.com/*",
+    "https://api.vxtwitter.com/*"
+  ],
+  "optional_host_permissions": [
+    "https://*/*"
+  ],
   "background": {
     "service_worker": "background.js"
   },
   "content_scripts": [
     {
-      "matches": ["https://x.com/*", "https://twitter.com/*"],
-      "js": ["logos.js", "content.js"],
-      "css": ["content.css"],
+      "matches": [
+        "https://x.com/*",
+        "https://twitter.com/*"
+      ],
+      "js": [
+        "logos.js",
+        "content.js"
+      ],
+      "css": [
+        "content.css"
+      ],
       "run_at": "document_idle",
       "all_frames": false
     },
@@ -23,7 +38,23 @@
         "https://www.sendtogrokbot.com/connect*",
         "https://sendtogrokbot.com/docs/connect*"
       ],
-      "js": ["hosts.js", "connect.js", "relay.js", "site-connect.js"],
+      "js": [
+        "hosts.js",
+        "connect.js",
+        "relay.js",
+        "site-connect.js"
+      ],
+      "run_at": "document_start",
+      "all_frames": false
+    },
+    {
+      "matches": [
+        "https://sendtogrokbot.com/*",
+        "https://www.sendtogrokbot.com/*"
+      ],
+      "js": [
+        "site-ready.js"
+      ],
       "run_at": "document_start",
       "all_frames": false
     }
@@ -31,8 +62,13 @@
   "options_page": "options.html",
   "web_accessible_resources": [
     {
-      "resources": ["grant.html"],
-      "matches": ["https://sendtogrokbot.com/*", "https://www.sendtogrokbot.com/*"]
+      "resources": [
+        "grant.html"
+      ],
+      "matches": [
+        "https://sendtogrokbot.com/*",
+        "https://www.sendtogrokbot.com/*"
+      ]
     }
   ],
   "action": {
