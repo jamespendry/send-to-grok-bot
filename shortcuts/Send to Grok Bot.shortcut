@@ -10,7 +10,7 @@
 			<key>WFWorkflowActionParameters</key>
 			<dict>
 				<key>GroupingIdentifier</key>
-				<string>7B330305-2472-458F-BD0F-C488A0D8E374</string>
+				<string>BE0BA54F-8E35-49C0-A28F-B1D305612FF5</string>
 				<key>WFControlFlowMode</key>
 				<integer>0</integer>
 				<key>WFMenuItems</key>
@@ -18,7 +18,6 @@
 					<string>Grok Bot</string>
 					<string>Claude</string>
 					<string>ChatGPT</string>
-					<string>Codex</string>
 				</array>
 				<key>WFMenuPrompt</key>
 				<string>Send this post to</string>
@@ -30,7 +29,7 @@
 			<key>WFWorkflowActionParameters</key>
 			<dict>
 				<key>GroupingIdentifier</key>
-				<string>7B330305-2472-458F-BD0F-C488A0D8E374</string>
+				<string>BE0BA54F-8E35-49C0-A28F-B1D305612FF5</string>
 				<key>WFControlFlowMode</key>
 				<integer>1</integer>
 				<key>WFMenuItemTitle</key>
@@ -45,7 +44,7 @@
 				<key>ShowHeaders</key>
 				<false/>
 				<key>UUID</key>
-				<string>2A454ACA-F0F0-48B9-A3E4-48B05F8172C4</string>
+				<string>E3471C4C-3E73-42B6-A6F2-B6A0A0108D0F</string>
 				<key>WFHTTPBodyType</key>
 				<string>JSON</string>
 				<key>WFHTTPMethod</key>
@@ -181,7 +180,7 @@
 						<key>OutputName</key>
 						<string>Contents of URL</string>
 						<key>OutputUUID</key>
-						<string>2A454ACA-F0F0-48B9-A3E4-48B05F8172C4</string>
+						<string>E3471C4C-3E73-42B6-A6F2-B6A0A0108D0F</string>
 						<key>Type</key>
 						<string>ActionOutput</string>
 					</dict>
@@ -207,7 +206,7 @@
 			<key>WFWorkflowActionParameters</key>
 			<dict>
 				<key>UUID</key>
-				<string>A02C2FC4-17DB-4077-BEC8-8EBBB62C7C96</string>
+				<string>761804EF-C002-42D8-B123-BA4D02A8B775</string>
 				<key>WFTextActionText</key>
 				<string>grokbot://</string>
 			</dict>
@@ -224,7 +223,7 @@
 						<key>OutputName</key>
 						<string>Text</string>
 						<key>OutputUUID</key>
-						<string>A02C2FC4-17DB-4077-BEC8-8EBBB62C7C96</string>
+						<string>761804EF-C002-42D8-B123-BA4D02A8B775</string>
 						<key>Type</key>
 						<string>ActionOutput</string>
 					</dict>
@@ -239,7 +238,7 @@
 			<key>WFWorkflowActionParameters</key>
 			<dict>
 				<key>GroupingIdentifier</key>
-				<string>7B330305-2472-458F-BD0F-C488A0D8E374</string>
+				<string>BE0BA54F-8E35-49C0-A28F-B1D305612FF5</string>
 				<key>WFControlFlowMode</key>
 				<integer>1</integer>
 				<key>WFMenuItemTitle</key>
@@ -254,7 +253,7 @@
 				<key>ShowHeaders</key>
 				<false/>
 				<key>UUID</key>
-				<string>8E72C6B4-6D3F-4EED-9AB7-196CDF1733CC</string>
+				<string>746A9D0A-1DE6-416B-A3E6-ABF1C9522164</string>
 				<key>WFHTTPBodyType</key>
 				<string>JSON</string>
 				<key>WFHTTPMethod</key>
@@ -390,7 +389,7 @@
 						<key>OutputName</key>
 						<string>Contents of URL</string>
 						<key>OutputUUID</key>
-						<string>8E72C6B4-6D3F-4EED-9AB7-196CDF1733CC</string>
+						<string>746A9D0A-1DE6-416B-A3E6-ABF1C9522164</string>
 						<key>Type</key>
 						<string>ActionOutput</string>
 					</dict>
@@ -405,7 +404,7 @@
 			<key>WFWorkflowActionParameters</key>
 			<dict>
 				<key>GroupingIdentifier</key>
-				<string>7B330305-2472-458F-BD0F-C488A0D8E374</string>
+				<string>BE0BA54F-8E35-49C0-A28F-B1D305612FF5</string>
 				<key>WFControlFlowMode</key>
 				<integer>1</integer>
 				<key>WFMenuItemTitle</key>
@@ -420,7 +419,7 @@
 				<key>ShowHeaders</key>
 				<false/>
 				<key>UUID</key>
-				<string>EF456DE1-0210-40AF-8B7D-1A5FDB1A5B48</string>
+				<string>A0155D2F-A089-4081-B6D2-5B9EB4497B27</string>
 				<key>WFHTTPBodyType</key>
 				<string>JSON</string>
 				<key>WFHTTPMethod</key>
@@ -556,7 +555,7 @@
 						<key>OutputName</key>
 						<string>Contents of URL</string>
 						<key>OutputUUID</key>
-						<string>EF456DE1-0210-40AF-8B7D-1A5FDB1A5B48</string>
+						<string>A0155D2F-A089-4081-B6D2-5B9EB4497B27</string>
 						<key>Type</key>
 						<string>ActionOutput</string>
 					</dict>
@@ -571,173 +570,7 @@
 			<key>WFWorkflowActionParameters</key>
 			<dict>
 				<key>GroupingIdentifier</key>
-				<string>7B330305-2472-458F-BD0F-C488A0D8E374</string>
-				<key>WFControlFlowMode</key>
-				<integer>1</integer>
-				<key>WFMenuItemTitle</key>
-				<string>Codex</string>
-			</dict>
-		</dict>
-		<dict>
-			<key>WFWorkflowActionIdentifier</key>
-			<string>is.workflow.actions.downloadurl</string>
-			<key>WFWorkflowActionParameters</key>
-			<dict>
-				<key>ShowHeaders</key>
-				<false/>
-				<key>UUID</key>
-				<string>3172B0F7-542A-4F7E-BE66-B6EF91838D6B</string>
-				<key>WFHTTPBodyType</key>
-				<string>JSON</string>
-				<key>WFHTTPMethod</key>
-				<string>POST</string>
-				<key>WFJSONValues</key>
-				<dict>
-					<key>Value</key>
-					<dict>
-						<key>WFDictionaryFieldValueItems</key>
-						<array>
-							<dict>
-								<key>WFItemType</key>
-								<integer>0</integer>
-								<key>WFKey</key>
-								<dict>
-									<key>Value</key>
-									<dict>
-										<key>string</key>
-										<string>destination</string>
-									</dict>
-									<key>WFSerializationType</key>
-									<string>WFTextTokenString</string>
-								</dict>
-								<key>WFValue</key>
-								<dict>
-									<key>Value</key>
-									<dict>
-										<key>string</key>
-										<string>codex</string>
-									</dict>
-									<key>WFSerializationType</key>
-									<string>WFTextTokenString</string>
-								</dict>
-							</dict>
-							<dict>
-								<key>WFItemType</key>
-								<integer>0</integer>
-								<key>WFKey</key>
-								<dict>
-									<key>Value</key>
-									<dict>
-										<key>string</key>
-										<string>url</string>
-									</dict>
-									<key>WFSerializationType</key>
-									<string>WFTextTokenString</string>
-								</dict>
-								<key>WFValue</key>
-								<dict>
-									<key>Value</key>
-									<dict>
-										<key>attachmentsByRange</key>
-										<dict>
-											<key>{0, 1}</key>
-											<dict>
-												<key>Type</key>
-												<string>ExtensionInput</string>
-											</dict>
-										</dict>
-										<key>string</key>
-										<string>￼</string>
-									</dict>
-									<key>WFSerializationType</key>
-									<string>WFTextTokenString</string>
-								</dict>
-							</dict>
-							<dict>
-								<key>WFItemType</key>
-								<integer>0</integer>
-								<key>WFKey</key>
-								<dict>
-									<key>Value</key>
-									<dict>
-										<key>string</key>
-										<string>source</string>
-									</dict>
-									<key>WFSerializationType</key>
-									<string>WFTextTokenString</string>
-								</dict>
-								<key>WFValue</key>
-								<dict>
-									<key>Value</key>
-									<dict>
-										<key>string</key>
-										<string>shortcut</string>
-									</dict>
-									<key>WFSerializationType</key>
-									<string>WFTextTokenString</string>
-								</dict>
-							</dict>
-							<dict>
-								<key>WFItemType</key>
-								<integer>0</integer>
-								<key>WFKey</key>
-								<dict>
-									<key>Value</key>
-									<dict>
-										<key>string</key>
-										<string>format</string>
-									</dict>
-									<key>WFSerializationType</key>
-									<string>WFTextTokenString</string>
-								</dict>
-								<key>WFValue</key>
-								<dict>
-									<key>Value</key>
-									<dict>
-										<key>string</key>
-										<string>text</string>
-									</dict>
-									<key>WFSerializationType</key>
-									<string>WFTextTokenString</string>
-								</dict>
-							</dict>
-						</array>
-					</dict>
-					<key>WFSerializationType</key>
-					<string>WFDictionaryFieldValue</string>
-				</dict>
-				<key>WFURL</key>
-				<string>https://relay.sendtogrokbot.com/v1/open</string>
-			</dict>
-		</dict>
-		<dict>
-			<key>WFWorkflowActionIdentifier</key>
-			<string>is.workflow.actions.openurl</string>
-			<key>WFWorkflowActionParameters</key>
-			<dict>
-				<key>WFInput</key>
-				<dict>
-					<key>Value</key>
-					<dict>
-						<key>OutputName</key>
-						<string>Contents of URL</string>
-						<key>OutputUUID</key>
-						<string>3172B0F7-542A-4F7E-BE66-B6EF91838D6B</string>
-						<key>Type</key>
-						<string>ActionOutput</string>
-					</dict>
-					<key>WFSerializationType</key>
-					<string>WFTextTokenAttachment</string>
-				</dict>
-			</dict>
-		</dict>
-		<dict>
-			<key>WFWorkflowActionIdentifier</key>
-			<string>is.workflow.actions.choosefrommenu</string>
-			<key>WFWorkflowActionParameters</key>
-			<dict>
-				<key>GroupingIdentifier</key>
-				<string>7B330305-2472-458F-BD0F-C488A0D8E374</string>
+				<string>BE0BA54F-8E35-49C0-A28F-B1D305612FF5</string>
 				<key>WFControlFlowMode</key>
 				<integer>2</integer>
 			</dict>

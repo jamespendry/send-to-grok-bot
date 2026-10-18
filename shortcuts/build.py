@@ -40,7 +40,9 @@ def end_if(group):
 def gid():
     return str(uuid.uuid4()).upper()
 
-MENU = [("Grok Bot", "grokbot"), ("Claude", "claude"), ("ChatGPT", "chatgpt"), ("Codex", "codex")]
+# Codex is left out: on iPhone it lives inside the ChatGPT app, which does not open
+# Codex links, so it would land on the website. It stays in the Chrome extension.
+MENU = [("Grok Bot", "grokbot"), ("Claude", "claude"), ("ChatGPT", "chatgpt")]
 
 def shared_input():
     return {"Value": {"string": OBJ, "attachmentsByRange": {"{0, 1}": {"Type": "ExtensionInput"}}},
