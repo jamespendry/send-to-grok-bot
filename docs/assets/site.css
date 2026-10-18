@@ -374,3 +374,9 @@ ol.install .copy .val { font-size: 15px; }
 a.path:hover { background: var(--surface); text-decoration: none; }
 .path span { color: var(--muted); font-size: 14px; }
 h2[id] { scroll-margin-top: 72px; }
+
+/* Connect: the confirmation the extension adds after a save */
+#stgb-done { font-size: 16px; padding: 16px 18px; border: 1px solid rgba(0, 186, 124, 0.35); }
+#stgb-done b { color: var(--ok); }
+#stgb-done a { font-weight: 700; margin-left: 4px; }
+#msg.pending { color: var(--fg); }
