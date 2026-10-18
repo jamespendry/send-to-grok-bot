@@ -3,6 +3,7 @@ import { encryptSecret, decryptSecret, sha256Hex } from "./crypto.js";
 import { ensureSchema, findAccount, insertAccount, updateAccount, addSend, recentSends } from "./db.js";
 import { safeLog } from "./log.js";
 import { prefilledOpenUrl } from "./open-link.js";
+import { buildOpen } from "./open.js";
 import { renderPage, setupJavaScript } from "./page.js";
 import { LIMITS, takeToken } from "./rate.js";
 import { claudeFireUrl, claudeText, parseSendBody, pointsAtRelay, publicError, webhookProblem } from "./validate.js";
@@ -46,7 +47,7 @@ export function normalizePath(pathname) {
 function logPath(request) {
   try {
     const path = normalizePath(new URL(request.url).pathname);
-    if (path === "/" || path === "/setup.js" || path === "/v1/config" || path === "/v1/send" || path === "/v1/history") return path;
+    if (path === "/" || path === "/setup.js" || path === "/v1/open" || path === "/v1/config" || path === "/v1/send" || path === "/v1/history") return path;
   } catch { /* ignore */ }
   return "other";
 }
@@ -417,6 +418,26 @@ async function send(request, env, who) {
   return json(named(parsed.destination, { ok: false, error, notice: error }), result.http || 502);
 }
 
+// No code and nothing stored: the shortcut's open-with-the-post-filled-in path.
+async function openPost(request, env) {
+  if (request.method !== "POST") return json({ ok: false, error: "That method is not allowed." }, 405, { allow: "POST" });
+  if (!env || !env.KV) requireStorage(env);
+  const limited = await takeToken(env.KV, await clientId(request, env), "open", LIMITS.open);
+  if (!limited.ok) return tooMany(limited);
+  const body = await readJson(request);
+  if (body.error) return json({ ok: false, error: body.error, notice: body.error }, body.status || 400);
+  const value = body.value || {};
+  const result = await buildOpen(String(value.destination || ""), value.url, (u, init) => {
+    // Workers reject the credentials option, and fxtwitter asks callers to name themselves.
+    const { credentials, ...rest } = init || {};
+    const headers = { ...(rest.headers || {}), "User-Agent": "SendToGrokBot/1.0 (+https://sendtogrokbot.com)" };
+    return callOut(env, new Request(u, { ...rest, headers }));
+  });
+  safeLog({ method: "POST", path: "/v1/open", status: result.ok ? 200 : 400, destination: result.ok ? result.destination : "", error: result.ok ? "" : "input" });
+  if (!result.ok) return json({ ok: false, error: result.error, notice: result.error }, 400);
+  return json(result);
+}
+
 async function getHistory(request, env, who, extra) {
   const limited = await takeToken(env.KV, who.keyHash, "configRead", LIMITS.configRead);
   if (!limited.ok) return tooMany(limited, extra);
@@ -445,6 +466,7 @@ export async function handle(request, env) {
       headers: { ...SECURITY, "content-type": "text/javascript; charset=utf-8" }
     });
   }
+  if (path === "/v1/open") return openPost(request, env);
   if (path !== "/v1/config" && path !== "/v1/send" && path !== "/v1/history") return json({ ok: false, error: "Nothing is here." }, 404);
   requireStorage(env);
   const cors = path === "/v1/history" ? corsHeaders(request) : {};

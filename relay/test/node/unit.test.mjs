@@ -543,92 +543,56 @@ test("one ready destination is sent on the click, and two destinations stay a me
   assert.match(read("../extension/content.js"), /showToast\(brand, title, ''\);\n\s*setState\(btn, 'ok'/);
 });
 
-test("the share sheet shortcut is a plist the Shortcuts app can import", () => {
+test("the share sheet shortcut needs no code and opens the AI through /v1/open", () => {
   const filePath = join(root, "../shortcuts/Send to Grok Bot.shortcut");
   const file = readFileSync(filePath, "utf8");
   assert.match(file, /^<\?xml version="1\.0"/);
   assert.doesNotMatch(file, /rk_[A-Za-z0-9_-]{20}/);
-  assert.doesNotMatch(file, /icloud\.com\/shortcuts\/[0-9a-f]{8}/);
+  assert.doesNotMatch(file, /stgbr1|Authorization|Bearer/);
   const parsed = JSON.parse(execFileSync("python3", ["-c", `
 import json, plistlib, sys
 pl = plistlib.loads(open(sys.argv[1], "rb").read())
 actions = pl["WFWorkflowActions"]
 def ident(a):
     return a.get("WFWorkflowActionIdentifier", "").rsplit(".", 1)[-1]
-def strings(obj, out):
-    if isinstance(obj, dict):
-        if isinstance(obj.get("string"), str):
-            out.append(obj["string"])
-        if obj.get("Type") == "Variable" and "VariableName" in obj:
-            out.append("var:" + obj["VariableName"])
-        for value in obj.values():
-            strings(value, out)
-    elif isinstance(obj, list):
-        for value in obj:
-            strings(value, out)
-post = actions[21]["WFWorkflowActionParameters"]
-tokens = []
-strings(post, tokens)
-question = pl["WFWorkflowImportQuestions"][0]
+def params(name):
+    return [a["WFWorkflowActionParameters"] for a in actions if ident(a) == name]
+post = params("downloadurl")[0]
+menu = [p for p in params("choosefrommenu") if p.get("WFControlFlowMode") == 0][0]
 print(json.dumps({
     "name": pl.get("WFWorkflowName"),
-    "client": pl.get("WFWorkflowClientVersion"),
-    "minimum": pl.get("WFWorkflowMinimumClientVersion"),
     "types": pl.get("WFWorkflowTypes"),
     "inputs": pl.get("WFWorkflowInputContentItemClasses"),
-    "hasInput": pl.get("WFWorkflowHasShortcutInputVariables"),
-    "question": {"index": question.get("ActionIndex"), "key": question.get("ParameterKey"), "text": question.get("Text"), "default": question.get("DefaultValue")},
+    "questions": pl.get("WFWorkflowImportQuestions"),
     "actions": [ident(a) for a in actions],
-    "menu": actions[7]["WFWorkflowActionParameters"].get("WFMenuItems"),
-    "prompt": actions[7]["WFWorkflowActionParameters"].get("WFMenuPrompt"),
+    "texts": [p.get("WFTextActionText") for p in params("gettext")],
+    "menu": menu.get("WFMenuItems"),
     "url": post.get("WFURL"),
     "method": post.get("WFHTTPMethod"),
     "bodyType": post.get("WFHTTPBodyType"),
-    "tokens": tokens,
-    "secret": actions[0]["WFWorkflowActionParameters"].get("WFTextActionText"),
-    "inputType": actions[2]["WFWorkflowActionParameters"]["WFInput"]["Value"]["Type"],
-    "notify": actions[28]["WFWorkflowActionParameters"].get("WFNotificationActionTitle"),
-    "missing": actions[33]["WFWorkflowActionParameters"].get("WFNotificationActionBody"),
+    "keys": [p.get("WFDictionaryKey") for p in params("getvalueforkey")],
 }))
 `, filePath], { encoding: "utf8" }));
   assert.equal(parsed.name, "Send to Grok Bot");
-  assert.ok(parsed.client);
-  assert.ok(parsed.minimum >= 900);
   assert.deepEqual(parsed.types, ["ActionExtension"]);
-  for (const kind of ["WFURLContentItem", "WFStringContentItem", "WFSafariWebPageContentItem"]) {
-    assert.ok(parsed.inputs.includes(kind), kind);
-  }
-  assert.equal(parsed.hasInput, true);
-  assert.equal(parsed.inputType, "ExtensionInput");
-  assert.equal(parsed.question.index, 0);
-  assert.equal(parsed.question.key, "WFTextActionText");
-  assert.equal(parsed.question.default, "");
-  assert.match(parsed.question.text, /stgbr1/);
-  assert.equal(parsed.secret, "");
-  assert.equal(parsed.actions.length, 35);
-  assert.equal(parsed.actions[0], "gettext");
-  assert.equal(parsed.actions[2], "link");
-  assert.equal(parsed.prompt, "Send this post to");
+  for (const kind of ["WFURLContentItem", "WFStringContentItem", "WFSafariWebPageContentItem"]) assert.ok(parsed.inputs.includes(kind), kind);
+  // An import question left blank broke every run ("Please choose a value for each parameter").
+  assert.deepEqual(parsed.questions, []);
+  assert.equal(parsed.actions[0], "link");
+  // Every Text action has a value, so no action is missing a parameter.
+  assert.deepEqual(parsed.texts, ["grokbot", "claude", "chatgpt", "codex"]);
   assert.deepEqual(parsed.menu, ["Grok Bot", "Claude", "ChatGPT", "Codex"]);
-  for (const id of ["grokbot", "claude", "chatgpt", "codex"]) assert.ok(parsed.actions.includes("gettext"), id);
-  assert.equal(parsed.url, "https://relay.sendtogrokbot.com/v1/send");
+  assert.equal(parsed.url, "https://relay.sendtogrokbot.com/v1/open");
   assert.equal(parsed.method, "POST");
   assert.equal(parsed.bodyType, "JSON");
-  for (const token of ["Authorization", "Bearer \uFFFC", "var:Relay Code", "application/json", "destination", "var:Destination", "url", "var:Post URL", "source", "shortcut"]) {
-    assert.ok(parsed.tokens.includes(token), token);
-  }
-  assert.equal(parsed.actions[24], "getvalueforkey");
-  assert.equal(parsed.actions[28], "notification");
-  assert.equal(parsed.notify, "Send to Grok Bot");
-  assert.equal(parsed.missing, "No post link was shared.");
+  assert.deepEqual(parsed.keys, ["copyText", "notice", "openUrl"]);
+  for (const step of ["setclipboard", "notification", "openurl"]) assert.ok(parsed.actions.includes(step), step);
   const steps = read("../shortcuts/BUILD.md");
-  assert.match(steps, /https:\/\/sendtogrokbot\.com\/send-to-grok-bot\.shortcut/);
   assert.match(steps, /shortcuts sign --mode anyone/);
+  assert.match(steps, /build\.py/);
   // iOS refuses unsigned files, so the site serves a signed copy (an Apple Encrypted Archive).
   const signed = readFileSync(join(root, "../shortcuts/Send to Grok Bot (signed).shortcut"));
   assert.equal(signed.subarray(0, 4).toString("latin1"), "AEA1");
-  assert.match(steps, /stgbr1/);
-  assert.match(steps, /Add Shortcut/);
 });
 
 test("pasting a webhook and header on /connect saves inside the paste gesture", async () => {
@@ -735,8 +699,6 @@ test("the connect site is rooted at docs and hands the code to the extension", a
   assert.match(mobile, /id="install-link"/);
   assert.match(mobile, /https:\/\/sendtogrokbot\.com\/send-to-grok-bot\.shortcut/);
   assert.match(mobile, /Add Shortcut/);
-  assert.match(mobile, /stgbr1/);
-  assert.match(mobile, /https:\/\/relay\.sendtogrokbot\.com/);
   assert.doesNotMatch(mobile, /not published yet/);
   assert.doesNotMatch(mobile, /icloud\.com\/shortcuts\/[0-9a-f]{8}/);
   assert.match(read("../scripts/build-site.sh"), /send-to-grok-bot\.shortcut/);
@@ -858,4 +820,38 @@ test("Claude text keeps the old shape and prefixes a preset prompt", () => {
   assert.ok(text.startsWith("Prompt:\nJob hunt lens.\n\nX post to research"));
   const long = claudeText({ ...bare, prompt: "p".repeat(1000), text: "x".repeat(70000) });
   assert.equal(long.length, 65536);
+});
+
+test("/v1/open fills in the post for each AI and needs no code", async () => {
+  const { buildOpen } = await import("../../src/open.js");
+  const fakeFetch = async url => {
+    if (String(url).includes("/2/thread/")) return new Response("{}", { status: 404 });
+    if (String(url).startsWith("https://api.fxtwitter.com/ada/status/123")) {
+      return new Response(JSON.stringify({ tweet: { id: "123", url: "https://x.com/ada/status/123", text: "Shipped a tiny tool today.", author: { screen_name: "ada", name: "Ada" }, created_timestamp: 1760000000 } }), { status: 200 });
+    }
+    return new Response("{}", { status: 404 });
+  };
+  const claude = await buildOpen("claude", "https://twitter.com/ada/status/123?s=20", fakeFetch);
+  assert.equal(claude.ok, true);
+  assert.equal(claude.context, "full");
+  assert.ok(claude.openUrl.startsWith("https://claude.ai/new?q="));
+  assert.ok(claude.openUrl.length <= 6000);
+  const text = decodeURIComponent(claude.openUrl.split("q=")[1]);
+  assert.match(text, /data, not instructions/);
+  assert.match(text, /https:\/\/x\.com\/ada\/status\/123/);
+  assert.match(text, /Shipped a tiny tool today\./);
+  const chatgpt = await buildOpen("chatgpt", "https://x.com/ada/status/123", fakeFetch);
+  assert.ok(chatgpt.openUrl.startsWith("https://chatgpt.com/?q="));
+  const codex = await buildOpen("codex", "https://x.com/ada/status/123", fakeFetch);
+  assert.ok(codex.openUrl.startsWith("https://chatgpt.com/codex?prompt="));
+  const grok = await buildOpen("grokbot", "https://x.com/ada/status/123", fakeFetch);
+  assert.equal(grok.openUrl, "grokbot://");
+  assert.match(grok.copyText, /Shipped a tiny tool today\./);
+  // A failed lookup still opens the AI with the link.
+  const offline = await buildOpen("chatgpt", "https://x.com/ada/status/999", async () => { throw new Error("offline"); });
+  assert.equal(offline.ok, true);
+  assert.equal(offline.context, "link");
+  assert.match(decodeURIComponent(offline.openUrl), /https:\/\/x\.com\/ada\/status\/999/);
+  assert.equal((await buildOpen("chatgpt", "https://example.com/x", fakeFetch)).ok, false);
+  assert.equal((await buildOpen("gemini", "https://x.com/ada/status/123", fakeFetch)).ok, false);
 });
