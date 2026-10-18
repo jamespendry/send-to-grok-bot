@@ -6,6 +6,8 @@ out="dist/site"
 rm -rf "$out"
 mkdir -p "$out/assets/icons" "$out/assets/promo"
 cp -R docs/. "$out/"
+bash scripts/package.sh >/dev/null
+cp "$(ls -t dist/send-to-grok-bot-*.zip | head -1)" "$out/send-to-grok-bot.zip"
 cp extension/connect.js "$out/connect.js"
 cp extension/prompts.js "$out/prompts.js"
 cp extension/icons/icon32.png extension/icons/icon48.png extension/icons/icon128.png "$out/assets/icons/"
@@ -24,7 +26,7 @@ out.push("</svg>");
 require("fs").writeFileSync(process.argv[1], out.join("\n") + "\n");
 ' "$out/assets/logos.svg"
 
-for f in connect.html connect.js prompts.js _redirects _headers setup/index.html assets/site.css assets/site.js assets/logos.svg logo.svg logo.png; do
+for f in send-to-grok-bot.zip connect.html connect.js prompts.js _redirects _headers setup/index.html assets/site.css assets/site.js assets/logos.svg logo.svg logo.png; do
   test -f "$out/$f" || { echo "missing $out/$f"; exit 1; }
 done
 grep -q 'id="paste"' "$out/connect.html" && grep -q 'id="msg"' "$out/connect.html" \

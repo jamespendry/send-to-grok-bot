@@ -363,3 +363,6 @@ footer .wrap { gap: 4px 20px; }
 .start-row .copy .val { font-size: 14px; }
 .note.agent { background: var(--surface); border: 1px solid var(--line); }
 .start-row .text span b { display: inline; font-size: inherit; }
+ol.install li { margin-top: 10px; }
+ol.install .copy { margin: 8px 0 0; max-width: 360px; }
+ol.install .copy .val { font-size: 15px; }
