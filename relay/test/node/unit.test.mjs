@@ -585,15 +585,15 @@ print(json.dumps({
   assert.equal(parsed.actions[0], "choosefrommenu");
   assert.ok(!parsed.actions.includes("conditional"));
   assert.ok(!parsed.actions.includes("link"));
-  assert.deepEqual(parsed.menu, ["Grok Bot", "Claude", "ChatGPT", "Codex"]);
+  assert.deepEqual(parsed.menu, ["Grok Bot", "Claude", "ChatGPT"]);
   assert.equal(parsed.url, "https://relay.sendtogrokbot.com/v1/open");
   assert.equal(parsed.method, "POST");
   assert.equal(parsed.bodyType, "JSON");
   // iOS left unwired variables empty, so every input names an earlier action's output.
   assert.deepEqual(parsed.keys, []);
   assert.equal(parsed.setvars, 0);
-  assert.deepEqual(parsed.opens, ["ActionOutput", "ActionOutput", "ActionOutput", "ActionOutput"]);
-  assert.deepEqual(parsed.formats, ["copy", "text", "text", "text"]);
+  assert.deepEqual(parsed.opens, ["ActionOutput", "ActionOutput", "ActionOutput"]);
+  assert.deepEqual(parsed.formats, ["copy", "text", "text"]);
   for (const step of ["setclipboard", "notification", "openurl"]) assert.ok(parsed.actions.includes(step), step);
   const steps = read("../shortcuts/BUILD.md");
   assert.match(steps, /shortcuts sign --mode anyone/);
