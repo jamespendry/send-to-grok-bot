@@ -328,7 +328,7 @@ footer .sp { flex: 1; }
 .fill-row .badge { width: 28px; height: 28px; font-size: 14px; margin-top: -2px; }
 .fill-row b { display: block; }
 .fill-row .muted { font-size: 14px; }
-figure.shot img { border-radius: 12px; border: 1px solid var(--line); width: 100%; background: #1f1f1e; }
+figure.shot img { border-radius: 12px; border: 1px solid var(--line); width: 100%; background: var(--surface); }
 
 /* Design review pass */
 .tag.easy { color: #00875a; font-weight: 700; }
