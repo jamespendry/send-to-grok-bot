@@ -18,9 +18,62 @@
       return '';
     }
   }
+  // Save a parsed code into chrome.storage.local, the same way the paste box does.
+  function save(parsed) {
+    chrome.storage.local.get(null, function (current) {
+      const plan = globalThis.STGB_CONNECT.planConnect(current || {enabled: []}, parsed);
+      if (!plan.ok) { report(plan.error, false); return; }
+      chrome.storage.local.set(plan.settings, function () {
+        const finish = function () {
+          const panel = document.getElementById('stgb-finish');
+          if (panel) panel.remove();
+          report(globalThis.STGB_CONNECT.finishMessage(parsed, plan), true);
+        };
+        if (plan.removeKeys && plan.removeKeys.length) chrome.storage.local.remove(plan.removeKeys, finish);
+        else finish();
+      });
+    });
+  }
+
+  // A connect link. The Finish button lives on the page itself, not in the extension
+  // frame, so it works in tabs where embedded extension frames are removed (agent-driven
+  // tabs). The click is the gesture; the service worker asks for Allow in that turn.
   function handTo(code) {
-    if (!code || !frame || !frame.contentWindow) return;
-    frame.contentWindow.postMessage({stgb: 'code', code: code}, 'chrome-extension://' + chrome.runtime.id);
+    if (!code || !globalThis.STGB_CONNECT) return;
+    const parsed = globalThis.STGB_CONNECT.parseSetupPaste(code);
+    if (!parsed.ok) { report(parsed.error, false); return; }
+    const draft = globalThis.STGB_CONNECT.planConnect({enabled: []}, parsed);
+    if (!draft.ok) { report(draft.error, false); return; }
+    const origins = draft.origins || [];
+    if (!origins.length) { save(parsed); return; }
+    const old = document.getElementById('stgb-finish');
+    if (old) old.remove();
+    const panel = document.createElement('div');
+    panel.id = 'stgb-finish';
+    panel.className = 'note';
+    const what = document.createElement('p');
+    what.style.margin = '0 0 12px';
+    what.style.fontWeight = '600';
+    what.textContent = parsed.plain || 'Ready to connect.';
+    const go = document.createElement('button');
+    go.type = 'button';
+    go.id = 'stgb-finish-go';
+    go.className = 'btn';
+    go.textContent = 'Finish';
+    go.addEventListener('click', function () {
+      report('Choose Allow in the Chrome prompt.', false, true);
+      chrome.runtime.sendMessage({stgbAction: 'request-origins', origins: origins}, function (res) {
+        const err = chrome.runtime.lastError && chrome.runtime.lastError.message;
+        if (err || !res || !res.ok) { report('Choose Allow to finish. Click Finish again.', false); return; }
+        save(parsed);
+      });
+    });
+    panel.appendChild(what);
+    panel.appendChild(go);
+    const anchor = document.getElementById('stgb-grant') || document.getElementById('paste');
+    if (anchor) anchor.insertAdjacentElement('beforebegin', panel);
+    else if (document.body) document.body.prepend(panel);
+    report('Click Finish.', false, true);
   }
   handoff = takeHash();
   // A second link opened while this page is already open only changes the hash.
@@ -31,7 +84,7 @@
       handoff = code;
       const heading = document.querySelector('#step-paste h2');
       if (heading) heading.textContent = 'Finish connecting';
-      if (frameReady) handTo(code);
+      if (document.readyState !== 'loading') handTo(code);
     });
   }
 
@@ -76,6 +129,7 @@
 
   function mount() {
     shorten();
+    if (handoff) setTimeout(function () { handTo(handoff); }, 0);
     if (!document.body || !document.createElement || !document.getElementById) return;
     const box = document.getElementById('paste');
     if (!box || document.getElementById('stgb-grant')) return;
@@ -86,10 +140,7 @@
     frame.src = chrome.runtime.getURL('grant.html');
     frame.style.cssText = 'display:block;width:100%;height:160px;border:0;border-radius:12px;background:transparent';
     frame.setAttribute('allowtransparency', 'true');
-    frame.addEventListener('load', function () {
-      frameReady = true;
-      if (handoff) handTo(handoff);
-    });
+    frame.addEventListener('load', function () { frameReady = true; });
     box.hidden = true;
     box.disabled = true;
     box.setAttribute('aria-hidden', 'true');
