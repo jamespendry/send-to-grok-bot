@@ -3,8 +3,9 @@
 # Re-sign after building; see BUILD.md. Run: python3 shortcuts/build.py
 #
 # The shortcut needs no code. It sends the shared post link and the chosen AI to
-# relay.sendtogrokbot.com/v1/open, which returns a link that opens that AI with
-# the post filled in. For Grok Bot it returns text to copy and opens the app.
+# relay.sendtogrokbot.com/v1/open, which answers in plain text with a link that
+# opens that AI with the post filled in. For Grok Bot it answers with the message
+# to paste; the shortcut copies it and opens the app.
 import plistlib, uuid
 from pathlib import Path
 
@@ -45,30 +46,39 @@ def shared_input():
     return {"Value": {"string": OBJ, "attachmentsByRange": {"{0, 1}": {"Type": "ExtensionInput"}}},
             "WFSerializationType": "WFTextTokenString"}
 
+def output_of(action, name):
+    # Wire an action's input to an earlier action's output by that action's UUID.
+    # iOS does not fill a missing input in, so every input is named.
+    return {"Value": {"Type": "ActionOutput", "OutputName": name, "OutputUUID": action["WFWorkflowActionParameters"]["UUID"]},
+            "WFSerializationType": "WFTextTokenAttachment"}
+
+def with_uuid(action):
+    action["WFWorkflowActionParameters"]["UUID"] = gid()
+    return action
+
+def ask_relay(dest, fmt):
+    # The relay answers in plain text: the link to open, or the message to paste.
+    return with_uuid(act("downloadurl", WFURL="https://relay.sendtogrokbot.com/v1/open", WFHTTPMethod="POST", WFHTTPBodyType="JSON",
+        ShowHeaders=False,
+        WFJSONValues={"Value": {"WFDictionaryFieldValueItems": [
+            {"WFItemType": 0, "WFKey": plain("destination"), "WFValue": plain(dest)},
+            {"WFItemType": 0, "WFKey": plain("url"), "WFValue": shared_input()},
+            {"WFItemType": 0, "WFKey": plain("source"), "WFValue": plain("shortcut")},
+            {"WFItemType": 0, "WFKey": plain("format"), "WFValue": plain(fmt)},
+        ]}, "WFSerializationType": "WFDictionaryFieldValue"}))
+
 def send_steps(dest):
-    # No If blocks and no link check: the X app shares a link, a page, or text,
-    # and the relay finds the post link in whatever arrives.
-    steps = [
-        act("downloadurl", WFURL="https://relay.sendtogrokbot.com/v1/open", WFHTTPMethod="POST", WFHTTPBodyType="JSON",
-            WFJSONValues={"Value": {"WFDictionaryFieldValueItems": [
-                {"WFItemType": 0, "WFKey": plain("destination"), "WFValue": plain(dest)},
-                {"WFItemType": 0, "WFKey": plain("url"), "WFValue": shared_input()},
-                {"WFItemType": 0, "WFKey": plain("source"), "WFValue": plain("shortcut")},
-            ]}, "WFSerializationType": "WFDictionaryFieldValue"}),
-        act("detect.dictionary"),
-        setvar("Response"),
-        act("getvalueforkey", WFDictionaryKey="notice", WFInput=var("Response")),
-        setvar("Notice"),
-        act("notification", WFNotificationActionTitle="Send to Grok Bot", WFNotificationActionBody=text_with("Notice")),
-    ]
+    # No If blocks, no variables, no link check. The relay finds the post link in whatever the X app shared.
     if dest == "grokbot":
-        steps += [act("getvalueforkey", WFDictionaryKey="copyText", WFInput=var("Response")),
-                  setvar("Copy Text"),
-                  act("setclipboard", WFInput=var("Copy Text"))]
-    steps += [act("getvalueforkey", WFDictionaryKey="openUrl", WFInput=var("Response")),
-              setvar("Open URL"),
-              act("openurl", WFInput=var("Open URL"))]
-    return steps
+        get = ask_relay(dest, "copy")
+        link = with_uuid(act("gettext", WFTextActionText="grokbot://"))
+        return [get,
+                act("setclipboard", WFInput=output_of(get, "Contents of URL")),
+                act("notification", WFNotificationActionTitle="Send to Grok Bot", WFNotificationActionBody="Copied. Paste it in Grok Bot and send."),
+                link,
+                act("openurl", WFInput=output_of(link, "Text"))]
+    get = ask_relay(dest, "text")
+    return [get, act("openurl", WFInput=output_of(get, "Contents of URL"))]
 
 def build():
     menu = gid()

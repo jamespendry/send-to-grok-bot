@@ -434,6 +434,15 @@ async function openPost(request, env) {
     return callOut(env, new Request(u, { ...rest, headers }));
   });
   safeLog({ method: "POST", path: "/v1/open", status: result.ok ? 200 : 400, destination: result.ok ? result.destination : "", error: result.ok ? "" : "input" });
+  // format "text" answers with just the link to open, and "copy" with just the text to paste.
+  // A Shortcut uses a plain-text answer directly, with no dictionary to unpack.
+  if (value.format === "text" || value.format === "copy") {
+    const help = "https://sendtogrokbot.com/mobile";
+    const body = value.format === "copy"
+      ? (result.ok ? result.copyText : result.error)
+      : (result.ok ? result.openUrl : help);
+    return new Response(body, { status: 200, headers: { ...SECURITY, "content-type": "text/plain; charset=utf-8" } });
+  }
   // The shortcut opens openUrl and shows notice either way, so a failure still lands somewhere helpful.
   if (!result.ok && value.source === "shortcut") return json({ ok: false, error: result.error, notice: result.error, openUrl: "https://sendtogrokbot.com/mobile" });
   if (!result.ok) return json({ ok: false, error: result.error, notice: result.error }, 400);
