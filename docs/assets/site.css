@@ -328,7 +328,7 @@ footer .sp { flex: 1; }
 .fill-row .badge { width: 28px; height: 28px; font-size: 14px; margin-top: -2px; }
 .fill-row b { display: block; }
 .fill-row .muted { font-size: 14px; }
-figure.shot img { border-radius: 12px; border: 1px solid var(--line); width: 100%; background: #1f1f1e; }
+figure.shot img { border-radius: 12px; border: 1px solid var(--line); width: 100%; background: var(--surface); }
 
 /* Design review pass */
 .tag.easy { color: #00875a; font-weight: 700; }
@@ -374,3 +374,9 @@ ol.install .copy .val { font-size: 15px; }
 a.path:hover { background: var(--surface); text-decoration: none; }
 .path span { color: var(--muted); font-size: 14px; }
 h2[id] { scroll-margin-top: 72px; }
+
+/* Connect: the confirmation the extension adds after a save */
+#stgb-done { font-size: 16px; padding: 16px 18px; border: 1px solid rgba(0, 186, 124, 0.35); }
+#stgb-done b { color: var(--ok); }
+#stgb-done a { font-weight: 700; margin-left: 4px; }
+#msg.pending { color: var(--fg); }
