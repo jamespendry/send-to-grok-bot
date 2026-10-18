@@ -38,4 +38,15 @@ test -f "$out/connect.js"
 test -f "$out/prompts.js"
 test -f "$out/_redirects"
 test -f "$out/setup/index.html"
+# Every page must have balanced block tags. A broken page once shipped stray install steps.
+python3 - "$out" <<'CHECK'
+import glob, re, sys
+bad = []
+for f in glob.glob(sys.argv[1] + '/**/*.html', recursive=True):
+    s = re.sub(r'<script.*?</script>', '', open(f).read(), flags=re.S)
+    for t in ['li', 'ol', 'ul', 'div', 'section', 'main', 'figure', 'details', 'p']:
+        o = len(re.findall(r'<%s[\s>]' % t, s)); c = len(re.findall(r'</%s>' % t, s))
+        if o != c: bad.append('%s <%s> %d open, %d closed' % (f, t, o, c))
+if bad: sys.exit('Unbalanced tags:\n' + '\n'.join(bad))
+CHECK
 echo "wrote $out"
