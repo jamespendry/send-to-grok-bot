@@ -416,7 +416,7 @@ test("service worker scripts share one scope and an empty webhook stays in the m
     action: { onClicked: { addListener() {} } },
     storage: { session: { set() {} } }
   };
-  for (const file of ["hosts.js", "prompts.js", "destinations/grokbot.js", "destinations/claude.js", "destinations/chatgpt.js", "destinations/codex.js", "relay.js", "background.js"]) {
+  for (const file of ["hosts.js", "enrich.js", "prompts.js", "destinations/grokbot.js", "destinations/claude.js", "destinations/chatgpt.js", "destinations/codex.js", "relay.js", "background.js"]) {
     vm.runInContext(read("../extension/" + file), context, { filename: file });
   }
   assert.equal(typeof context.STGB_DESTINATIONS.grokbot.send, "function");
@@ -467,9 +467,11 @@ test("one ready destination is sent on the click, and two destinations stay a me
   const fetches = [];
   let listener;
   const context = {
-    console, URL, TextEncoder, TextDecoder, btoa, atob, Uint8Array,
+    console, URL, TextEncoder, TextDecoder, btoa, atob, Uint8Array, setTimeout, clearTimeout,
     crypto: webcrypto,
     fetch(url, init) {
+      // Mirror lookups for the full post fail here, so the page post is what goes out.
+      if (/^https:\/\/api\.(fx|vx)twitter\.com\//.test(String(url))) return Promise.resolve({ ok: false, status: 404 });
       fetches.push({ url, body: init && init.body });
       return Promise.resolve({ ok: true, status: 200 });
     }
@@ -503,7 +505,7 @@ test("one ready destination is sent on the click, and two destinations stay a me
     }
   };
   vm.createContext(context);
-  for (const file of ["hosts.js", "prompts.js", "destinations/grokbot.js", "destinations/claude.js", "destinations/chatgpt.js", "destinations/codex.js", "relay.js", "background.js"]) {
+  for (const file of ["hosts.js", "enrich.js", "prompts.js", "destinations/grokbot.js", "destinations/claude.js", "destinations/chatgpt.js", "destinations/codex.js", "relay.js", "background.js"]) {
     vm.runInContext(read("../extension/" + file), context, { filename: file });
   }
   const post = { stgbAction: "send", url: "https://x.com/a/status/1", text: "hi", author: "a" };

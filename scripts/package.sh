@@ -11,6 +11,7 @@ out="$root/dist/$name"
 files=(
   manifest.json
   background.js
+  enrich.js
   content.js
   content.css
   hosts.js
@@ -55,7 +56,7 @@ if (m.manifest_version !== 3) fail("manifest_version");
 if (m.version !== process.argv[1]) fail("version");
 if (m.description.length > 132) fail("description length");
 if (!Array.isArray(m.permissions) || m.permissions.length !== 1 || m.permissions[0] !== "storage") fail("permissions");
-if (m.host_permissions) fail("required host_permissions");
+if (!m.host_permissions || m.host_permissions.join() !== "https://api.fxtwitter.com/*,https://api.vxtwitter.com/*") fail("required host_permissions are the two post mirrors only");
 if (!m.optional_host_permissions || m.optional_host_permissions.join() !== "https://*/*") fail("optional host");
 for (const size of ["16", "32", "48", "128"]) {
   if (!m.icons[size] || !m.action.default_icon[size]) fail("icon " + size);
@@ -125,7 +126,7 @@ if uncompressed > 5 * 1024 * 1024:
     raise SystemExit(f"uncompressed {uncompressed}")
 manifest = json.loads(z.read("manifest.json"))
 expected = [
-    "manifest.json", "background.js", "content.js", "content.css", "hosts.js", "connect.js",
+    "manifest.json", "background.js", "enrich.js", "content.js", "content.css", "hosts.js", "connect.js",
     "logos.js", "options.html", "options.css", "options.js", "prompts.js", "relay.js", "site-connect.js",
     "grant.html", "grant.js", "destinations/grokbot.js", "destinations/claude.js",
     "destinations/chatgpt.js", "destinations/codex.js",

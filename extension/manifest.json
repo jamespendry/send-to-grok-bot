@@ -4,6 +4,7 @@
   "version": "1.2.7",
   "description": "Adds a native-looking button to X posts that sends the post to Grok Bot, Claude, ChatGPT, or Codex.",
   "permissions": ["storage"],
+  "host_permissions": ["https://api.fxtwitter.com/*", "https://api.vxtwitter.com/*"],
   "optional_host_permissions": ["https://*/*"],
   "background": {
     "service_worker": "background.js"

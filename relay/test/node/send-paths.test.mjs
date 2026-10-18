@@ -24,7 +24,9 @@ const POST = {
 const FIRE = "https://api.anthropic.com/v1/claude_code/routines/trig_TEST123/fire";
 const TOKEN = "sk-ant-oat01-FAKEFAKEFAKEFAKE";
 
-function worker(settings) {
+// The service worker asks api.fxtwitter.com / api.vxtwitter.com for the full post first.
+// `mirror` maps those URLs to JSON bodies; anything else there is a 404, so the page post goes out.
+function worker(settings, mirror = {}) {
   const cap = [];
   let listener;
   const store = { ...settings };
@@ -36,6 +38,11 @@ function worker(settings) {
   const ctx = vm.createContext({
     console, URL, TextEncoder, TextDecoder, btoa, atob, setTimeout, clearTimeout, Date, JSON, Promise,
     fetch: async (url, init) => {
+      if (/^https:\/\/api\.(fx|vx)twitter\.com\//.test(String(url))) {
+        cap.push({ kind: "mirror", url: String(url) });
+        const body = mirror[String(url)];
+        return body ? { ok: true, status: 200, json: async () => body } : { ok: false, status: 404, json: async () => ({}) };
+      }
       cap.push({ kind: "fetch", url: String(url), ...init });
       return { ok: true, status: 200, json: async () => ({ claude_code_session_url: "https://claude.ai/code/session_fake" }) };
     }
@@ -50,7 +57,7 @@ function worker(settings) {
     permissions: { contains: async () => true },
     tabs: { create: async (o) => { cap.push({ kind: "tab", url: o.url }); return { id: 1 }; } }
   };
-  for (const f of ["hosts.js", "prompts.js", "destinations/grokbot.js", "destinations/claude.js", "destinations/chatgpt.js", "destinations/codex.js", "relay.js", "background.js"]) {
+  for (const f of ["hosts.js", "enrich.js", "prompts.js", "destinations/grokbot.js", "destinations/claude.js", "destinations/chatgpt.js", "destinations/codex.js", "relay.js", "background.js"]) {
     vm.runInContext(read(f), ctx, { filename: f });
   }
   const send = (msg) => new Promise((resolve) => listener(msg, {}, resolve));
@@ -90,6 +97,40 @@ test("Grok webhook: JSON payload with prompt and digest, key in both headers", a
   assert.ok(body.prompt.startsWith("Someone saved one X post"));
   assert.ok(body.digest.startsWith("X post by @alice (Alice Example)"));
   assert.equal("stgbDestination" in body, false);
+});
+
+test("a reply's parent and full text reach the Claude fire text and the Grok digest", async () => {
+  const tweet = (id, user, text, extra = {}) => ({ code: 200, message: "OK", tweet: {
+    url: `https://x.com/${user}/status/${id}`, id, text, author: { screen_name: user, name: user.toUpperCase() },
+    created_at: "Sun Oct 18 05:06:07 +0000 2026", created_timestamp: 1792299967, is_note_tweet: false,
+    replying_to: null, replying_to_status: null, ...extra } });
+  const full = POST.text + " and here is the rest of the long post after Show more.";
+  const mirror = {
+    "https://api.fxtwitter.com/alice/status/1234567890": tweet("1234567890", "alice", full, { replying_to: "bob", replying_to_status: "99" }),
+    "https://api.fxtwitter.com/bob/status/99": tweet("99", "bob", "Step 1: parent post the page never showed.")
+  };
+  const c = worker({ enabled: ["claude"], claudeFireUrl: FIRE, claudeToken: TOKEN }, mirror);
+  assert.equal((await c.send({ stgbDestination: "claude", ...POST })).ok, true);
+  const text = JSON.parse(c.cap.find((x) => x.kind === "fetch").body).text;
+  assert.ok(text.includes("Replying to (1 earlier post, oldest first):\n[1] @bob (BOB)"), text);
+  assert.ok(text.includes("Step 1: parent post the page never showed."));
+  assert.ok(text.includes("Post:\n" + full));
+  const g = worker({ enabled: ["grokbot"], webhookUrl: "https://example.test/hook", senderKey: "abc" }, mirror);
+  assert.equal((await g.send({ stgbDestination: "grokbot", ...POST })).ok, true);
+  const body = JSON.parse(g.cap.find((x) => x.kind === "fetch").body);
+  assert.equal(body.text, full);
+  assert.equal(body.context.source, "fxtwitter");
+  assert.equal(body.context.parents[0].text, "Step 1: parent post the page never showed.");
+  assert.ok(body.digest.includes("Step 1: parent post the page never showed."));
+});
+
+test("with no mirror answer, the send still goes out with the page text and source page", async () => {
+  const w = worker({ enabled: ["grokbot"], webhookUrl: "https://example.test/hook", senderKey: "abc" });
+  assert.equal((await w.send({ stgbDestination: "grokbot", ...POST })).ok, true);
+  assert.ok(w.cap.some((c) => c.kind === "mirror"), "mirrors were asked first");
+  const body = JSON.parse(w.cap.find((c) => c.kind === "fetch").body);
+  assert.equal(body.context.source, "page");
+  assert.ok(body.digest.includes("\nText:\n" + POST.text));
 });
 
 for (const [brand, settings, prefix, max] of [

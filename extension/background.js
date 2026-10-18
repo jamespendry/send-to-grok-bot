@@ -1,48 +1,44 @@
-importScripts('hosts.js', 'prompts.js', 'destinations/grokbot.js', 'destinations/claude.js', 'destinations/chatgpt.js', 'destinations/codex.js', 'relay.js');
+importScripts('hosts.js', 'enrich.js', 'prompts.js', 'destinations/grokbot.js', 'destinations/claude.js', 'destinations/chatgpt.js', 'destinations/codex.js', 'relay.js');
 
-function mediaLine(m) {
-  if (!m || typeof m !== 'object') return '';
-  const label = m.type === 'gif' ? 'GIF' : m.type === 'video' ? 'Video' : 'Image';
-  const head = m.duration ? `${label} (${m.duration}s)` : label;
-  if (m.type === 'image') {
-    const body = [m.alt, m.url].filter(Boolean).join(' ');
-    return '- ' + (body ? `${head}: ${body}` : head);
-  }
-  const parts = [head];
-  if (m.alt) parts.push(m.alt);
-  if (m.captions) parts.push('captions: ' + m.captions);
-  if (m.thumbnail) parts.push('thumbnail: ' + m.thumbnail);
-  return '- ' + parts.join(' ');
-}
-function normUrl(u) {
-  return String(u || '').split('?')[0].replace(/\/$/, '');
-}
 // Plain-text rendering of the payload, for receivers that forward a single text field to an AI.
+// enrich.js builds it: the page's fields as before, or the labelled full context when a mirror answered.
 function digest(p) {
-  const L = [`X post by @${p.author}${p.authorName ? ` (${p.authorName})` : ''}`, `URL: ${p.url}`];
-  if (p.postedAt) L.push(`Posted: ${p.postedAt}`);
-  if (p.metrics) L.push(`Engagement: ${p.metrics}`);
-  if (p.inReplyTo) L.push('', `In reply to @${p.inReplyTo.author} (${p.inReplyTo.url}):`, p.inReplyTo.text);
-  const thread = Array.isArray(p.thread) ? p.thread : [];
-  const url = normUrl(p.url);
-  const threadHasClicked = url
-    ? thread.some(t => normUrl(t && t.url) === url)
-    : !!(p.text && thread.some(t => t && t.text === p.text));
-  if (thread.length > 1) {
-    L.push('', `Thread (${thread.length} posts by the author):`);
-    thread.forEach((t, i) => L.push(`[${i + 1}/${thread.length}] ${t.url}`, t.text));
-    if (!threadHasClicked) L.push('', 'Text:', p.text || '(no text)');
-  } else L.push('', 'Text:', p.text || '(no text)');
-  if (p.truncated) L.push('(Post text was cut off by "Show more" in the timeline; the full text may be longer.)');
-  if (p.quoted) L.push('', `Quoting @${p.quoted.author}${p.quoted.postedAt ? ` (${p.quoted.postedAt})` : ''}:`, p.quoted.text);
-  const links = [...(p.links || []), ...((p.quoted && p.quoted.links) || [])];
-  if (links.length) L.push('', 'Links:', ...links.map(l => `- ${l.url || l.text} (${l.href})`));
-  if (p.card) L.push('', `Link card: ${p.card.text} (${p.card.href})`);
-  if (p.media && p.media.length) {
-    const lines = p.media.map(mediaLine).filter(Boolean);
-    if (lines.length) L.push('', 'Media:', ...lines);
+  return self.STGB_ENRICH.digest(p);
+}
+
+// Mirror lookups for the full post, its reply chain, and its quote. One per URL, reused for a minute,
+// so the menu path can start it on the first click and the chosen row only waits for what is left.
+const ENRICH_HARD_MS = 2700;
+const enrichCache = new Map();
+function enrichFor(url) {
+  const E = self.STGB_ENRICH;
+  if (!E || !E.parseStatusUrl(url)) return Promise.resolve(null);
+  const now = Date.now();
+  for (const [k, v] of enrichCache) if (now - v.at > 60000) enrichCache.delete(k);
+  const hit = enrichCache.get(url);
+  if (hit) return hit.promise;
+  // A miss is not kept, so the next click tries the mirrors again.
+  const promise = E.fetchContext(url, {budgetMs: E.BUDGET_MS}).catch(() => null).then(ctx => {
+    if (!ctx) enrichCache.delete(url);
+    return ctx;
+  });
+  enrichCache.set(url, {at: now, promise});
+  return promise;
+}
+// Never longer than the budget, and never a reason not to send.
+async function enrichPost(post) {
+  let timer;
+  try {
+    const ctx = await Promise.race([
+      enrichFor(post.url),
+      new Promise(resolve => { timer = setTimeout(() => resolve(null), ENRICH_HARD_MS); })
+    ]);
+    return self.STGB_ENRICH.mergePost(post, ctx);
+  } catch (_) {
+    try { return self.STGB_ENRICH.mergePost(post, null); } catch (_) { return post; }
+  } finally {
+    clearTimeout(timer);
   }
-  return L.join('\n');
 }
 
 function getStore(area, keys) {
@@ -165,9 +161,10 @@ async function deliver(brand, msg, s) {
     return {ok: false, error: SETUP_NOTICE.grokbot, needsSetup: true, brand, title: 'Set up ' + name};
   }
   // Version 2 object, including media and thumbnails. Every destination receives it.
-  const post = {source: 'x', ...msg, version: 2, sentAt: new Date().toISOString()};
+  let post = {source: 'x', ...msg, version: 2, sentAt: new Date().toISOString()};
   delete post.stgbDestination;
   delete post.stgbAction;
+  post = await enrichPost(post);
   try { post.digest = digest(post); } catch (_) { post.digest = ''; }
   const chosen = chosenPrompt(s, brand);
   post.preset = chosen.id;
@@ -218,6 +215,7 @@ chrome.runtime.onMessage.addListener((msg, _s, reply) => {
         return;
       }
       if (items.length !== 1) {
+        enrichFor(msg.url);
         reply({ok: true, items});
         return;
       }
