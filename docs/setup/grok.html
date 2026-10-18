@@ -21,26 +21,20 @@
 <header class="top"><div class="wrap">
   <a class="brand" href="/"><img src="/assets/icons/icon48.png" alt="" width="28" height="28"><span>Send to Grok Bot</span></a>
   <nav aria-label="Main">
-    <a href="/setup" aria-current="page">Setup</a>
-    <a href="/mobile" class="hide-sm">iPhone</a>
-    <a class="btn small" data-chrome-store href="https://github.com/jamespendry/send-to-grok-bot#readme">Add to Chrome</a>
   </nav>
 </div></header>
 
 <main class="narrow page">
+  <nav class="flow" aria-label="Setup progress"><ol><li class="done"><a href="/install"><span class="num">1</span><span class="lbl">Install</span></a></li><li class="done"><a href="/setup"><span class="num">2</span><span class="lbl">Choose AI</span></a></li><li class="now" aria-current="step"><span class="num">3</span><span class="lbl">Connect</span></li><li class=""><span class="num">4</span><span class="lbl">Try it</span></li></ol></nav>
+  <div class="note when-missing" style="margin-bottom:20px"><b>Install the extension first.</b> <a href="/install">Go to step 1</a></div>
   <a class="crumb" href="/setup"><svg viewBox="0 0 24 24" aria-hidden="true"><path fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" d="M15 5l-7 7 7 7"/></svg>Setup</a>
   <div class="page-head">
     <span class="logo grokbot"><svg><use href="/assets/logos.svg#grokbot"/></svg></span>
-    <h1>Grok Bot</h1>
+    <h1>Connect Grok Bot</h1>
   </div>
-  <p class="intro">Four steps on a computer. Grok Bot creates the routine for you. You copy two things into the connect page.</p>
+  <p class="intro">Three steps on a computer. Grok Bot creates the routine for you. You copy two things into the connect page.</p>
 
   <ol class="steps num">
-    <li>
-      <h2>Install the extension</h2>
-      <p class="muted">Skip this if you already did. It isn't in the Chrome Web Store yet, so it's a few clicks you do yourself.</p>
-      <div class="actions" style="margin-top:12px"><a class="btn secondary" href="/install">Install steps</a></div>
-    </li>
     <li>
       <h2>Send Grok Bot this line</h2>
       <div class="copy">
@@ -57,11 +51,11 @@
       </figure>
     </li>
     <li>
-      <h2>Copy two values into the connect page</h2>
+      <h2>Copy two lines into the connect page</h2>
       <div class="actions" style="margin:4px 0 12px"><a class="btn" href="/connect" target="_blank" rel="noopener">Open the connect page</a></div>
       <div class="fill">
         <div class="fill-row"><span class="badge">1</span><div><b>POST to</b><span class="muted">Starts with <span class="mono">https://api2.cursor.sh/automations/webhook/</span>. Copy it and paste it into the connect page. It says "Webhook URL saved."</span></div></div>
-        <div class="fill-row"><span class="badge">2</span><div><b>header</b><span class="muted">Starts with <span class="mono">Authorization: Bearer crsr_</span>. Copy it and paste it into the same box. It says "Now open x.com and click the arrow." The <b>key</b> line (just <span class="mono">crsr_…</span>) works too.</span></div></div>
+        <div class="fill-row"><span class="badge">2</span><div><b>header</b><span class="muted">Starts with <span class="mono">Authorization: Bearer crsr_</span>. Copy it and paste it into the same box. It says "Now open x.com and click the Send arrow." The <b>key</b> line (just <span class="mono">crsr_…</span>) works too.</span></div></div>
       </div>
       <figure class="shot">
         <img src="/img/grok-webhook-values.png" width="630" height="497" alt="The routine's Webhook section with sample values: POST to (https://api2.cursor.sh/automations/...) numbered 1, and header (Authorization: Bearer crsr_...) numbered 2." style="max-width:630px">
@@ -71,21 +65,21 @@
     </li>
   </ol>
 
-  <div class="note done"><b>You're done.</b> On x.com, click the arrow on any post. The icon turns green when the run starts, and the reply shows up in your Grok Bot chat.</div>
+  <div class="note done"><b>You're done.</b> On x.com, click the Send arrow on any post. The icon turns green when the run starts, and the reply shows up in your Grok Bot chat.</div>
 
   <h2>Change the reply style later</h2>
   <p>Leave the routine as it is. In the extension settings, under <span class="ui">Replies</span>, pick Research, Job hunt, Buy or skip, Learn later, or Content ideas. The routine follows it on the next post.</p>
-  <div class="next"><a class="btn secondary" href="/setup">Set up another AI</a></div>
+  <div class="big-next"><a class="btn large" href="/try">Next: Try it</a></div>
 </main>
 
 <footer><div class="wrap">
   <span>Free and open source.</span>
-  <a href="https://github.com/jamespendry/send-to-grok-bot">GitHub</a>
-  <a href="/setup">Setup</a>
+  <a href="/install">Get started</a>
   <a href="/mobile">iPhone</a>
   <a href="/history">History</a>
   <a href="/connect">Connect</a>
   <a href="/privacy">Privacy</a>
+  <a href="https://github.com/jamespendry/send-to-grok-bot">GitHub</a>
   <span class="sp"></span>
   <span>Not affiliated with X, xAI, Anthropic, or OpenAI.</span>
 </div></footer>

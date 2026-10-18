@@ -380,3 +380,43 @@ h2[id] { scroll-margin-top: 72px; }
 #stgb-done b { color: var(--ok); }
 #stgb-done a { font-weight: 700; margin-left: 4px; }
 #msg.pending { color: var(--fg); }
+
+/* Guided flow: a progress bar like Apple's setup screens */
+.flow { margin: 0 0 28px; }
+.flow ol { list-style: none; margin: 0; padding: 0; display: flex; gap: 6px; }
+.flow li { flex: 1; min-width: 0; }
+.flow li > a, .flow li > .num { text-decoration: none; }
+.flow li > a { display: block; color: inherit; }
+.flow li .num, .flow li a .num { display: none; }
+.flow li .lbl { display: block; padding-top: 10px; border-top: 4px solid var(--line); color: var(--muted); font-size: 13px; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.flow li.done .lbl { border-top-color: var(--ok); color: var(--fg); }
+.flow li.now .lbl { border-top-color: var(--btn); color: var(--fg); }
+.flow li a:hover .lbl { color: var(--link); }
+@media (max-width: 520px) { .flow li .lbl { font-size: 12px; } }
+
+/* Install check: the extension marks every sendtogrokbot.com page when it's installed */
+.when-ready { display: none; }
+html[data-stgb-ready] .when-ready { display: block; }
+html[data-stgb-ready] .when-missing { display: none; }
+.detect { margin-top: 28px; padding: 20px; border-radius: var(--radius); border: 1px solid var(--line); background: var(--surface); }
+.detect b { display: block; font-size: 17px; margin-bottom: 4px; }
+.detect.when-ready { border-color: rgba(0, 186, 124, 0.35); background: rgba(0, 186, 124, 0.08); }
+.detect .actions { margin-top: 14px; }
+.big-next { margin-top: 28px; }
+.how.four { grid-template-columns: repeat(4, 1fr); }
+@media (max-width: 900px) { .how.four { grid-template-columns: 1fr 1fr; } }
+@media (max-width: 520px) { .how.four { grid-template-columns: 1fr; } }
+
+/* Review fixes */
+.flow li { margin: 0 !important; background: none !important; padding: 0 !important; }
+html:not([data-stgb-ready]) .flow li:first-child.done .lbl { border-top-color: var(--line); color: var(--muted); }
+.flow li .lbl { white-space: normal; overflow: visible; }
+.flow li.done a:hover .lbl { text-decoration: underline; }
+.slot.video { display: none; }
+.fill-row b { display: inline; }
+.fill-row > div > b:first-child { display: block; }
+.menu { right: auto; left: 46%; width: 236px; }
+.shots2 { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+@media (max-width: 520px) { .shots2 { grid-template-columns: 1fr; } }
+@media (max-width: 640px) { .brand span { display: inline; } }
+@media (max-width: 520px) { .top nav .btn { display: none; } }

@@ -23,6 +23,7 @@ files=(
   prompts.js
   relay.js
   site-connect.js
+  site-ready.js
   grant.html
   grant.js
   destinations/grokbot.js
@@ -127,7 +128,7 @@ if uncompressed > 5 * 1024 * 1024:
 manifest = json.loads(z.read("manifest.json"))
 expected = [
     "manifest.json", "background.js", "enrich.js", "content.js", "content.css", "hosts.js", "connect.js",
-    "logos.js", "options.html", "options.css", "options.js", "prompts.js", "relay.js", "site-connect.js",
+    "logos.js", "options.html", "options.css", "options.js", "prompts.js", "relay.js", "site-connect.js", "site-ready.js",
     "grant.html", "grant.js", "destinations/grokbot.js", "destinations/claude.js",
     "destinations/chatgpt.js", "destinations/codex.js",
     "icons/icon16.png", "icons/icon32.png", "icons/icon48.png", "icons/icon128.png",

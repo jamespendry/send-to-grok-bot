@@ -4,11 +4,11 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Install Send to Grok Bot</title>
-<meta name="description" content="Six steps to add the Send to Grok Bot extension to Chrome while it waits for the Chrome Web Store.">
+<meta name="description" content="Step 1 of 4. Add the Send to Grok Bot extension to Chrome. About two minutes.">
 <meta name="theme-color" content="#ffffff" media="(prefers-color-scheme: light)">
 <meta name="theme-color" content="#000000" media="(prefers-color-scheme: dark)">
 <meta property="og:title" content="Install Send to Grok Bot">
-<meta property="og:description" content="Six steps to add the Send to Grok Bot extension to Chrome while it waits for the Chrome Web Store.">
+<meta property="og:description" content="Step 1 of 4. Add the Send to Grok Bot extension to Chrome. About two minutes.">
 <meta property="og:image" content="https://sendtogrokbot.com/assets/promo/marquee-1400x560.png">
 <meta name="twitter:card" content="summary_large_image">
 <link rel="icon" href="/assets/icons/icon32.png" sizes="32x32">
@@ -21,30 +21,29 @@
 <header class="top"><div class="wrap">
   <a class="brand" href="/"><img src="/assets/icons/icon48.png" alt="" width="28" height="28"><span>Send to Grok Bot</span></a>
   <nav aria-label="Main">
-    <a href="/setup" aria-current="page">Setup</a>
-    <a href="/mobile" class="hide-sm">iPhone</a>
-    <a class="btn small" data-chrome-store href="https://github.com/jamespendry/send-to-grok-bot#readme">Add to Chrome</a>
   </nav>
 </div></header>
 
 <main class="narrow page">
-  <a class="crumb" href="/setup"><svg viewBox="0 0 24 24" aria-hidden="true"><path fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" d="M15 5l-7 7 7 7"/></svg>Setup</a>
+  <nav class="flow" aria-label="Setup progress"><ol><li class="now" aria-current="step"><span class="num">1</span><span class="lbl">Install</span></li><li class=""><span class="num">2</span><span class="lbl">Choose AI</span></li><li class=""><span class="num">3</span><span class="lbl">Connect</span></li><li class=""><span class="num">4</span><span class="lbl">Try it</span></li></ol></nav>
   <h1>Install the extension</h1>
-  <p class="intro" style="margin-top:12px">Do this once, on a computer, in Chrome. It takes about two minutes. Every AI needs it first, and no AI can do it for you, because Chrome doesn't let anything but you add extensions.</p>
-  <div class="note">It isn't in the Chrome Web Store yet, so it takes a few extra clicks. When it's in the store, this page becomes one Add to Chrome button.</div>
+  <div class="detect when-ready" style="margin:16px 0 0"><b>It's installed.</b><span class="muted">You can skip this step.</span>
+    <div class="actions"><a class="btn large" href="/setup">Next: Choose your AI</a></div></div>
+  <p class="intro when-missing" style="margin-top:12px">On a computer, in Chrome. About two minutes. You do this once.</p>
 
-  <ol class="steps num">
+  <ol class="steps num when-missing">
     <li>
       <h2>Download it</h2>
-      <div class="actions" style="margin:4px 0 0"><a class="btn" href="/send-to-grok-bot.zip" download>Download the extension</a></div>
+      <div class="actions" style="margin:4px 0 0"><a class="btn large" href="/send-to-grok-bot.zip" download>Download the extension</a></div>
     </li>
     <li>
       <h2>Unzip it</h2>
-      <p class="muted">Open your <span class="ui">Downloads</span> folder and double-click <span class="ui">send-to-grok-bot.zip</span>. You get a folder named <span class="ui">send-to-grok-bot</span>. On Windows, right-click the zip and choose <span class="ui">Extract All</span>.</p>
+      <p class="muted">Open your <span class="ui">Downloads</span> folder and double-click <span class="ui">send-to-grok-bot.zip</span>. You get a folder called <span class="ui">send-to-grok-bot</span>. Leave it there.</p>
+      <p class="muted" style="margin-top:6px">On Windows: right-click the zip, then <span class="ui">Extract All</span>.</p>
     </li>
     <li>
       <h2>Open Chrome's extensions page</h2>
-      <p class="muted">Copy this, paste it into Chrome's address bar, and press Enter. Websites can't link to it directly.</p>
+      <p class="muted">Copy this, paste it into the address bar at the top of Chrome, and press Enter.</p>
       <div class="copy" style="max-width:360px">
         <span class="val mono" id="extpage">chrome://extensions</span>
         <button type="button" data-copy="#extpage">Copy</button>
@@ -52,28 +51,29 @@
     </li>
     <li>
       <h2>Turn on Developer mode, then click Load unpacked</h2>
-      <p class="muted">Switch on <span class="badge">1</span> <span class="ui">Developer mode</span> at the top right. Then click <span class="badge">2</span> <span class="ui">Load unpacked</span> and choose the <span class="ui">send-to-grok-bot</span> folder from step 2.</p>
-      <figure class="shot">
-        <img src="/img/chrome-extensions.png" width="1320" height="150" alt="Chrome's extensions page with Developer mode numbered 1 and Load unpacked numbered 2.">
-      </figure>
+      <p class="muted"><span class="badge">1</span> Switch on <span class="ui">Developer mode</span> at the top right. <span class="badge">2</span> Click <span class="ui">Load unpacked</span> and choose the <span class="ui">send-to-grok-bot</span> folder from your Downloads.</p>
+      <div class="shots2">
+        <figure class="shot"><img src="/img/chrome-devmode.png" width="560" height="160" alt="Developer mode switched on, numbered 1, at the top right of Chrome's extensions page."></figure>
+        <figure class="shot"><img src="/img/chrome-load-unpacked.png" width="560" height="160" alt="The Load unpacked button, numbered 2."></figure>
+      </div>
     </li>
     <li>
-      <h2>Pin it (optional)</h2>
-      <p class="muted">Click the puzzle-piece icon next to Chrome's address bar, then the pin next to <span class="ui">Send to Grok Bot</span>. Its icon opens the settings.</p>
+      <h2>Come back here and refresh</h2>
+      <p class="muted">This page checks for the extension and moves you to the next step.</p>
     </li>
   </ol>
 
-  <div class="note done"><b>Installed.</b> Now pick your AI. <a href="/setup">Choose an AI</a></div>
+  <div class="detect when-missing"><b>Not installed yet.</b><span class="muted">Finish the steps above, then refresh this page. It isn't in the Chrome Web Store yet, which is why it takes these steps.</span></div>
 </main>
 
 <footer><div class="wrap">
   <span>Free and open source.</span>
-  <a href="https://github.com/jamespendry/send-to-grok-bot">GitHub</a>
-  <a href="/setup">Setup</a>
+  <a href="/install">Get started</a>
   <a href="/mobile">iPhone</a>
   <a href="/history">History</a>
   <a href="/connect">Connect</a>
   <a href="/privacy">Privacy</a>
+  <a href="https://github.com/jamespendry/send-to-grok-bot">GitHub</a>
   <span class="sp"></span>
   <span>Not affiliated with X, xAI, Anthropic, or OpenAI.</span>
 </div></footer>

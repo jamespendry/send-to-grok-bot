@@ -3,12 +3,12 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Set up Send to Grok Bot</title>
-<meta name="description" content="Pick your AI and set up Send to Grok Bot in about two minutes.">
+<title>Choose your AI</title>
+<meta name="description" content="Step 2 of 4. Pick where your X posts go: Grok Bot, Claude, ChatGPT, or Codex.">
 <meta name="theme-color" content="#ffffff" media="(prefers-color-scheme: light)">
 <meta name="theme-color" content="#000000" media="(prefers-color-scheme: dark)">
-<meta property="og:title" content="Set up Send to Grok Bot">
-<meta property="og:description" content="Pick your AI and set up Send to Grok Bot in about two minutes.">
+<meta property="og:title" content="Choose your AI">
+<meta property="og:description" content="Step 2 of 4. Pick where your X posts go: Grok Bot, Claude, ChatGPT, or Codex.">
 <meta property="og:image" content="https://sendtogrokbot.com/assets/promo/marquee-1400x560.png">
 <meta name="twitter:card" content="summary_large_image">
 <link rel="icon" href="/assets/icons/icon32.png" sizes="32x32">
@@ -21,69 +21,47 @@
 <header class="top"><div class="wrap">
   <a class="brand" href="/"><img src="/assets/icons/icon48.png" alt="" width="28" height="28"><span>Send to Grok Bot</span></a>
   <nav aria-label="Main">
-    <a href="/setup" aria-current="page">Setup</a>
-    <a href="/mobile" class="hide-sm">iPhone</a>
-    <a class="btn small" data-chrome-store href="https://github.com/jamespendry/send-to-grok-bot#readme">Add to Chrome</a>
   </nav>
 </div></header>
 
 <main class="narrow page">
-  <h1>Set up in 2 minutes</h1>
-  <p class="intro" style="margin-top:12px">Send to Grok Bot adds one button on an X post. You click it and pick where the post goes. It is free, with nothing to buy and no account to create.</p>
-
-  <ol class="steps num">
-    <li>
-      <h2>Install the extension</h2>
-      <p class="muted">Once, on a computer, in Chrome. About two minutes. No AI can do this part for you.</p>
-      <div class="actions" style="margin-top:14px"><a class="btn" href="/install">Install steps</a></div>
-    </li>
-    <li>
-      <h2>Pick your AI</h2>
-      <p class="muted" style="margin-bottom:14px">Choose one to start. Each takes you to its own short page.</p>
-      <div class="rows">
-        <a class="row" href="/setup/grok">
-          <span class="logo grokbot"><svg><use href="/assets/logos.svg#grokbot"/></svg></span>
-          <span class="text"><b>Grok Bot</b><span>Send Grok Bot one line, then copy two values from its routine.</span></span>
-          <svg class="chev" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" d="M9 6l6 6-6 6"/></svg>
-        </a>
-        <a class="row" href="/setup/claude">
-          <span class="logo claude"><svg><use href="/assets/logos.svg#claude"/></svg></span>
-          <span class="text"><b>Claude</b><span>Four short steps on claude.ai. Replies on its own.</span></span>
-          <svg class="chev" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" d="M9 6l6 6-6 6"/></svg>
-        </a>
-        <a class="row" href="/setup/chatgpt">
-          <span class="logo chatgpt"><svg><use href="/assets/logos.svg#chatgpt"/></svg></span>
-          <span class="text"><b>ChatGPT <span class="tag">No setup</span></b><span>Check one box. Posts open in ChatGPT, ready to send.</span></span>
-          <svg class="chev" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" d="M9 6l6 6-6 6"/></svg>
-        </a>
-        <a class="row" href="/setup/codex">
-          <span class="logo codex"><svg><use href="/assets/logos.svg#codex"/></svg></span>
-          <span class="text"><b>Codex <span class="tag">No setup</span></b><span>Check one box. Posts open as a Codex task.</span></span>
-          <svg class="chev" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" d="M9 6l6 6-6 6"/></svg>
-        </a>
-      </div>
-    </li>
-  </ol>
-
-  <h2>How replies sound</h2>
-  <p>Every reply starts with a one-line takeaway, then answers in the shape that fits the post. Change the style in the extension settings, under <span class="ui">Replies</span>.</p>
-  <div class="chips reply-chips">
-    <span class="chip">General</span><span class="chip">Research</span><span class="chip">Job hunt</span>
-    <span class="chip">Buy or skip</span><span class="chip">Learn later</span><span class="chip">Content ideas</span>
+  <nav class="flow" aria-label="Setup progress"><ol><li class="done"><a href="/install"><span class="num">1</span><span class="lbl">Install</span></a></li><li class="now" aria-current="step"><span class="num">2</span><span class="lbl">Choose AI</span></li><li class=""><span class="num">3</span><span class="lbl">Connect</span></li><li class=""><span class="num">4</span><span class="lbl">Try it</span></li></ol></nav>
+  <div class="note when-missing" style="margin-bottom:20px"><b>Install the extension first.</b> <a href="/install">Go to step 1</a></div>
+  <h1>Choose your AI</h1>
+  <p class="intro" style="margin-top:12px">Where should your posts go? Pick one. You can add more later.</p>
+  <div class="rows">
+    <a class="row" href="/setup/grok">
+      <span class="logo grokbot"><svg><use href="/assets/logos.svg#grokbot"/></svg></span>
+      <span class="text"><b>Grok Bot</b><span>Grok Bot sets itself up. You copy two lines. About 2 minutes.</span></span>
+      <svg class="chev" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" d="M9 6l6 6-6 6"/></svg>
+    </a>
+    <a class="row" href="/setup/claude">
+      <span class="logo claude"><svg><use href="/assets/logos.svg#claude"/></svg></span>
+      <span class="text"><b>Claude</b><span>Replies on its own. Needs a paid Claude plan. About 4 minutes.</span></span>
+      <svg class="chev" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" d="M9 6l6 6-6 6"/></svg>
+    </a>
+    <a class="row" href="/setup/chatgpt">
+      <span class="logo chatgpt"><svg><use href="/assets/logos.svg#chatgpt"/></svg></span>
+      <span class="text"><b>ChatGPT <span class="tag">No setup</span></b><span>Check one box. Posts open in ChatGPT, ready to send.</span></span>
+      <svg class="chev" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" d="M9 6l6 6-6 6"/></svg>
+    </a>
+    <a class="row" href="/setup/codex">
+      <span class="logo codex"><svg><use href="/assets/logos.svg#codex"/></svg></span>
+      <span class="text"><b>Codex <span class="tag">No setup</span></b><span>Check one box. Posts open as a Codex task.</span></span>
+      <svg class="chev" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" d="M9 6l6 6-6 6"/></svg>
+    </a>
   </div>
-
-  <h2>On iPhone</h2>
-  <p>Share a post from the X app and pick Grok Bot, Claude, ChatGPT, or Codex. You paste one relay code, not a webhook address. <a href="/mobile">Set up iPhone</a>. Recent sends are on <a href="/history">History</a>.</p>
+  <p class="muted" style="margin-top:20px">On an iPhone? <a href="/mobile">Use the share sheet instead</a>.</p>
 </main>
 
 <footer><div class="wrap">
   <span>Free and open source.</span>
-  <a href="https://github.com/jamespendry/send-to-grok-bot">GitHub</a>
-  <a href="/setup">Setup</a>
+  <a href="/install">Get started</a>
   <a href="/mobile">iPhone</a>
   <a href="/history">History</a>
   <a href="/connect">Connect</a>
   <a href="/privacy">Privacy</a>
+  <a href="https://github.com/jamespendry/send-to-grok-bot">GitHub</a>
   <span class="sp"></span>
   <span>Not affiliated with X, xAI, Anthropic, or OpenAI.</span>
 </div></footer>
