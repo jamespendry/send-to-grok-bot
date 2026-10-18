@@ -10,7 +10,7 @@ People who use Grok Bot can paste this one line into the bot:
 Set up Send to Grok Bot for me: https://github.com/jamespendry/send-to-grok-bot
 ```
 
-The bot creates a webhook routine with the General prompt. It cannot read the webhook key. After the routine exists it sends one message: install the extension, then open the sidebar links named Webhook URL and Authorization header, copy both, and paste them at `https://sendtogrokbot.com/connect`. With the extension installed, pasting on `/connect` saves it. There is no Connect button. The website (`/`, `/setup`, `/setup/grok`, `/setup/claude`, `/setup/chatgpt`, `/setup/codex`, `/mobile`, `/history`, `/connect`, `/privacy`) is in [docs/](docs/). To publish it: `bash scripts/build-site.sh`, then `npx wrangler deploy --config site/wrangler.toml`. [site/README.md](site/README.md) has the details.
+The bot creates a webhook routine with the General prompt. It cannot read the webhook key. After the routine exists it sends one message. On a computer, add the extension, then open the routine from Routines in the bot's info pane. Copy **POST to** and paste it at `https://sendtogrokbot.com/connect`. Then copy **header** and paste it in the same box. With the extension installed, each paste saves. The website (`/`, `/setup`, `/setup/grok`, `/setup/claude`, `/setup/chatgpt`, `/setup/codex`, `/mobile`, `/history`, `/connect`, `/privacy`) is in [docs/](docs/). To publish it: `bash scripts/build-site.sh`, then `npx wrangler deploy --config site/wrangler.toml`. [site/README.md](site/README.md) has the details.
 
 People installing by hand: the steps below are from a folder. Store listing text, promo images, and the upload steps are in [store/](store/). `scripts/package.sh` writes the zip.
 
@@ -76,15 +76,15 @@ You should see a page titled **Send to Grok Bot**, with a box labeled **Paste he
 
 ### 8. Turn on a destination
 
-Paste the webhook URL and the Authorization header together into **Paste here**. The same paste works on `https://sendtogrokbot.com/connect`. If the extension is installed, the paste saves. There is no Connect button.
+For Grok Bot, paste the webhook URL into **Paste here**, then paste the Authorization header into the same box. Either order works. The same pastes work on `https://sendtogrokbot.com/connect`. If the extension is installed, each paste saves.
 
-For Grok Bot you should see: Now open x.com and click the arrow. Paste those two values only on this page or on that connect page, not into a chat. Another paste later adds another destination. It does not erase the ones already saved.
+After the first value you should see: Webhook URL saved. Now paste the Authorization header. After the second: Now open x.com and click the arrow. Paste those two values only on this page or on that connect page, not into a chat. Another paste later adds another destination. It does not erase the ones already saved.
 
 If you do not have a link:
 
 - **ChatGPT** needs no setup. Check **Send to ChatGPT** and click **Save**. You should see the word Saved. No password. Clicking a post opens ChatGPT with the post filled in. You press Send.
 - **Codex** needs no setup. Check **Send to Codex** and click **Save**. You should see the word Saved. No password. Clicking a post opens Codex with the post filled in. You press Send.
-- **Grok Bot**: paste the URL and the Authorization header together into **Paste here**. You should see: Now open x.com and click the arrow. Where those two values are is in the Grok Bot section below. The separate URL and key fields are under **More options**.
+- **Grok Bot**: paste the webhook URL into **Paste here**, then the Authorization header. You should see: Now open x.com and click the arrow. Where those two values are is in the Grok Bot section below. The separate URL and key fields are under **More options**.
 - **Claude**, opening a tab: check **Send to Claude**, leave the box empty, and click **Save**. You should see the word Saved.
 - **Claude**, a routine: check **Send to Claude**. Paste the Fire URL and the token into the one box, in any order. Click **Save**. You should see the word Saved. The Claude section below is the click path.
 
@@ -123,7 +123,7 @@ The pictures above are placeholders. Take these and save them under `docs/img/` 
 | `docs/img/08-destinations.png` | A destination checked, its fields, and the word Saved |
 | `docs/img/09-post-button.png` | The arrow icon in an X post's action row |
 | `docs/img/10-menu.png` | The destination menu open on a post |
-| `docs/img/grok-routines-webhook.png` | Grok Bot sidebar, Routines tab, routine open. Bottom shows When to run = Webhook, Method POST, URL, and Authorization header. Blur both secrets |
+| `docs/img/grok-routines-webhook.png` | Grok Bot info pane, Routines, Send to Grok Bot open. Webhook shows POST to, key, and header. Blur the key and header |
 | `docs/img/connect-page.png` | sendtogrokbot.com/connect with Step 1, the paste box, and no Connect button. No real secret |
 | `docs/img/claude-scheduled-tasks.png` | claude.ai left sidebar, Routines, page titled Scheduled tasks. Blur account details |
 | `docs/img/options-replies.png` | Options page, Replies preset menu, and the Claude box with Copy task prompt |
@@ -132,7 +132,7 @@ The pictures above are placeholders. Take these and save them under `docs/img/` 
 
 ## Where the paste comes from
 
-Grok Bot cannot read the webhook key, so it does not hand you a connect link. After it creates the routine, you open the sidebar links named Webhook URL and Authorization header, copy both, and paste them together at `https://sendtogrokbot.com/connect`. The page does not upload what you paste.
+Grok Bot cannot read the webhook key, so it does not hand you a connect link. After it creates the routine, you open the routine's detail pane, copy **POST to**, and paste it at `https://sendtogrokbot.com/connect`. Then you copy **header** (or **key**) and paste it in the same box. Either order works. The page does not upload what you paste.
 
 The same box accepts a Claude Fire URL and token pasted together, in any order. It accepts a `trig_` id. The options page accepts those same pastes. A Claude, ChatGPT, or Codex connection code can still be pasted there. It starts with `stgb1.`. Grok Bot setup does not use one.
 
@@ -167,7 +167,7 @@ The relay is a Cloudflare Worker in [`relay/`](relay/). Setup, including the exa
 
 ## Marketplace plugin
 
-[`plugin/`](plugin/) is the Grok Bot and Cursor plugin. It creates the webhook routine, then sends one message telling you to paste the Webhook URL and Authorization header at sendtogrokbot.com/connect. The logo on the site is `/logo.svg`. The form answers are in [plugin/SUBMIT.md](plugin/SUBMIT.md). Submit them at https://x.ai/bot/marketplace/submit-a-plugin.
+[`plugin/`](plugin/) is the Grok Bot and Cursor plugin. It creates the webhook routine, then sends one message telling you to copy POST to and header from the routine and paste them, one at a time, at sendtogrokbot.com/connect. The logo on the site is `/logo.svg`. The form answers are in [plugin/SUBMIT.md](plugin/SUBMIT.md). Submit them at https://x.ai/bot/marketplace/submit-a-plugin.
 
 When Relay is on, Grok Bot and Claude still receive the version 2 post, including `digest` and media fields. The relay forwards that object.
 
@@ -237,11 +237,11 @@ Presets on the options page: General, Research, Job hunt, Buy or skip, Learn lat
 
 ### Grok Bot
 
-The automatic path is the one line at the top of this file. The bot cannot read the webhook key. After the routine exists it tells you to install the extension, then open the sidebar links named Webhook URL and Authorization header, copy both, and paste them at sendtogrokbot.com/connect.
+The automatic path is the one line at the top of this file. The bot cannot read the webhook key. After the routine exists it sends one message: on a computer, add the extension, open the routine, and paste POST to and then header at sendtogrokbot.com/connect.
 
-To copy it yourself, on a computer: in Grok Bot, open the bot's sidebar, open the Routines tab, and open the routine. At the bottom, When to run is Webhook and Method is POST. Copy the URL and the Authorization header. Paste both on [the connect page](docs/connect.html). The phone app does not show these fields.
+To copy it yourself, on a computer: in the Grok Bot desktop app, click the bot's name at the top of the chat, or press Cmd+Shift+I. Under **Routines**, click **Send to Grok Bot**. Its When to run is When a webhook fires. Under **Webhook** are three copy fields: **POST to** (the webhook URL), **key**, and **header** (the Authorization header). Paste **POST to** on [the connect page](docs/connect.html). The page says: Webhook URL saved. Now paste the Authorization header. Paste **header** in the same box. Pasting **key** instead also works. The page says: Now open x.com and click the arrow. Do this on a computer. The extension is Chrome on a computer.
 
-Any webhook that accepts the JSON above will do, including Zapier, Make, or n8n. On the connect page, paste the URL and the Authorization header together. A response of 200 means the run started. The reply shows up in the bot's chat.
+Any webhook that accepts the JSON above will do, including Zapier, Make, or n8n. On the connect page, paste the URL and then the Authorization header. A response of 200 means the run started. The reply shows up in the bot's chat.
 
 There is no screenshot of that Routines screen yet. Take `docs/img/grok-routines-webhook.png` and blur the URL and the header.
 

@@ -12,9 +12,9 @@ Read this file before you give instructions. The human steps in the README are f
 
 ## Rules
 
-1. Do every step your tools and permissions allow. Reading this repo and creating the routine are your job. You cannot read a Grok Bot webhook key. Do not build a Grok Bot connection code.
+1. Do every step your tools and permissions allow. Reading this repo and creating the routine are your job. You cannot read a Grok Bot webhook key, so you cannot build a Grok Bot connect link or connection code.
 2. Grok Bot, after the routine exists, sends one message and stops. Do not walk those clicks one per message. Claude stays one action per message. Wait until they tell you what they see. If it does not match the success line, fix that step before you send the next one.
-3. Do not ask the person to paste a webhook key, routine token, or other secret into this chat. For Grok Bot they paste the webhook URL and the Authorization header together at https://sendtogrokbot.com/connect. For Claude they paste into the extension options page.
+3. Do not ask the person to paste a webhook key, routine token, or other secret into this chat. For Grok Bot they copy POST to and header from the routine's detail pane and paste them one at a time at https://sendtogrokbot.com/connect. For Claude they paste into the extension options page.
 4. A connection code is for Claude, ChatGPT, or Codex, and only when you can see every field that code needs. Grok Bot does not use one. Do not print a Grok Bot key. Do not invent the webhook URL.
 5. When you cannot see a Claude secret, do not collect it. The person copies it from the task page straight into the options page. A secret-request card is the wrong destination. The secret belongs in the extension, in `chrome.storage.local`, not in your notes.
 6. Do not invent webhook URLs, `trig_` ids, or tokens. Copy them from the tool or the screen that created them.
@@ -26,7 +26,7 @@ Read this file before you give instructions. The human steps in the README are f
 
 Chrome shows a button on each X post. The person clicks it and picks a destination you prepared.
 
-- Grok Bot: a webhook routine exists, and the extension has its URL and key.
+- Grok Bot: a routine named Send to Grok Bot runs When a webhook fires, and the extension has its webhook URL and key.
 - Claude Code: an API task exists under Scheduled tasks, with the short task prompt from **Copy task prompt** and an API trigger, and the extension has its Fire URL and token. Runs show up under that task's History. If they cannot use tasks, Claude opens in a tab and no secret is stored.
 - ChatGPT or Codex: no setup and no secret. They check the box and click Save. Clicking a post opens that product with the post filled in, and they press Send.
 
@@ -52,14 +52,13 @@ node -e 'const {encodeConnectionCode}=require("./extension/connect.js"); console
 
 | Destination | JSON |
 | --- | --- |
-| Grok Bot | `{"destination":"grokbot","mode":"webhook","url":"https://...","key":"..."}` |
 | Claude routine | `{"destination":"claude","mode":"routine","url":"https://api.anthropic.com/v1/claude_code/routines/trig_.../fire","token":"..."}` |
 | Claude tab | `{"destination":"claude","mode":"link"}` |
 | ChatGPT tab | `{"destination":"chatgpt","mode":"link"}` |
 | ChatGPT agent | `{"destination":"chatgpt","mode":"agent","triggerId":"agtch_...","token":"..."}` |
 | Codex | `{"destination":"codex","mode":"link"}` |
 
-The key is optional for Grok Bot. For Claude, `url` is the **Fire URL** copied from Edit scheduled task. A routines page link or a bare `trig_` id also works. Do not build the URL yourself. Codex may also include `environment` and `branch`. Claude, ChatGPT, and Codex may include `prompt`. Grok Bot must not: the prompt lives on the routine, and the encoder rejects a Grok Bot code that contains one.
+For Claude, `url` is the **Fire URL** copied from Edit scheduled task. A routines page link or a bare `trig_` id also works. Do not build the URL yourself. Codex may also include `environment` and `branch`. Claude, ChatGPT, and Codex may include `prompt`. Grok Bot must not: the prompt lives on the routine, and the encoder rejects a Grok Bot code that contains one.
 
 A Claude or ChatGPT `link` code clears a routine token already saved for that destination, so the button opens a tab. It does not clear the other destinations.
 
@@ -69,29 +68,29 @@ For Claude, ChatGPT, or Codex, the link you send a person is:
 
 The hash is the code. There is no `connect=` in front of it. The page can fill the box from that hash. Pasting the box saves it when the extension is installed. There is no Connect button. `options.html#connect=stgb1....` still fills the options page. Do not send a `chrome-extension://` link. Those links do not open reliably.
 
-[docs/connect.html](docs/connect.html) is that page. For Grok Bot the person pastes the webhook URL and the Authorization header together. A Claude Fire URL plus a token also works, in any order. It does not upload what they paste. Do not ask them to paste the secret into chat so you can run the Node command.
+[docs/connect.html](docs/connect.html) is that page. For Grok Bot the person pastes the webhook URL and then the Authorization header, one at a time, in either order. Grok Bot needs both. A Claude Fire URL and a token also work, in any order. It does not upload what they paste. Do not ask them to paste the secret into chat so you can run the Node command.
 
 ## Grok Bot
 
 Create a webhook-triggered routine yourself.
 
 - Name: Send to Grok Bot
-- Trigger: webhook
+- When to run: When a webhook fires
 - Instruction: the prompt under the line in [prompts/general.md](prompts/general.md), unchanged. Do not include the title. That file is also [prompts/default-routine-prompt.md](prompts/default-routine-prompt.md).
 
 If creating it shows a confirm card, that confirmation is one step. Ask, wait, then continue. Leave the routine on, not paused.
 
 The routine prompt tells the bot to follow a `prompt` field on the post when one is present. The extension sends `preset` and `prompt` with every post, so the person can switch Research, Job hunt, Buy or skip, Learn later, or Content ideas on the options page without you editing the routine. Do not put a prompt inside a connection code.
 
-You cannot read the webhook URL or the Authorization header. Do not invent them. Do not print a key. Do not build an `stgb1.` code for Grok Bot. Do not walk the person through one click per message.
+You cannot read the webhook URL or the Authorization header. Do not invent them. Do not print a key. Do not build an `stgb1.` code or a connect link for Grok Bot. Do not walk the person through one click per message.
 
-After the routine is on, send one message and stop. That message has the install steps, then the paste. Use these words:
+After the routine is on, send one message and stop. Use these words:
 
-Install Send to Grok Bot. It is not in the Chrome Web Store yet. Download the zip from https://github.com/jamespendry/send-to-grok-bot and unzip it. Find the folder named extension. It contains manifest.json. In Chrome, open chrome://extensions, turn on Developer mode, and click Load unpacked. Select that extension folder. Then open https://sendtogrokbot.com/connect.
+Your Send to Grok Bot routine is ready. On a computer: 1) Add the extension. The steps are at sendtogrokbot.com/connect. 2) Click my name at the top, then Routines, then Send to Grok Bot. 3) Copy POST to and paste it at sendtogrokbot.com/connect. 4) Copy header and paste it in the same box. Then open x.com and click the arrow on any post.
 
-Open the sidebar links named Webhook URL and Authorization header, copy both, and paste them together at sendtogrokbot.com/connect.
+Do not add a second message. Do not ask them to paste the key into this chat. If your message can include the links named Webhook URL and Authorization header, they open the same pane.
 
-Do not add a second message. Do not ask them to paste the key into this chat. The page saves when they paste, if the extension is installed. Success on that page is: Now open x.com and click the arrow.
+What the person sees: clicking the bot's name at the top of the chat, or Cmd+Shift+I, opens its info pane. The routine is under Routines. Its detail pane shows three copyable fields under Webhook: POST to (the webhook URL, `https://api2.cursor.sh/automations/...`), key (`crsr_...`), and header (`Authorization: Bearer crsr_...`). It also has Pause, Edit, and a delete icon. Pasting key instead of header also works, and either order works. After POST to, the page says: Webhook URL saved. Now paste the Authorization header. After the second value it says: Now open x.com and click the arrow. The paste saves only when the extension is installed. The extension is Chrome on a computer. It is not in the Chrome Web Store yet. The install steps are on sendtogrokbot.com/connect: download the zip, open chrome://extensions, turn on Developer mode, click Load unpacked, and choose the extension folder.
 
 The extension POSTs the post as JSON, including `preset` and `prompt`, and sends the key as `Authorization: Bearer <key>` and as `X-Sender-Key: <key>`. A 200 means the routine started. The reply shows up in the bot's chat when the run finishes.
 
@@ -229,7 +228,8 @@ If they already have the folder, skip the download and start at the first step t
 - Chrome says it needs a manifest: they selected the folder that contains `extension`, not `extension` itself.
 - Developer mode is off: Load unpacked is hidden. That is step 4.
 - The menu on a post is empty and the options page opens: nothing is checked, or Grok Bot is checked without a webhook address.
-- Grok Bot returns anything other than 200: the routine is paused, or the key is not the current one.
+- Grok Bot returns anything other than 200: the routine is paused, or the key is not the current one. Copy header again from the routine's detail pane and paste it at sendtogrokbot.com/connect.
+- The page says Webhook URL saved. Now paste the Authorization header: the key is still missing. Copy header from the routine's detail pane and paste it in the same box.
 - Claude says the token is invalid: on the task page, open the menu next to the task name, click Edit, click Regenerate, paste that token into the extension's Fire URL and token box, and click Save. Regenerating invalidates the previous token.
 - Claude says it cannot open the post: that is expected. It replies from the text the extension sent. If the reply says the post was empty, send it again from the post's own page so the thread is included.
 - They pasted the code into this chat: tell them to paste it into the options page instead, and do not ask them to paste it again here.
