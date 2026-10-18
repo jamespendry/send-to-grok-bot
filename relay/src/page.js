@@ -58,6 +58,12 @@ const PAGE = `<!doctype html>
   .bad { color: #f4212e !important; }
   [hidden] { display: none !important; }
   .history p { margin: 0 0 8px; font-size: 14px; overflow-wrap: anywhere; }
+  .phone { display: flex; gap: 16px; align-items: center; margin: 20px 0 8px; padding: 16px; border: 1px solid #eff3f4; border-radius: 16px; }
+  .phone h3 { margin: 0 0 4px; }
+  .phone p { margin: 0; }
+  #qr { flex: none; width: 132px; height: 132px; background: #fff; }
+  #qr svg { display: block; width: 132px; height: 132px; }
+  @media (max-width: 480px) { .phone { display: none; } }
 </style>
 </head>
 <body>
@@ -78,6 +84,13 @@ const PAGE = `<!doctype html>
     <div class="row">
       <button type="button" id="copy">Copy code</button>
       <span id="copyMsg"></span>
+    </div>
+    <div class="phone">
+      <div id="qr" aria-label="QR code for iPhone setup"></div>
+      <div>
+        <h3>Setting up an iPhone?</h3>
+        <p class="muted">Point the iPhone camera at this code and tap the link. The iPhone setup opens with your code ready to copy. Nothing to type.</p>
+      </div>
     </div>
     <label for="key">Relay key</label>
     <p class="hint">The extension and the iPhone shortcut both paste the whole code above. You do not copy this key.</p>

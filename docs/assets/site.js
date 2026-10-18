@@ -31,6 +31,18 @@
       show('Select and copy');
     }
   });
+  // The relay page's QR code opens /mobile#code=stgbr1.... Show that code ready to copy.
+  // The #fragment never reaches a server, and it is removed from the address bar here.
+  (function () {
+    var box = document.getElementById('phone-ready');
+    if (!box || location.hash.indexOf('#code=') !== 0) return;
+    var code = '';
+    try { code = decodeURIComponent(location.hash.slice(6)).trim(); } catch (e) {}
+    if (history.replaceState) history.replaceState(null, '', location.pathname + location.search);
+    if (!/^stgbr1\.[A-Za-z0-9_-]{20,8000}$/.test(code)) return;
+    document.getElementById('phone-code').textContent = code;
+    box.hidden = false;
+  })();
   // Links to a folded section, such as /setup/claude#claude-does-it, open it.
   function openTarget() {
     var id = location.hash.slice(1);
