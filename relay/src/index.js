@@ -434,6 +434,8 @@ async function openPost(request, env) {
     return callOut(env, new Request(u, { ...rest, headers }));
   });
   safeLog({ method: "POST", path: "/v1/open", status: result.ok ? 200 : 400, destination: result.ok ? result.destination : "", error: result.ok ? "" : "input" });
+  // The shortcut opens openUrl and shows notice either way, so a failure still lands somewhere helpful.
+  if (!result.ok && value.source === "shortcut") return json({ ok: false, error: result.error, notice: result.error, openUrl: "https://sendtogrokbot.com/mobile" });
   if (!result.ok) return json({ ok: false, error: result.error, notice: result.error }, 400);
   return json(result);
 }
