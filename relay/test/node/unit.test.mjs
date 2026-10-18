@@ -578,14 +578,16 @@ print(json.dumps({
   for (const kind of ["WFURLContentItem", "WFStringContentItem", "WFSafariWebPageContentItem"]) assert.ok(parsed.inputs.includes(kind), kind);
   // An import question left blank broke every run ("Please choose a value for each parameter").
   assert.deepEqual(parsed.questions, []);
-  assert.equal(parsed.actions[0], "link");
-  // Every Text action has a value, so no action is missing a parameter.
-  assert.deepEqual(parsed.texts, ["grokbot", "claude", "chatgpt", "codex"]);
+  // No link check and no If blocks: the X app's share did not pass one, so the relay finds the link.
+  assert.equal(parsed.actions[0], "choosefrommenu");
+  assert.ok(!parsed.actions.includes("conditional"));
+  assert.ok(!parsed.actions.includes("link"));
   assert.deepEqual(parsed.menu, ["Grok Bot", "Claude", "ChatGPT", "Codex"]);
   assert.equal(parsed.url, "https://relay.sendtogrokbot.com/v1/open");
   assert.equal(parsed.method, "POST");
   assert.equal(parsed.bodyType, "JSON");
-  assert.deepEqual(parsed.keys, ["copyText", "notice", "openUrl"]);
+  for (const key of ["notice", "openUrl", "copyText"]) assert.ok(parsed.keys.includes(key), key);
+  assert.equal(parsed.keys.filter(k => k === "openUrl").length, 4);
   for (const step of ["setclipboard", "notification", "openurl"]) assert.ok(parsed.actions.includes(step), step);
   const steps = read("../shortcuts/BUILD.md");
   assert.match(steps, /shortcuts sign --mode anyone/);
@@ -853,5 +855,9 @@ test("/v1/open fills in the post for each AI and needs no code", async () => {
   assert.equal(offline.context, "link");
   assert.match(decodeURIComponent(offline.openUrl), /https:\/\/x\.com\/ada\/status\/999/);
   assert.equal((await buildOpen("chatgpt", "https://example.com/x", fakeFetch)).ok, false);
+  // The X app can share text with the link inside it.
+  const shared = await buildOpen("chatgpt", "anand iyer on X: \"Too many assistants\" https://x.com/ada/status/123?s=46&t=abc", fakeFetch);
+  assert.equal(shared.ok, true);
+  assert.equal(shared.context, "full");
   assert.equal((await buildOpen("gemini", "https://x.com/ada/status/123", fakeFetch)).ok, false);
 });

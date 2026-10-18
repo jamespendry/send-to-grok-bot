@@ -42,15 +42,19 @@ function fit(base, head, body) {
   return make(body.slice(0, lo) + "…");
 }
 
+// The X app shares a link, a page, or text with a link in it. Find the post link anywhere in it.
+const STATUS = /https?:\/\/(?:www\.|mobile\.)?(?:x|twitter)\.com\/[A-Za-z0-9_]{1,15}\/status(?:es)?\/\d{1,25}/i;
+
 export function parsePostUrl(raw) {
-  const ref = E.parseStatusUrl(String(raw || "").trim());
+  const found = String(raw || "").match(STATUS);
+  const ref = found && E.parseStatusUrl(found[0]);
   if (!ref) return null;
   return { ...ref, url: `https://x.com/${ref.user}/status/${ref.id}` };
 }
 
 export async function buildOpen(destination, postUrl, fetchFn) {
   const ref = parsePostUrl(postUrl);
-  if (!ref) return { ok: false, error: "That is not a link to an X post." };
+  if (!ref) return { ok: false, error: "No post link came through. In the X app, tap Share on a post, then Share via, then Send to Grok Bot." };
   if (!Object.prototype.hasOwnProperty.call(OPEN_NOTICES, destination)) {
     return { ok: false, error: "Pick Grok Bot, Claude, ChatGPT, or Codex." };
   }

@@ -41,49 +41,43 @@ def gid():
 
 MENU = [("Grok Bot", "grokbot"), ("Claude", "claude"), ("ChatGPT", "chatgpt"), ("Codex", "codex")]
 
-def build():
-    has_link, menu, copy, opener = gid(), gid(), gid(), gid()
-    a = [
-        act("detect.link", WFInput={"Value": {"Type": "ExtensionInput"}, "WFSerializationType": "WFTextTokenAttachment"}),
-        setvar("Links"),
-        if_has_value("Links", has_link),
-        act("getitemfromlist", WFItemSpecifier="First Item", WFInput=var("Links")),
-        setvar("Post URL"),
-        act("choosefrommenu", GroupingIdentifier=menu, WFControlFlowMode=0, WFMenuPrompt="Send this post to",
-            WFMenuItems=[t for t, _ in MENU]),
-    ]
-    for title, dest in MENU:
-        a += [act("choosefrommenu", GroupingIdentifier=menu, WFControlFlowMode=1, WFMenuItemTitle=title),
-              act("gettext", WFTextActionText=dest),
-              setvar("Destination")]
-    a += [
-        act("choosefrommenu", GroupingIdentifier=menu, WFControlFlowMode=2),
+def shared_input():
+    return {"Value": {"string": OBJ, "attachmentsByRange": {"{0, 1}": {"Type": "ExtensionInput"}}},
+            "WFSerializationType": "WFTextTokenString"}
+
+def send_steps(dest):
+    # No If blocks and no link check: the X app shares a link, a page, or text,
+    # and the relay finds the post link in whatever arrives.
+    steps = [
         act("downloadurl", WFURL="https://relay.sendtogrokbot.com/v1/open", WFHTTPMethod="POST", WFHTTPBodyType="JSON",
             WFJSONValues={"Value": {"WFDictionaryFieldValueItems": [
-                {"WFItemType": 0, "WFKey": plain("destination"), "WFValue": text_with("Destination")},
-                {"WFItemType": 0, "WFKey": plain("url"), "WFValue": text_with("Post URL")},
+                {"WFItemType": 0, "WFKey": plain("destination"), "WFValue": plain(dest)},
+                {"WFItemType": 0, "WFKey": plain("url"), "WFValue": shared_input()},
                 {"WFItemType": 0, "WFKey": plain("source"), "WFValue": plain("shortcut")},
             ]}, "WFSerializationType": "WFDictionaryFieldValue"}),
         act("detect.dictionary"),
         setvar("Response"),
-        act("getvalueforkey", WFDictionaryKey="copyText", WFInput=var("Response")),
-        setvar("Copy Text"),
-        if_has_value("Copy Text", copy),
-        act("setclipboard", WFInput=var("Copy Text")),
-        end_if(copy),
         act("getvalueforkey", WFDictionaryKey="notice", WFInput=var("Response")),
         setvar("Notice"),
         act("notification", WFNotificationActionTitle="Send to Grok Bot", WFNotificationActionBody=text_with("Notice")),
-        act("getvalueforkey", WFDictionaryKey="openUrl", WFInput=var("Response")),
-        setvar("Open URL"),
-        if_has_value("Open URL", opener),
-        act("openurl", WFInput=var("Open URL")),
-        end_if(opener),
-        otherwise(has_link),
-        act("notification", WFNotificationActionTitle="Send to Grok Bot",
-            WFNotificationActionBody=plain("Share a post from the X app, then pick Send to Grok Bot.")),
-        end_if(has_link),
     ]
+    if dest == "grokbot":
+        steps += [act("getvalueforkey", WFDictionaryKey="copyText", WFInput=var("Response")),
+                  setvar("Copy Text"),
+                  act("setclipboard", WFInput=var("Copy Text"))]
+    steps += [act("getvalueforkey", WFDictionaryKey="openUrl", WFInput=var("Response")),
+              setvar("Open URL"),
+              act("openurl", WFInput=var("Open URL"))]
+    return steps
+
+def build():
+    menu = gid()
+    a = [act("choosefrommenu", GroupingIdentifier=menu, WFControlFlowMode=0, WFMenuPrompt="Send this post to",
+             WFMenuItems=[t for t, _ in MENU])]
+    for title, dest in MENU:
+        a.append(act("choosefrommenu", GroupingIdentifier=menu, WFControlFlowMode=1, WFMenuItemTitle=title))
+        a += send_steps(dest)
+    a.append(act("choosefrommenu", GroupingIdentifier=menu, WFControlFlowMode=2))
     return {
         "WFWorkflowName": "Send to Grok Bot",
         "WFWorkflowClientVersion": "2700.0.1",
