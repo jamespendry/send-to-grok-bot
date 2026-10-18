@@ -1,6 +1,11 @@
 # Publish the iPhone shortcut
 
-The shortcut is an unsigned Shortcuts file: `shortcuts/Send to Grok Bot.shortcut`. The name has to stay **Send to Grok Bot**. That is the label in the X share sheet.
+The editable source is `shortcuts/Send to Grok Bot.shortcut` (unsigned XML). iOS refuses unsigned files, so the site serves `shortcuts/Send to Grok Bot (signed).shortcut`. After editing the source, re-sign it on a Mac signed in to iCloud:
+
+```bash
+plutil -convert binary1 -o /tmp/in.shortcut "shortcuts/Send to Grok Bot.shortcut" && shortcuts sign --mode anyone --input /tmp/in.shortcut --output "shortcuts/Send to Grok Bot (signed).shortcut"
+```
+ The name has to stay **Send to Grok Bot**. That is the label in the X share sheet.
 
 Apple does not let this repository mint an iCloud link. The install link is the file itself, served from the site:
 
@@ -14,7 +19,7 @@ https://sendtogrokbot.com/send-to-grok-bot.shortcut
 2. On the iPhone, tap https://sendtogrokbot.com/send-to-grok-bot.shortcut.
 3. Tap the downloaded file, then tap Add Shortcut.
 4. When Shortcuts asks, paste the code. Paste it once. Do not paste a webhook URL or a key.
-5. If iOS says the shortcut is untrusted, open Settings, tap Shortcuts, and turn on **Allow Untrusted Shortcuts**. Tap the link again. If that switch is missing, open the downloaded file from the Files app and tap Add Shortcut.
+5. If Shortcuts asks whether to add it, tap Add Shortcut.
 6. In the X app, open a post and tap Share. Tap **Send to Grok Bot**. Pick Grok Bot, Claude, ChatGPT, or Codex.
 7. A notification names what happened. ChatGPT and Codex then open with the post filled in. You press Send in that app. Grok Bot and Claude are sent for you.
 

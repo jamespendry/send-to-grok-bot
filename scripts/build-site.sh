@@ -31,7 +31,7 @@ for f in send-to-grok-bot.zip connect.html connect.js prompts.js _redirects _hea
 done
 grep -q 'id="paste"' "$out/connect.html" && grep -q 'id="msg"' "$out/connect.html" \
   || { echo "connect.html lost an id that extension/site-connect.js needs"; exit 1; }
-cp "shortcuts/Send to Grok Bot.shortcut" "$out/send-to-grok-bot.shortcut"
+cp "shortcuts/Send to Grok Bot (signed).shortcut" "$out/send-to-grok-bot.shortcut"
 test -f "$out/connect.html"
 test -f "$out/send-to-grok-bot.shortcut"
 test -f "$out/connect.js"
