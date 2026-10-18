@@ -427,3 +427,9 @@ html:not([data-stgb-ready]) .flow li:first-child.done .lbl { border-top-color: v
 .demo { max-width: 880px; margin: 0 auto; }
 .demo video { display: block; width: 100%; height: auto; aspect-ratio: 1470 / 922; border: 1px solid var(--line); border-radius: 16px; background: var(--card, #fff); }
 .demo figcaption { margin-top: 10px; text-align: center; font-size: 14px; color: var(--muted); }
+
+.shots3 { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; margin: 12px 0 4px; align-items: start; }
+.shots3 figure { margin: 0; }
+.shots3 img { display: block; width: 100%; height: auto; border-radius: 14px; border: 1px solid var(--line); }
+.shots3 figcaption { margin-top: 8px; font-size: 14px; color: var(--muted); }
+@media (max-width: 640px) { .shots3 { grid-template-columns: 1fr; gap: 16px; } }

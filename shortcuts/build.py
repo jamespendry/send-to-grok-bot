@@ -76,7 +76,7 @@ def send_steps(dest):
         link = with_uuid(act("gettext", WFTextActionText="grokbot://"))
         return [get,
                 act("setclipboard", WFInput=output_of(get, "Contents of URL")),
-                act("notification", WFNotificationActionTitle="Send to Grok Bot", WFNotificationActionBody="Copied. Paste it in Grok Bot and send."),
+                act("notification", WFNotificationActionTitle="Send to Grok Bot", WFNotificationActionBody="Copied. In Grok Bot, tap the message box, then Paste."),
                 link,
                 act("openurl", WFInput=output_of(link, "Text"))]
     get = ask_relay(dest, "text")
@@ -95,7 +95,7 @@ def build():
         "WFWorkflowClientVersion": "2700.0.1",
         "WFWorkflowMinimumClientVersion": 900,
         "WFWorkflowMinimumClientVersionString": "900",
-        "WFWorkflowIcon": {"WFWorkflowIconStartColor": 431817727, "WFWorkflowIconGlyphNumber": 59511},
+        "WFWorkflowIcon": {"WFWorkflowIconStartColor": 255, "WFWorkflowIconGlyphNumber": 59836},
         "WFWorkflowTypes": ["ActionExtension"],
         "WFWorkflowInputContentItemClasses": ["WFURLContentItem", "WFStringContentItem", "WFSafariWebPageContentItem"],
         "WFWorkflowHasShortcutInputVariables": True,
