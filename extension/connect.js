@@ -391,8 +391,39 @@
       return asCode(input);
     }
 
+    // A key on its own. planConnect decides from saved settings whether it
+    // belongs to Grok Bot or to a Claude routine that is waiting for its secret.
+    let loneKey = headerKey;
+    if (!loneKey && leftovers.length === 1) loneKey = leftovers[0];
+    if (loneKey && !/^https?:/i.test(loneKey)) {
+      if (loneKey.length > 2000) return {ok: false, error: 'The key is too long.'};
+      if (placeholder(loneKey)) return {ok: false, error: 'That key looks like an example. Use the real one from the routine page.'};
+      return {ok: true, kind: 'secret', key: loneKey, plain: 'A key, with no address. Paste the webhook URL as well.'};
+    }
     if (headerKey || leftovers.length) return {ok: false, error: 'Paste the address as well as the secret.'};
     return {ok: false, error: 'Paste the webhook URL and the Authorization header.'};
+  }
+
+  function filledText(v) {
+    return !!String(v == null ? '' : v).trim();
+  }
+
+  function grokMessage(next, base) {
+    const haveUrl = filledText(next.webhookUrl);
+    const haveKey = filledText(next.senderKey);
+    if (haveUrl && haveKey) return base || 'Saved Send to Grok Bot on this computer. Clicking a post sends it to your webhook.';
+    if (haveUrl) return 'Webhook URL saved. Now paste the Authorization header.';
+    return 'Key saved. Now paste the Webhook URL.';
+  }
+
+  function claudeMessage(next) {
+    const haveUrl = filledText(next.claudeFireUrl);
+    const haveToken = filledText(next.claudeToken);
+    let message = 'Saved Send to Claude on this computer.';
+    if (haveUrl && haveToken) message += ' Clicking a post starts the Claude routine.';
+    else if (!haveUrl) message += ' Paste the routine address as well.';
+    else message += ' Paste the secret as well.';
+    return message;
   }
 
   function planConnect(current, parsed) {
@@ -406,6 +437,7 @@
     }
     const removeKeys = [];
     let message = '';
+    let destination = '';
 
     if (parsed.kind === 'relay') {
       if (typeof STGB_RELAY !== 'undefined' && STGB_RELAY.decodeConnectCode) {
@@ -416,13 +448,16 @@
       next.relayCode = parsed.code;
       if (!enabled.length) enabled.push('grokbot', 'claude');
       message = 'Saved the relay on this computer.';
+      destination = 'relay';
     } else if (parsed.kind === 'code') {
-      if (parsed.destination === 'grokbot' && !(parsed.fields && String(parsed.fields.senderKey || '').trim())) {
-        return {ok: false, error: 'Paste the webhook URL and the Authorization header.'};
-      }
+      destination = parsed.destination;
       enable(parsed.destination);
       const fields = parsed.fields || {};
-      for (const key of Object.keys(fields)) next[key] = fields[key];
+      for (const key of Object.keys(fields)) {
+        // A webhook URL pasted alone keeps the key saved by an earlier paste.
+        if (key === 'senderKey' && !filledText(fields[key])) continue;
+        next[key] = fields[key];
+      }
       const prompt = fields.claudePrompt || fields.chatgptPrompt || fields.codexPrompt || '';
       if (prompt) {
         next.promptPreset = 'custom';
@@ -432,17 +467,29 @@
         delete next.codexPrompt;
         removeKeys.push('claudePrompt', 'chatgptPrompt', 'codexPrompt');
       }
-      message = parsed.message;
+      message = parsed.destination === 'grokbot' ? grokMessage(next, parsed.message) : parsed.message;
     } else if (parsed.kind === 'claude') {
+      destination = 'claude';
       enable('claude');
       if (parsed.url) next.claudeFireUrl = parsed.url;
       if (parsed.token) next.claudeToken = parsed.token;
-      const haveUrl = !!next.claudeFireUrl;
-      const haveToken = !!next.claudeToken;
-      message = 'Saved Send to Claude on this computer.';
-      if (haveUrl && haveToken) message += ' Clicking a post starts the Claude routine.';
-      else if (!haveUrl) message += ' Paste the routine address as well.';
-      else message += ' Paste the secret as well.';
+      message = claudeMessage(next);
+    } else if (parsed.kind === 'secret' && filledText(parsed.key)) {
+      // Prefer Grok Bot when its webhook is waiting for a key. Otherwise a Claude
+      // routine address waiting for its secret takes it. Otherwise it is a Grok Bot key.
+      const grokWaiting = filledText(next.webhookUrl) && !filledText(next.senderKey);
+      const claudeWaiting = filledText(next.claudeFireUrl) && !filledText(next.claudeToken);
+      if (!grokWaiting && claudeWaiting) {
+        destination = 'claude';
+        enable('claude');
+        next.claudeToken = String(parsed.key).trim();
+        message = claudeMessage(next);
+      } else {
+        destination = 'grokbot';
+        enable('grokbot');
+        next.senderKey = String(parsed.key).trim();
+        message = grokMessage(next, '');
+      }
     } else {
       return {ok: false, error: 'Paste the webhook URL and the Authorization header.'};
     }
@@ -453,11 +500,14 @@
       try { origins = stgbNeededOrigins(next); }
       catch (_) { origins = []; }
     }
-    return {ok: true, settings: next, removeKeys: removeKeys, origins: origins, message: message, plain: parsed.plain || message};
+    return {ok: true, settings: next, removeKeys: removeKeys, origins: origins, message: message, plain: parsed.plain || message, destination: destination};
   }
 
+  // Once the saved settings hold both the webhook URL and its key, the next step is x.com.
   function finishMessage(parsed, plan) {
-    if (parsed && parsed.destination === 'grokbot' && parsed.fields && String(parsed.fields.senderKey || '').trim()) {
+    const settings = (plan && plan.settings) || {};
+    const grokPaste = (plan && plan.destination === 'grokbot') || (parsed && parsed.destination === 'grokbot');
+    if (grokPaste && filledText(settings.webhookUrl) && filledText(settings.senderKey)) {
       return 'Now open x.com and click the arrow.';
     }
     return (plan && plan.message) || '';

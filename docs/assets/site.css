@@ -352,3 +352,13 @@ footer .wrap { gap: 4px 20px; }
 .reply-chips { margin-top: 16px; }
 .steps.plain > li { padding-left: 0; }
 .steps.plain > li::before, .steps.plain > li::after { display: none; }
+
+/* Connect: where to start when there is nothing to paste yet */
+.start { margin-top: 32px; }
+.start h2 { font-size: 19px; margin: 0 0 12px; }
+.start-row { align-items: flex-start; }
+.start-row .text { display: flex; flex-direction: column; gap: 6px; }
+.start-row .text > span { color: var(--muted); font-size: 14px; }
+.start-row .copy { margin: 4px 0; }
+.start-row .copy .val { font-size: 14px; }
+.note.agent { background: var(--surface); border: 1px solid var(--line); }

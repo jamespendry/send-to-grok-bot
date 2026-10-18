@@ -4,13 +4,21 @@
 <meta charset="utf-8">
 <title>Paste</title>
 <style>
-html,body{margin:0;height:100%;background:#fff}
-textarea{width:100%;height:100%;box-sizing:border-box;border:1px solid #cfd9de;border-radius:8px;padding:12px;font:16px/1.4 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;resize:none;color:#0f1419}
-textarea:focus{outline:none;border-color:#1d9bf0}
+:root{--bg:#fff;--fg:#0f1419;--muted:#536471;--line:#cfd9de;--blue:#1d9bf0;--btn:#0f1419;--btnfg:#fff;color-scheme:light}
+@media (prefers-color-scheme: dark){:root{--bg:#000;--fg:#e7e9ea;--muted:#8b98a5;--line:#2f3336;--btn:#eff3f4;--btnfg:#0f1419;color-scheme:dark}}
+html,body{margin:0;height:100%;background:var(--bg);color:var(--fg);font:16px/1.4 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif}
+textarea{width:100%;height:100%;box-sizing:border-box;border:1px solid var(--line);border-radius:12px;padding:12px;font:inherit;resize:none;color:var(--fg);background:var(--bg)}
+textarea:focus{outline:none;border-color:var(--blue);box-shadow:0 0 0 1px var(--blue)}
+#finish{box-sizing:border-box;height:100%;border:1px solid var(--line);border-radius:12px;padding:16px;display:flex;flex-direction:column;justify-content:center;gap:12px}
+#finish[hidden]{display:none}
+#what{margin:0;font-weight:600}
+#go{align-self:flex-start;border:0;border-radius:9999px;padding:10px 24px;background:var(--btn);color:var(--btnfg);font:700 15px/1 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;cursor:pointer}
+#go:focus-visible{outline:2px solid var(--blue);outline-offset:2px}
 </style>
 </head>
 <body>
-<textarea id="box" spellcheck="false" autocomplete="off" placeholder="Webhook URL and Authorization header, together"></textarea>
+<textarea id="box" spellcheck="false" autocomplete="off" placeholder="Paste here"></textarea>
+<div id="finish" hidden><p id="what"></p><button id="go" type="button">Finish</button></div>
 <script src="hosts.js"></script>
 <script src="relay.js"></script>
 <script src="connect.js"></script>

@@ -373,9 +373,11 @@ test("a pasted connect link, header, or Fire URL is recognized in any order", ()
   assert.equal(finishMessage(fromLink, plan), "Now open x.com and click the arrow.");
   const urlOnlyGrok = parseSetupPaste("https://hooks.example.com/hook");
   assert.equal(urlOnlyGrok.ok, true);
-  const rejected = planConnect({ enabled: [] }, urlOnlyGrok);
-  assert.equal(rejected.ok, false);
-  assert.match(rejected.error, /Authorization header/);
+  const partial = planConnect({ enabled: [] }, urlOnlyGrok);
+  assert.equal(partial.ok, true);
+  assert.equal(partial.settings.webhookUrl, "https://hooks.example.com/hook");
+  assert.equal(partial.message, "Webhook URL saved. Now paste the Authorization header.");
+  assert.equal(finishMessage(urlOnlyGrok, partial), "Webhook URL saved. Now paste the Authorization header.");
 });
 
 test("1.1.0 settings survive an update and a blank local webhook does not win", () => {
@@ -666,7 +668,7 @@ test("pasting a webhook and header on /connect saves inside the paste gesture", 
   assert.equal(context.document.documentElement.dataset.stgbMessage, "Now open x.com and click the arrow.");
   assert.equal(context.document.documentElement.dataset.stgbOk, "1");
   assert.equal(box.value, "");
-  box.listeners.paste({ clipboardData: { getData() { return "https://hooks.example.com/only"; } } });
+  box.listeners.paste({ clipboardData: { getData() { return "not a webhook"; } } });
   assert.equal(requests, 1);
   assert.match(context.document.documentElement.dataset.stgbMessage, /Authorization header/);
   assert.equal(context.document.documentElement.dataset.stgbOk, "");
