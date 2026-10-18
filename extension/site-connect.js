@@ -88,11 +88,48 @@
     });
   }
 
+  // A saved paste or link gets an unmistakable confirmation at the top of the step,
+  // so nobody has to guess whether they're done.
+  function confirm(text) {
+    const step = document.getElementById('step-paste') || document.querySelector('main');
+    if (!step) return;
+    let done = document.getElementById('stgb-done');
+    if (!done) {
+      done = document.createElement('div');
+      done.id = 'stgb-done';
+      done.className = 'note done';
+      done.setAttribute('role', 'status');
+      const heading = step.querySelector('h2');
+      if (heading) heading.insertAdjacentElement('afterend', done);
+      else step.prepend(done);
+    }
+    done.textContent = '';
+    const title = document.createElement('b');
+    title.textContent = /now paste/i.test(text) ? 'Saved. One more to go.' : 'Connected.';
+    const body = document.createElement('span');
+    body.textContent = ' ' + text + ' ';
+    done.appendChild(title);
+    done.appendChild(body);
+    if (!/now paste/i.test(text)) {
+      const go = document.createElement('a');
+      go.href = 'https://x.com/home';
+      go.target = '_blank';
+      go.rel = 'noopener';
+      go.textContent = 'Open x.com';
+      done.appendChild(go);
+    }
+    if (done.scrollIntoView) done.scrollIntoView({block: 'center', behavior: 'smooth'});
+  }
+
   function report(text, ok, pending) {
     const el = document.getElementById('msg');
     if (el) {
       el.textContent = text || '';
       el.className = text ? (pending ? 'pending' : (ok ? 'ok' : 'err')) : '';
+    }
+    if (ok && text) {
+      confirm(text);
+      if (el) { el.textContent = ''; el.className = ''; }
     }
     if (typeof CustomEvent === 'function') {
       document.dispatchEvent(new CustomEvent('stgb-connect-result', {detail: {ok: !!ok, pending: !!pending, message: text || ''}}));

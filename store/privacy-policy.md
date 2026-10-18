@@ -20,6 +20,8 @@ The extension handles the post you choose to send. On that post's own page it al
 - a plain-text digest of those fields
 - the reply preset you picked (General, Research, Job hunt, Buy or skip, Learn later, Content ideas, or Custom) and the prompt text for that preset
 
+When you send a post, the extension requests that post, the posts it replies to, and any post it quotes from the public mirrors api.fxtwitter.com and api.vxtwitter.com, without cookies or account details, so the destination receives the full text and conversation. Only the post's public URL is sent to them.
+
 That data is sent only to a destination you configured. If one destination is on, the click sends it there. If more than one is on, it goes to the one you pick. The preset and prompt travel with the post so the destination follows them. Destinations are:
 
 - **Grok Bot, or any other webhook you enter.** The extension POSTs the post as JSON to the https URL you saved. If you saved a key, it is sent on that request as `Authorization: Bearer` and `X-Sender-Key`.
