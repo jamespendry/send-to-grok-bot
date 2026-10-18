@@ -25,13 +25,13 @@
 </div></header>
 
 <main class="narrow page">
-  <nav class="flow" aria-label="Setup progress"><ol><li class="now" aria-current="step"><span class="num">1</span><span class="lbl">Install</span></li><li class=""><span class="num">2</span><span class="lbl">Choose your AI</span></li><li class=""><span class="num">3</span><span class="lbl">Connect</span></li><li class=""><span class="num">4</span><span class="lbl">Try it</span></li></ol></nav>
-  <div class="detect when-ready" style="margin:0 0 24px"><b>It's installed.</b><span class="muted">You can skip this step.</span>
-    <div class="actions"><a class="btn large" href="/setup">Next: Choose your AI</a></div></div>
+  <nav class="flow" aria-label="Setup progress"><ol><li class="now" aria-current="step"><span class="num">1</span><span class="lbl">Install</span></li><li class=""><span class="num">2</span><span class="lbl">Choose AI</span></li><li class=""><span class="num">3</span><span class="lbl">Connect</span></li><li class=""><span class="num">4</span><span class="lbl">Try it</span></li></ol></nav>
   <h1>Install the extension</h1>
-  <p class="intro" style="margin-top:12px">On a computer, in Chrome. About two minutes. You do this once.</p>
+  <div class="detect when-ready" style="margin:16px 0 0"><b>It's installed.</b><span class="muted">You can skip this step.</span>
+    <div class="actions"><a class="btn large" href="/setup">Next: Choose your AI</a></div></div>
+  <p class="intro when-missing" style="margin-top:12px">On a computer, in Chrome. About two minutes. You do this once.</p>
 
-  <ol class="steps num">
+  <ol class="steps num when-missing">
     <li>
       <h2>Download it</h2>
       <div class="actions" style="margin:4px 0 0"><a class="btn large" href="/send-to-grok-bot.zip" download>Download the extension</a></div>
@@ -52,9 +52,10 @@
     <li>
       <h2>Turn on Developer mode, then click Load unpacked</h2>
       <p class="muted"><span class="badge">1</span> Switch on <span class="ui">Developer mode</span> at the top right. <span class="badge">2</span> Click <span class="ui">Load unpacked</span> and choose the <span class="ui">send-to-grok-bot</span> folder from your Downloads.</p>
-      <figure class="shot">
-        <img src="/img/chrome-extensions.png" width="1320" height="150" alt="Chrome's extensions page with Developer mode numbered 1 and Load unpacked numbered 2.">
-      </figure>
+      <div class="shots2">
+        <figure class="shot"><img src="/img/chrome-devmode.png" width="560" height="160" alt="Developer mode switched on, numbered 1, at the top right of Chrome's extensions page."></figure>
+        <figure class="shot"><img src="/img/chrome-load-unpacked.png" width="560" height="160" alt="The Load unpacked button, numbered 2."></figure>
+      </div>
     </li>
     <li>
       <h2>Come back here and refresh</h2>
@@ -63,8 +64,6 @@
   </ol>
 
   <div class="detect when-missing"><b>Not installed yet.</b><span class="muted">Finish the steps above, then refresh this page. It isn't in the Chrome Web Store yet, which is why it takes these steps.</span></div>
-  <div class="detect when-ready"><b>Installed.</b><span class="muted">Nice. Now pick the AI you want your posts to go to.</span>
-    <div class="actions"><a class="btn large" href="/setup">Next: Choose your AI</a></div></div>
 </main>
 
 <footer><div class="wrap">

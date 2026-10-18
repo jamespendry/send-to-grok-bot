@@ -31,4 +31,12 @@
       show('Select and copy');
     }
   });
+  // Links to a folded section, such as /setup/claude#claude-does-it, open it.
+  function openTarget() {
+    var id = location.hash.slice(1);
+    var el = id && document.getElementById(id);
+    if (el && el.tagName === 'DETAILS') { el.open = true; el.scrollIntoView({block: 'start'}); }
+  }
+  window.addEventListener('hashchange', openTarget);
+  openTarget();
 })();

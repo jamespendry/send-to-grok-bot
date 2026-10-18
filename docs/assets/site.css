@@ -406,3 +406,17 @@ html[data-stgb-ready] .when-missing { display: none; }
 .how.four { grid-template-columns: repeat(4, 1fr); }
 @media (max-width: 900px) { .how.four { grid-template-columns: 1fr 1fr; } }
 @media (max-width: 520px) { .how.four { grid-template-columns: 1fr; } }
+
+/* Review fixes */
+.flow li { margin: 0 !important; background: none !important; padding: 0 !important; }
+html:not([data-stgb-ready]) .flow li:first-child.done .lbl { border-top-color: var(--line); color: var(--muted); }
+.flow li .lbl { white-space: normal; overflow: visible; }
+.flow li.done a:hover .lbl { text-decoration: underline; }
+.slot.video { display: none; }
+.fill-row b { display: inline; }
+.fill-row > div > b:first-child { display: block; }
+.menu { right: auto; left: 46%; width: 236px; }
+.shots2 { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+@media (max-width: 520px) { .shots2 { grid-template-columns: 1fr; } }
+@media (max-width: 640px) { .brand span { display: inline; } }
+@media (max-width: 520px) { .top nav .btn { display: none; } }
