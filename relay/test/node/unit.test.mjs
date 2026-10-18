@@ -339,6 +339,22 @@ test("preset files match the extension prompt text", () => {
   assert.doesNotMatch(claudePage, /Allowed domains|Network access/);
   assert.match(prompts.CLAUDE_TASK, /routine-fire-payload/);
   assert.match(prompts.CLAUDE_TASK, /Do not open web pages or fetch anything/);
+  // Every reply names the post it answers, so a reply read later still makes sense.
+  const header = '**@handle**, Mon D: "first ~80 characters of the post…"\nhttps://x.com/handle/status/ID';
+  for (const t of [...prompts.ORDER.map((id) => prompts.text(id)), prompts.CLAUDE_TASK]) {
+    assert.ok(t.includes(header), "reply header");
+    assert.ok(t.includes("Link not available."), "missing link wording");
+    assert.ok(t.includes("Never invent or rebuild a link"), "no invented links");
+    assert.ok(t.includes('"Replying to" chain (oldest first)'), "reads the chain");
+    assert.ok(t.includes("Mention the parent only when it changes the meaning"), "parent rule");
+    assert.ok(t.indexOf(header) < t.lastIndexOf("one-line takeaway"), "header comes before the takeaway");
+    assert.doesNotMatch(t, /[\u{1F300}-\u{1FAFF}\u{2600}-\u{27BF}]/u);
+  }
+  assert.match(prompts.CLAUDE_TASK, /\[Discuss in chat\]\(https:\/\/claude\.ai\/new\?q=/);
+  assert.ok(prompts.CLAUDE_TASK.includes("About this X post: <post URL>\n\nYour earlier reply:\n<the takeaway line>\n\nLet's discuss it."));
+  assert.match(prompts.CLAUDE_TASK, /under 1,800 characters/);
+  assert.match(prompts.CLAUDE_TASK, /Never post, follow, message, email, or contact anyone/);
+  for (const id of prompts.ORDER) assert.doesNotMatch(prompts.text(id), /Discuss in chat/, id);
   assert.equal(prompts.ALLOWED_SITES.split("\n").length, 10);
 });
 

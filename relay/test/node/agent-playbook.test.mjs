@@ -27,8 +27,13 @@ function tokenScript() {
   return m[1];
 }
 
-test("the playbook quotes the Claude task prompt exactly", () => {
-  assert.ok(claudeSection().includes("```text\n" + CLAUDE_TASK + "\n```"));
+// CLAUDE_TASK lives in extension/prompts.js. The playbook either quotes it exactly or sends the
+// person to the extension's Copy task prompt button, which copies that same text.
+test("the playbook quotes the Claude task prompt exactly or points to Copy task prompt", () => {
+  const s = claudeSection();
+  const quoted = s.includes("```text\n" + CLAUDE_TASK + "\n```");
+  const pointer = s.includes("**Copy task prompt**");
+  assert.ok(quoted || pointer, "AGENTS.md quotes CLAUDE_TASK or names Copy task prompt");
 });
 
 test("the playbook says never to look while the token dialog is open", () => {
