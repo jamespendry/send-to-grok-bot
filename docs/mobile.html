@@ -4,11 +4,11 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Send to Grok Bot on iPhone</title>
-<meta name="description" content="Share a post from the X app on iPhone and pick Grok Bot, Claude, ChatGPT, or Codex.">
+<meta name="description" content="Share any X post from the iPhone to Grok Bot, Claude, ChatGPT, or Codex. One tap to install. Nothing to set up.">
 <meta name="theme-color" content="#ffffff" media="(prefers-color-scheme: light)">
 <meta name="theme-color" content="#000000" media="(prefers-color-scheme: dark)">
 <meta property="og:title" content="Send to Grok Bot on iPhone">
-<meta property="og:description" content="Share a post from the X app on iPhone and pick Grok Bot, Claude, ChatGPT, or Codex.">
+<meta property="og:description" content="Share any X post from the iPhone to Grok Bot, Claude, ChatGPT, or Codex. One tap to install. Nothing to set up.">
 <meta property="og:image" content="https://sendtogrokbot.com/assets/promo/marquee-1400x560.png">
 <meta name="twitter:card" content="summary_large_image">
 <link rel="icon" href="/assets/icons/icon32.png" sizes="32x32">
@@ -27,84 +27,28 @@
 
 <main class="narrow page">
   <h1>On iPhone</h1>
-  <p class="intro" style="margin-top:12px">Scan one code. Tap Install. Then share a post from the X app.</p>
-
-  <div class="detect phone-ready" id="phone-ready" hidden>
-    <b>Your code is ready.</b>
-    <span class="muted">Tap Copy code, then tap Install. When Shortcuts asks for the code, paste it.</span>
-    <code class="mono phone-code" id="phone-code"></code>
-    <div class="actions">
-      <button type="button" class="btn large" data-copy="#phone-code">Copy code</button>
-      <a class="btn large secondary" href="https://sendtogrokbot.com/send-to-grok-bot.shortcut">Install</a>
-    </div>
-  </div>
+  <p class="intro" style="margin-top:12px">Share any post from the X app to your AI. One tap to install. Nothing to set up.</p>
 
   <ol class="steps num">
     <li>
-      <h2>Get your code</h2>
-      <ol>
-        <li>On a computer, open <a href="https://relay.sendtogrokbot.com">relay.sendtogrokbot.com</a>. For Grok Bot or Claude, save that destination there. ChatGPT and Codex need nothing saved.</li>
-        <li>Point your iPhone camera at the QR code on that page and tap the link. This page opens with your code ready.</li>
-      </ol>
-      <p class="muted">Only using ChatGPT or Codex? You can skip the computer: open <a href="https://relay.sendtogrokbot.com">relay.sendtogrokbot.com</a> on the iPhone and tap <span class="ui">Copy code</span>. The code starts with <span class="mono">stgbr1.</span></p>
+      <h2>Install</h2>
+      <div class="actions" style="margin:4px 0 12px" id="install-link"><a class="btn large" href="https://sendtogrokbot.com/send-to-grok-bot.shortcut">Install Send to Grok Bot</a></div>
+      <p>Open this page on your iPhone and tap <span class="ui">Install Send to Grok Bot</span>. When Shortcuts opens, tap <span class="ui">Add Shortcut</span>.</p>
+      <p class="muted">Installed an older version? Delete it in the Shortcuts app first, so you don't end up with "Send to Grok Bot (1)".</p>
     </li>
     <li>
-      <h2>Add the Shortcut</h2>
-      <div class="actions" style="margin:4px 0 12px" id="install-link"><a class="btn" href="https://sendtogrokbot.com/send-to-grok-bot.shortcut">Install Send to Grok Bot</a></div>
-      <ol>
-        <li>On the iPhone, tap <span class="ui">Install Send to Grok Bot</span>.</li>
-        <li>Tap the downloaded file, then tap <span class="ui">Add Shortcut</span>.</li>
-        <li>When Shortcuts asks, paste the code. You paste it once.</li>
-      </ol>
-      <figure>
-        <div class="slot">
-          <b>Screenshot slot</b>
-          <code>/img/ios-shortcut-setup.png</code>
-          <span>The Shortcut's setup question with the relay code pasted in. Blur the code.</span>
-        </div>
-      </figure>
+      <h2>Share a post</h2>
+      <p>In the X app, tap <span class="ui">Share</span> on any post, then <span class="ui">Send to Grok Bot</span>. Pick Grok Bot, Claude, ChatGPT, or Codex.</p>
+      <p class="muted">Don't see it? Scroll to the bottom of the share list, tap <span class="ui">Edit Actions</span>, and add Send to Grok Bot.</p>
     </li>
     <li>
-      <h2>Send a post</h2>
-      <ol>
-        <li>In the X app, open a post and tap <span class="ui">Share</span>.</li>
-        <li>Tap <span class="ui">Send to Grok Bot</span>.</li>
-        <li>Pick Grok Bot, Claude, ChatGPT, or Codex.</li>
-      </ol>
-      <p class="muted">A notification names the destination. Grok Bot and Claude are sent for you, using what you saved on the relay. ChatGPT and Codex open with the post filled in, and you press Send in that app.</p>
-      <p class="muted" style="margin-top:8px">If the share sheet doesn't list it, tap <span class="ui">More</span> and turn on Send to Grok Bot.</p>
-      <figure>
-        <div class="slot">
-          <b>Screenshot slot</b>
-          <code>/img/ios-share-sheet.png</code>
-          <span>The X app share sheet with Send to Grok Bot in the list. Use a public post. Blur any account that is not yours.</span>
-        </div>
-      </figure>
+      <h2>Press Send</h2>
+      <p>Claude, ChatGPT, and Codex open with the post and its thread already filled in. Read it over and press Send.</p>
+      <p>For Grok Bot, the message is copied for you. Grok Bot opens. Paste it into the chat and send.</p>
     </li>
   </ol>
 
-  <div class="note done"><b>See what you sent.</b> The last 50 sends are on <a href="/history">History</a>. Paste the same code there. That page does not save it.</div>
-
-  <details class="fallback">
-    <summary>Build the Shortcut yourself</summary>
-    <p class="muted">Only if the install link above doesn't work. In the Shortcuts app, create a shortcut named <b>Send to Grok Bot</b>, turn on <b>Show in Share Sheet</b>, and add these actions in order.</p>
-    <ol>
-      <li><strong>Text.</strong> Paste the relay code. This stays the first action.</li>
-      <li><strong>Set Variable</strong> named Relay Code.</li>
-      <li><strong>Get URLs from Input.</strong> Input is Shortcut Input. Then <strong>Set Variable</strong> named Links.</li>
-      <li><strong>If</strong> Links has any value.</li>
-      <li>Inside that If: <strong>Get Item from List</strong>, First Item, from Links. <strong>Set Variable</strong> named Post URL.</li>
-      <li><strong>Choose from Menu.</strong> The lines are Grok Bot, Claude, ChatGPT, and Codex.</li>
-      <li>Under each line, add <strong>Text</strong> with exactly <code>grokbot</code>, <code>claude</code>, <code>chatgpt</code>, or <code>codex</code>, then <strong>Set Variable</strong> named Destination.</li>
-      <li>Below End Menu, add <strong>Get Contents of URL</strong>. URL <code>https://relay.sendtogrokbot.com/v1/send</code>. Method POST. Header <code>Authorization</code> is <code>Bearer </code> plus the Relay Code variable. Header <code>Content-Type</code> is <code>application/json</code>. JSON body: <code>destination</code> is Destination, <code>url</code> is Post URL, <code>source</code> is <code>shortcut</code>.</li>
-      <li><strong>Get Dictionary from Input</strong>, then <strong>Set Variable</strong> named Response.</li>
-      <li><strong>Get Dictionary Value</strong> for <code>notice</code>, from Response. <strong>Set Variable</strong> named Notice.</li>
-      <li><strong>Get Dictionary Value</strong> for <code>openUrl</code>, from Response. <strong>Set Variable</strong> named Open URL.</li>
-      <li><strong>Show Notification.</strong> Title Send to Grok Bot. Body is Notice.</li>
-      <li><strong>If</strong> Open URL has any value, <strong>Open URLs</strong> with Open URL.</li>
-      <li>In the Otherwise of the first If, show a notification: No post link was shared.</li>
-    </ol>
-  </details>
+  <p class="muted" style="margin-top:28px">The Shortcut sends the post link to sendtogrokbot.com to look up the post's text, then hands it to the app you picked. Nothing is saved. <a href="/privacy">Privacy</a></p>
 </main>
 
 <footer><div class="wrap">

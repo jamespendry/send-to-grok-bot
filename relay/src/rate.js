@@ -4,7 +4,8 @@ export const LIMITS = {
   send: 60,
   configWrite: 30,
   configRead: 240,
-  create: 20
+  create: 20,
+  open: 120
 };
 
 const HOUR = 60 * 60;

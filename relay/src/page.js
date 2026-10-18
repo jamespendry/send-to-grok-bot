@@ -85,13 +85,6 @@ const PAGE = `<!doctype html>
       <button type="button" id="copy">Copy code</button>
       <span id="copyMsg"></span>
     </div>
-    <div class="phone">
-      <div id="qr" aria-label="QR code for iPhone setup"></div>
-      <div>
-        <h3>Setting up an iPhone?</h3>
-        <p class="muted">Point the iPhone camera at this code and tap the link. The iPhone setup opens with your code ready to copy. Nothing to type.</p>
-      </div>
-    </div>
     <label for="key">Relay key</label>
     <p class="hint">The extension and the iPhone shortcut both paste the whole code above. You do not copy this key.</p>
     <input id="key" type="text" readonly spellcheck="false" translate="no" autocomplete="off">
