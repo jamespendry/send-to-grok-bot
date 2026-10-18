@@ -27,16 +27,26 @@
 
 <main class="narrow page">
   <h1>On iPhone</h1>
-  <p class="intro" style="margin-top:12px">Tap one link. Paste one code. Then share a post from the X app.</p>
+  <p class="intro" style="margin-top:12px">Scan one code. Tap Install. Then share a post from the X app.</p>
+
+  <div class="detect phone-ready" id="phone-ready" hidden>
+    <b>Your code is ready.</b>
+    <span class="muted">Tap Copy code, then tap Install. When Shortcuts asks for the code, paste it.</span>
+    <code class="mono phone-code" id="phone-code"></code>
+    <div class="actions">
+      <button type="button" class="btn large" data-copy="#phone-code">Copy code</button>
+      <a class="btn large secondary" href="https://sendtogrokbot.com/send-to-grok-bot.shortcut">Install</a>
+    </div>
+  </div>
 
   <ol class="steps num">
     <li>
-      <h2>Copy the code</h2>
+      <h2>Get your code</h2>
       <ol>
-        <li>On a computer, open <a href="https://relay.sendtogrokbot.com">relay.sendtogrokbot.com</a>.</li>
-        <li>Copy the code. It starts with <span class="mono">stgbr1.</span> This is the only code. Do not copy a webhook address.</li>
-        <li>For Grok Bot or Claude, save that destination on the same page. ChatGPT and Codex need nothing saved.</li>
+        <li>On a computer, open <a href="https://relay.sendtogrokbot.com">relay.sendtogrokbot.com</a>. For Grok Bot or Claude, save that destination there. ChatGPT and Codex need nothing saved.</li>
+        <li>Point your iPhone camera at the QR code on that page and tap the link. This page opens with your code ready.</li>
       </ol>
+      <p class="muted">Only using ChatGPT or Codex? You can skip the computer: open <a href="https://relay.sendtogrokbot.com">relay.sendtogrokbot.com</a> on the iPhone and tap <span class="ui">Copy code</span>. The code starts with <span class="mono">stgbr1.</span></p>
     </li>
     <li>
       <h2>Add the Shortcut</h2>

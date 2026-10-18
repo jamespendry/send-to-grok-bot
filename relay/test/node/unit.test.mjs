@@ -623,7 +623,10 @@ print(json.dumps({
   assert.equal(parsed.missing, "No post link was shared.");
   const steps = read("../shortcuts/BUILD.md");
   assert.match(steps, /https:\/\/sendtogrokbot\.com\/send-to-grok-bot\.shortcut/);
-  assert.match(steps, /Allow Untrusted Shortcuts/);
+  assert.match(steps, /shortcuts sign --mode anyone/);
+  // iOS refuses unsigned files, so the site serves a signed copy (an Apple Encrypted Archive).
+  const signed = readFileSync(join(root, "../shortcuts/Send to Grok Bot (signed).shortcut"));
+  assert.equal(signed.subarray(0, 4).toString("latin1"), "AEA1");
   assert.match(steps, /stgbr1/);
   assert.match(steps, /Add Shortcut/);
 });

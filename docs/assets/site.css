@@ -420,3 +420,6 @@ html:not([data-stgb-ready]) .flow li:first-child.done .lbl { border-top-color: v
 @media (max-width: 520px) { .shots2 { grid-template-columns: 1fr; } }
 @media (max-width: 640px) { .brand span { display: inline; } }
 @media (max-width: 520px) { .top nav .btn { display: none; } }
+
+.phone-ready { margin: 20px 0 8px; }
+.phone-code { display: block; margin: 10px 0 2px; font-size: 13px; color: var(--muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }

@@ -19,6 +19,19 @@ function setupPage() {
     $("code").value = connect;
     var parsed = STGB_RELAY_CODE.decodeConnectCode(connect);
     $("key").value = parsed.ok ? parsed.key : "";
+    drawQr(connect);
+  }
+
+  // The code rides in the link's #fragment, which the browser never sends to a server.
+  function drawQr(connect) {
+    var box = $("qr");
+    if (!box || typeof qrcode !== "function") return;
+    try {
+      var q = qrcode(0, "M");
+      q.addData("https://sendtogrokbot.com/mobile#code=" + encodeURIComponent(connect));
+      q.make();
+      box.innerHTML = q.createSvgTag({ cellSize: 4, margin: 2, scalable: true });
+    } catch (e) { box.replaceChildren(); }
   }
 
   function fresh() {
