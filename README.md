@@ -10,71 +10,23 @@ People who use Grok Bot can paste this one line into the bot:
 Set up Send to Grok Bot for me: https://github.com/jamespendry/send-to-grok-bot
 ```
 
-The bot creates a webhook routine with the General prompt. It cannot read the webhook key. After the routine exists it sends one message. On a computer, add the extension, then open the routine from Routines in the bot's info pane. Copy **POST to** and paste it at `https://sendtogrokbot.com/connect`. Then copy **header** and paste it in the same box. With the extension installed, each paste saves. The website (`/`, `/setup`, `/setup/grok`, `/setup/claude`, `/setup/chatgpt`, `/setup/codex`, `/mobile`, `/history`, `/connect`, `/privacy`) is in [docs/](docs/). To publish it: `bash scripts/build-site.sh`, then `npx wrangler deploy --config site/wrangler.toml`. [site/README.md](site/README.md) has the details.
+The bot creates a webhook routine with the General prompt. It cannot read the webhook key. After the routine exists it sends one message. Install the extension first: `https://sendtogrokbot.com/install`. Then open the routine from Routines in the bot's info pane. Copy **POST to** and paste it at `https://sendtogrokbot.com/connect`. Then copy **header** and paste it in the same box. With the extension installed, each paste saves. The website (`/`, `/install`, `/setup`, `/setup/grok`, `/setup/claude`, `/setup/chatgpt`, `/setup/codex`, `/mobile`, `/history`, `/connect`, `/privacy`) is in [docs/](docs/). To publish it: `bash scripts/build-site.sh`, then `npx wrangler deploy --config site/wrangler.toml`. [site/README.md](site/README.md) has the details.
 
-People installing by hand: the steps below are from a folder. Store listing text, promo images, and the upload steps are in [store/](store/). `scripts/package.sh` writes the zip.
+Store listing text, promo images, and the upload steps are in [store/](store/). `scripts/package.sh` writes the zip.
 
 ## Set it up
 
-You need Chrome on a computer. Each step is one action. After it, you should see the thing in the "You should see" line. If you do not, stay on that step.
+Install the extension first: https://sendtogrokbot.com/install. It is not in the Chrome Web Store yet. You need Chrome on a computer.
 
-### 1. Download the zip
+### Open the settings
 
-Open this project on GitHub. Click the green **Code** button. Click **Download ZIP**.
-
-You should see a file in your Downloads folder whose name starts with `send-to-grok-bot` and ends with `.zip`.
-
-![The Code menu on the project page, with Download ZIP visible](docs/img/01-download-zip.png)
-
-### 2. Unzip it
-
-Double-click the zip.
-
-You should see a folder. Open it until you see another folder named `extension`. Open `extension`. You should see a file named `manifest.json`. Then go back, so `extension` is a folder you can select in a later step.
-
-![The unzipped project with the extension folder open and manifest.json visible](docs/img/02-unzipped-folder.png)
-
-### 3. Open the extensions page
-
-Open Chrome. Click the address bar. Type `chrome://extensions` and press Enter.
-
-You should see a page titled Extensions.
-
-![The Chrome address bar showing chrome://extensions, and the Extensions page](docs/img/03-chrome-extensions.png)
-
-### 4. Turn on Developer mode
-
-On that page, at the top right, turn **Developer mode** on.
-
-You should see a button named **Load unpacked**.
-
-![Developer mode switched on, with the Load unpacked button visible](docs/img/04-developer-mode.png)
-
-### 5. Load the extension
-
-Click **Load unpacked**. Select the `extension` folder (the one that contains `manifest.json`). Confirm.
-
-You should see a card named **Send to Grok Bot**, with its switch on. If Chrome says the manifest is missing, you selected the outer folder. Go back and select `extension`.
-
-![The folder picker with the extension folder selected, and the Send to Grok Bot card on the extensions page](docs/img/05-load-unpacked.png)
-
-### 6. Pin it
-
-Click the puzzle-piece icon on the Chrome toolbar. Beside **Send to Grok Bot**, click the pin.
-
-You should see the Send to Grok Bot icon on the toolbar.
-
-![The extensions menu with Send to Grok Bot and its pin](docs/img/06-pin.png)
-
-### 7. Open the settings
-
-Click that toolbar icon.
+Click the Send to Grok Bot icon on the Chrome toolbar. If you did not pin it, it is in the puzzle-piece menu.
 
 You should see a page titled **Send to Grok Bot**, with a box labeled **Paste here** at the top. Replies, destinations, and Save are under **More options**.
 
 ![The options page, with the paste box at the top](docs/img/07-options.png)
 
-### 8. Turn on a destination
+### Turn on a destination
 
 For Grok Bot, paste the webhook URL into **Paste here**, then paste the Authorization header into the same box. Either order works. The same pastes work on `https://sendtogrokbot.com/connect`. If the extension is installed, each paste saves.
 
@@ -113,12 +65,6 @@ The pictures above are placeholders. Take these and save them under `docs/img/` 
 
 | File | What to capture |
 | --- | --- |
-| `docs/img/01-download-zip.png` | The GitHub Code menu, with Download ZIP visible |
-| `docs/img/02-unzipped-folder.png` | The unzipped folder, with `extension` open and `manifest.json` visible |
-| `docs/img/03-chrome-extensions.png` | The address bar showing `chrome://extensions`, and the Extensions page |
-| `docs/img/04-developer-mode.png` | Developer mode on, and the Load unpacked button |
-| `docs/img/05-load-unpacked.png` | The folder picker selecting `extension`, and the Send to Grok Bot card |
-| `docs/img/06-pin.png` | The puzzle-piece menu, with Send to Grok Bot and the pin |
 | `docs/img/07-options.png` | The options page, showing the paste box at the top |
 | `docs/img/08-destinations.png` | A destination checked, its fields, and the word Saved |
 | `docs/img/09-post-button.png` | The arrow icon in an X post's action row |
@@ -149,7 +95,7 @@ scripts/build-site.sh
 npx wrangler deploy --config site/wrangler.toml
 ```
 
-`scripts/build-site.sh` writes `dist/site`. That folder is the site root: `/` is a short landing page, `/connect` is the connect page, `/setup`, `/setup/grok`, `/setup/claude`, `/mobile`, `/history`, and `/privacy` are the guides. The build copies `extension/connect.js` to `/connect.js` and `extension/prompts.js` to `/prompts.js` so the pages work without the rest of the repository. Attach the domain `sendtogrokbot.com` to the `sendtogrokbot` worker in the Cloudflare dashboard after the first deploy. `/mobile` tells an iPhone user to install the shortcut and paste one relay code. The iCloud link is not in the repository. Copy it from the Shortcuts app and paste it into `docs/mobile.html` where the page says the link is not published yet, then deploy again. The steps are in [shortcuts/BUILD.md](shortcuts/BUILD.md).
+`scripts/build-site.sh` writes `dist/site`. That folder is the site root: `/` is a short landing page, `/install` is the install page, `/connect` is the connect page, `/setup`, `/setup/grok`, `/setup/claude`, `/mobile`, `/history`, and `/privacy` are the guides. The build copies `extension/connect.js` to `/connect.js` and `extension/prompts.js` to `/prompts.js` so the pages work without the rest of the repository. Attach the domain `sendtogrokbot.com` to the `sendtogrokbot` worker in the Cloudflare dashboard after the first deploy. `/mobile` tells an iPhone user to install the shortcut and paste one relay code. The iCloud link is not in the repository. Copy it from the Shortcuts app and paste it into `docs/mobile.html` where the page says the link is not published yet, then deploy again. The steps are in [shortcuts/BUILD.md](shortcuts/BUILD.md).
 
 The same folder can go to Cloudflare Pages:
 
@@ -237,7 +183,7 @@ Presets on the options page: General, Research, Job hunt, Buy or skip, Learn lat
 
 ### Grok Bot
 
-The automatic path is the one line at the top of this file. The bot cannot read the webhook key. After the routine exists it sends one message: on a computer, add the extension, open the routine, and paste POST to and then header at sendtogrokbot.com/connect.
+The automatic path is the one line at the top of this file. The bot cannot read the webhook key. After the routine exists it sends one message: install the extension first at sendtogrokbot.com/install, open the routine, and paste POST to and then header at sendtogrokbot.com/connect.
 
 To copy it yourself, on a computer: in the Grok Bot desktop app, click the bot's name at the top of the chat, or press Cmd+Shift+I. Under **Routines**, click **Send to Grok Bot**. Its When to run is When a webhook fires. Under **Webhook** are three copy fields: **POST to** (the webhook URL), **key**, and **header** (the Authorization header). Paste **POST to** on [the connect page](docs/connect.html). The page says: Webhook URL saved. Now paste the Authorization header. Paste **header** in the same box. Pasting **key** instead also works. The page says: Now open x.com and click the arrow. Do this on a computer. The extension is Chrome on a computer.
 

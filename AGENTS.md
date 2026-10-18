@@ -30,7 +30,7 @@ Chrome shows a button on each X post. The person clicks it and picks a destinati
 - Claude Code: an API task exists under Scheduled tasks, with the short task prompt from **Copy task prompt** and an API trigger, and the extension has its Fire URL and token. Runs show up under that task's History. If they cannot use tasks, Claude opens in a tab and no secret is stored.
 - ChatGPT or Codex: no setup and no secret. They check the box and click Save. Clicking a post opens that product with the post filled in, and they press Send.
 
-You cannot load an unpacked extension into their Chrome unless you are driving that Chrome window. Assume you are not. The last section is the walkthrough you give them.
+You cannot install the extension for them. Chrome blocks extensions and agents from `chrome://` pages and the Web Store, so install is a manual step. Send them to https://sendtogrokbot.com/install. The last section is the walkthrough you give them.
 
 ## Which destination
 
@@ -86,11 +86,11 @@ You cannot read the webhook URL or the Authorization header. Do not invent them.
 
 After the routine is on, send one message and stop. Use these words:
 
-Your Send to Grok Bot routine is ready. On a computer: 1) Add the extension. The steps are at sendtogrokbot.com/connect. 2) Click my name at the top, then Routines, then Send to Grok Bot. 3) Copy POST to and paste it at sendtogrokbot.com/connect. 4) Copy header and paste it in the same box. Then open x.com and click the arrow on any post.
+Install the extension first: sendtogrokbot.com/install. Your Send to Grok Bot routine is ready. Click my name at the top, Routines, Send to Grok Bot. Copy POST to and paste it at sendtogrokbot.com/connect. Copy header and paste it in the same box. Then open x.com and click the arrow.
 
 Do not add a second message. Do not ask them to paste the key into this chat. If your message can include the links named Webhook URL and Authorization header, they open the same pane.
 
-What the person sees: clicking the bot's name at the top of the chat, or Cmd+Shift+I, opens its info pane. The routine is under Routines. Its detail pane shows three copyable fields under Webhook: POST to (the webhook URL, `https://api2.cursor.sh/automations/...`), key (`crsr_...`), and header (`Authorization: Bearer crsr_...`). It also has Pause, Edit, and a delete icon. Pasting key instead of header also works, and either order works. After POST to, the page says: Webhook URL saved. Now paste the Authorization header. After the second value it says: Now open x.com and click the arrow. The paste saves only when the extension is installed. The extension is Chrome on a computer. It is not in the Chrome Web Store yet. The install steps are on sendtogrokbot.com/connect: download the zip, open chrome://extensions, turn on Developer mode, click Load unpacked, and choose the extension folder.
+What the person sees: clicking the bot's name at the top of the chat, or Cmd+Shift+I, opens its info pane. The routine is under Routines. Its detail pane shows three copyable fields under Webhook: POST to (the webhook URL, `https://api2.cursor.sh/automations/...`), key (`crsr_...`), and header (`Authorization: Bearer crsr_...`). It also has Pause, Edit, and a delete icon. Pasting key instead of header also works, and either order works. After POST to, the page says: Webhook URL saved. Now paste the Authorization header. After the second value it says: Now open x.com and click the arrow. The paste saves only when the extension is installed. The extension is Chrome on a computer. Install the extension first: sendtogrokbot.com/install. It is not in the Chrome Web Store yet.
 
 The extension POSTs the post as JSON, including `preset` and `prompt`, and sends the key as `Authorization: Bearer <key>` and as `X-Sender-Key: <key>`. A 200 means the routine started. The reply shows up in the bot's chat when the run finishes.
 
@@ -115,7 +115,7 @@ Never ask for the API token in chat, on either path.
 ### Path (a): Claude in Chrome
 
 1. Open https://sendtogrokbot.com/connect. Run this with the javascript tool: `document.documentElement.dataset.stgbReady === '1'`. True means the extension is installed. Go to step 3.
-2. False means it is not installed. Chrome blocks every extension, you included, from the Web Store and from `chrome://` pages. Tell the person to follow the install steps on that page: the Add to Chrome click, or Developer mode and Load unpacked until it is in the store. Wait until they say it is done. Reload the page and check again.
+2. False means it is not installed. Chrome blocks every extension, you included, from the Web Store and from `chrome://` pages. Tell the person: "Install the extension first: https://sendtogrokbot.com/install." Wait until they say it is done. Reload the connect page and check again.
 3. For ChatGPT, open the connect link for `{"destination":"chatgpt","mode":"link"}`. For Codex, use `{"destination":"codex","mode":"link"}`. For a Claude tab, use `{"destination":"claude","mode":"link"}`. These codes hold no secret and need no permission. The extension saves them as soon as the page opens. Build each code with `encodeConnectionCode` (see **Connection code**) and open `https://sendtogrokbot.com/connect#` plus the code. Check each one with step 14. If they want only tabs, stop after that.
 4. Open https://claude.ai/code/routines. The sidebar item is **Scheduled**. Take a screenshot.
 5. If the page will not load, or there is no Scheduled item, their plan has no tasks. Offer the Claude tab from step 3 and stop the routine path.
@@ -165,7 +165,7 @@ If it returns anything other than `ok`, do what the line says. Do not take a scr
 
 Walk them through https://sendtogrokbot.com/setup/claude. Send one step. Stop. Wait for them to say what they see. Do not send the next step until it matches.
 
-1. Install the extension from https://sendtogrokbot.com/connect. Success: the page no longer asks them to install it.
+1. Install the extension first: https://sendtogrokbot.com/install. Wait until they say it is done. Success: the connect page no longer asks them to install it.
 2. On claude.ai, click **Scheduled** in the left sidebar. Click **New task**, then **Set up manually**. Name it Send to Claude.
 3. In the extension settings, open Send to Claude and click **Copy task prompt**. Paste it into the instructions box. Do not paste the prompt into chat yourself. Send them to the button.
 4. Set **Trigger** to **API**. Click **Create**.
@@ -202,31 +202,26 @@ Grok Bot does not use the walkthrough below. After the routine exists, the one m
 
 If the extension is already installed and the destination is ChatGPT or Codex, they check the box and click Save. There is nothing else to set up.
 
-Do the steps below for Claude, ChatGPT, and Codex when they do not have the extension yet. Send one step. Stop. Wait for them to say what they see. Use these words, with their real file name filled in.
+Do the steps below for Claude, ChatGPT, and Codex when they do not have the extension yet. Send one step. Stop. Wait for them to say what they see. Use these words.
 
-1. "Open the project page on GitHub in Chrome. Click the green Code button, then click Download ZIP. Tell me when a file whose name starts with send-to-grok-bot is in your Downloads folder."
-2. "Double-click that zip. Open the folder inside it until you see a folder named extension. Open extension and tell me when you see a file named manifest.json. Then go back so extension is a folder you can select, not a window full of files."
-3. "Click the address bar, type chrome://extensions, and press Enter. Tell me when the page title is Extensions."
-4. "At the top right, turn Developer mode on. Tell me when a button named Load unpacked appears."
-5. "Click Load unpacked. Select the extension folder, the one that contains manifest.json, and confirm. Tell me when a card named Send to Grok Bot appears and its switch is on. If Chrome says the manifest is missing, you selected the outer folder. Go back and select extension."
-6. "Click the puzzle-piece icon on the Chrome toolbar. Beside Send to Grok Bot, click the pin. Tell me when that icon is sitting on the toolbar."
-7. "Click that icon. Tell me when you see a page titled Send to Grok Bot with a box labeled Paste here."
-8. Then one of these, not both:
+1. "Install the extension first: sendtogrokbot.com/install. It is not in the Chrome Web Store yet. Tell me when a card named Send to Grok Bot is on chrome://extensions and its switch is on."
+2. "Click the Send to Grok Bot icon. It is in the puzzle-piece menu if you did not pin it. Tell me when you see a page titled Send to Grok Bot with a box labeled Paste here."
+3. Then one of these, not both:
    - You have a connection code for Claude, ChatGPT, or Codex: send `https://sendtogrokbot.com/connect#` plus the code. "Paste that link into the box. If Chrome asks, choose Allow. Do not paste it back here." Success is a green line that starts with "Saved Send to" and names their destination.
    - They are the only ones who can see the secret. For Claude: "On the task page, click the three dots next to Active, then Edit. Copy the Fire URL and the token. Paste both into the Fire URL and token box in the extension. Do not paste them here." Next message: "Click Save. Tell me when you see the word Saved." Remind them that Allowed websites is a separate step, after a run exists, under Edit cloud environment.
 
-9. "Open x.com and refresh. On any post, click the arrow icon in the row with reply, repost, like, and share. Tell me which names you see." Success is the destination you set up. Then: "Click that name."
+4. "Open x.com and refresh. On any post, click the arrow icon in the row with reply, repost, like, and share. Tell me which names you see." Success is the destination you set up. Then: "Click that name."
    - Grok Bot: the icon turns green, and a run shows up in the bot's chat. A 200 only means the run started.
    - Claude routine: the run is listed under History on the task page.
    - Claude, ChatGPT, or Codex tab: a new tab opens with the post written in the box. They press Send.
    - A red icon: read the line under the message at the bottom of the screen, and fix that one thing.
 
-If they already have the folder, skip the download and start at the first step they have not done. Ask what they see. Do not replay finished steps.
+If the extension is already installed, skip step 1 and start at the first step they have not done. Ask what they see. Do not replay finished steps.
 
 ## When something fails
 
-- Chrome says it needs a manifest: they selected the folder that contains `extension`, not `extension` itself.
-- Developer mode is off: Load unpacked is hidden. That is step 4.
+- Chrome says it needs a manifest: they selected the wrong folder. Select the send-to-grok-bot folder that the zip made. The steps are at sendtogrokbot.com/install.
+- Developer mode is off: Load unpacked is hidden. Developer mode is at the top right of chrome://extensions.
 - The menu on a post is empty and the options page opens: nothing is checked, or Grok Bot is checked without a webhook address.
 - Grok Bot returns anything other than 200: the routine is paused, or the key is not the current one. Copy header again from the routine's detail pane and paste it at sendtogrokbot.com/connect.
 - The page says Webhook URL saved. Now paste the Authorization header: the key is still missing. Copy header from the routine's detail pane and paste it in the same box.

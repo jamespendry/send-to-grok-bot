@@ -33,17 +33,16 @@
     <span class="logo claude"><svg><use href="/assets/logos.svg#claude"/></svg></span>
     <h1>Claude</h1>
   </div>
-  <p class="intro">Four short steps, about two minutes. After that, Claude replies to every post you send, on its own.</p>
+  <p class="intro">Two ways to connect Claude. Pick one. After that, Claude replies to every post you send, on its own.</p>
 
-  <div class="note agent"><b>Let Claude do it.</b> If you use Claude with Claude in Chrome, send it this line. It creates the task and connects the extension. You only add the extension and click Allow.
-    <div class="copy" style="margin-bottom:0">
-      <span class="val" id="claudeline">Set up Send to Grok Bot for me, with Claude: https://github.com/jamespendry/send-to-grok-bot</span>
-      <button type="button" data-copy="#claudeline">Copy</button>
-    </div>
+  <div class="paths">
+    <a class="path" href="#yourself"><b>Do it yourself</b><span>About 4 minutes on claude.ai. Works with any browser setup.</span></a>
+    <a class="path" href="#claude-does-it"><b>Have Claude do it</b><span>Needs Claude in Chrome. You add the extension and click Allow.</span></a>
   </div>
 
-  <div class="note"><b>You need:</b> a paid Claude plan (Pro or Max), and the extension added to Chrome with <b>Send to Claude</b> checked in its settings.</div>
+  <div class="note"><b>Either way you need:</b> a paid Claude plan (Pro or Max), and the extension installed. <a href="/install">Install steps</a></div>
 
+  <h2 id="yourself">Do it yourself</h2>
   <ol class="steps num">
     <li>
       <h2>Start a new task</h2>
@@ -88,6 +87,19 @@
   <div class="note"><b>Keep the token private.</b> Paste it only on the connect page, never in a chat or an email.</div>
 
   <div class="note done"><b>You're done.</b> Open x.com, refresh, click the Send button on any post, and choose <b>Send to Claude</b>. The icon turns green when Claude starts.</div>
+
+  <h2 id="claude-does-it">Have Claude do it</h2>
+  <p>Claude creates the task on claude.ai and connects the extension. It never sees your token. You need Claude in Chrome connected to this browser.</p>
+  <ol class="steps num">
+    <li><h2>Install the extension</h2><p class="muted">Claude can't do this part. <a href="/install">Install steps</a></p></li>
+    <li><h2>Send Claude this line</h2>
+      <div class="copy">
+        <span class="val" id="claudeline">Set up Send to Grok Bot for me, with Claude: https://github.com/jamespendry/send-to-grok-bot</span>
+        <button type="button" data-copy="#claudeline">Copy</button>
+      </div>
+    </li>
+    <li><h2>Click Allow when Chrome asks</h2><p class="muted">Claude opens the connect page and clicks <span class="ui">Finish</span>. Chrome then asks to let the extension reach api.anthropic.com. Click <span class="ui">Allow</span>.</p></li>
+  </ol>
 
   <h2>Where Claude's replies show up</h2>
   <p>On Claude's <a href="https://claude.ai/code/routines" target="_blank" rel="noopener">Scheduled page</a>, open <span class="ui">Send to Claude</span>. Each post you send is a line under <span class="ui">History</span>. Click one to read Claude's reply.</p>
