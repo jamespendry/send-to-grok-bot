@@ -2,9 +2,9 @@
 name: send-to-grok-bot
 description: >-
   Create the Send to Grok Bot webhook routine with the General prompt, then
-  send one message: on a computer, add the extension, open the routine from
-  Routines in the bot's info pane, and paste POST to and then header at
-  sendtogrokbot.com/connect. Answer an incoming X post using the preset on
+  send one message: install the extension first at sendtogrokbot.com/install,
+  open the routine from Routines in the bot's info pane, and paste POST to and
+  then header at sendtogrokbot.com/connect. Answer an incoming X post using the preset on
   that post. Use when someone says "Set up Send to Grok Bot" or a webhook
   delivery contains an X post.
 when-to-use: >-
@@ -31,11 +31,11 @@ You cannot read the webhook URL or the Authorization header. Do not try. Do not 
 
 After the routine is on, send one message and stop. Use these words:
 
-Your Send to Grok Bot routine is ready. On a computer: 1) Add the extension. The steps are at sendtogrokbot.com/connect. 2) Click my name at the top, then Routines, then Send to Grok Bot. 3) Copy POST to and paste it at sendtogrokbot.com/connect. 4) Copy header and paste it in the same box. Then open x.com and click the arrow on any post.
+Install the extension first: sendtogrokbot.com/install. Your Send to Grok Bot routine is ready. Click my name at the top, Routines, Send to Grok Bot. Copy POST to and paste it at sendtogrokbot.com/connect. Copy header and paste it in the same box. Then open x.com and click the arrow.
 
 Do not add a second message. Do not print the key. Do not ask them to paste the key into this chat. If your message can include the links named Webhook URL and Authorization header, they open the same pane.
 
-Clicking the bot's name at the top of the chat, or Cmd+Shift+I, opens its info pane. The routine is under Routines. Its detail pane shows three copyable fields under Webhook: POST to (the webhook URL), key, and header (the Authorization header). Pasting key instead of header also works. They paste one value at a time, in either order. After POST to, the page says: Webhook URL saved. Now paste the Authorization header. After the second value it says: Now open x.com and click the arrow. The extension is Chrome on a computer, and the paste saves only when it is installed. It is not in the Chrome Web Store yet. The install steps on sendtogrokbot.com/connect are: download the zip, open chrome://extensions, turn on Developer mode, click Load unpacked, and choose the extension folder.
+Clicking the bot's name at the top of the chat, or Cmd+Shift+I, opens its info pane. The routine is under Routines. Its detail pane shows three copyable fields under Webhook: POST to (the webhook URL), key, and header (the Authorization header). Pasting key instead of header also works. They paste one value at a time, in either order. After POST to, the page says: Webhook URL saved. Now paste the Authorization header. After the second value it says: Now open x.com and click the arrow. The extension is Chrome on a computer, and the paste saves only when it is installed. Install the extension first: sendtogrokbot.com/install. It is not in the Chrome Web Store yet. You cannot install it for them. Chrome blocks extensions and agents from chrome:// pages and the Web Store.
 
 Do not post, follow, or message anyone on X while you set this up. Do not commit a URL or a key.
 

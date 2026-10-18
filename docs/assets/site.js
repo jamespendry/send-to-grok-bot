@@ -1,9 +1,9 @@
 // Shared by every page. Sets the Add to Chrome link in one place and wires copy buttons.
 (function () {
   'use strict';
-  // Until the Chrome Web Store listing is live, this opens /connect, which has the install steps.
+  // Until the Chrome Web Store listing is live, this opens /install.
   // When the listing is live, put its URL here.
-  var CHROME_STORE_URL = '/connect';
+  var CHROME_STORE_URL = '/install';
 
   document.querySelectorAll('[data-chrome-store]').forEach(function (a) {
     a.href = CHROME_STORE_URL;

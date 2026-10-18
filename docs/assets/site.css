@@ -366,3 +366,11 @@ footer .wrap { gap: 4px 20px; }
 ol.install li { margin-top: 10px; }
 ol.install .copy { margin: 8px 0 0; max-width: 360px; }
 ol.install .copy .val { font-size: 15px; }
+
+/* Claude: choose a path */
+.paths { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin: 4px 0 20px; }
+@media (max-width: 560px) { .paths { grid-template-columns: 1fr; } }
+.path { display: flex; flex-direction: column; gap: 4px; padding: 16px; border: 1px solid var(--line); border-radius: var(--radius); color: var(--fg); background: var(--raised); }
+a.path:hover { background: var(--surface); text-decoration: none; }
+.path span { color: var(--muted); font-size: 14px; }
+h2[id] { scroll-margin-top: 72px; }

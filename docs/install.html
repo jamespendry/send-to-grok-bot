@@ -1,0 +1,81 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Install Send to Grok Bot</title>
+<meta name="description" content="Six steps to add the Send to Grok Bot extension to Chrome while it waits for the Chrome Web Store.">
+<meta name="theme-color" content="#ffffff" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#000000" media="(prefers-color-scheme: dark)">
+<meta property="og:title" content="Install Send to Grok Bot">
+<meta property="og:description" content="Six steps to add the Send to Grok Bot extension to Chrome while it waits for the Chrome Web Store.">
+<meta property="og:image" content="https://sendtogrokbot.com/assets/promo/marquee-1400x560.png">
+<meta name="twitter:card" content="summary_large_image">
+<link rel="icon" href="/assets/icons/icon32.png" sizes="32x32">
+<link rel="icon" href="/logo.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="/assets/icons/icon128.png">
+<link rel="stylesheet" href="/assets/site.css">
+<script src="/assets/site.js" defer></script>
+</head>
+<body>
+<header class="top"><div class="wrap">
+  <a class="brand" href="/"><img src="/assets/icons/icon48.png" alt="" width="28" height="28"><span>Send to Grok Bot</span></a>
+  <nav aria-label="Main">
+    <a href="/setup" aria-current="page">Setup</a>
+    <a href="/mobile" class="hide-sm">iPhone</a>
+    <a class="btn small" data-chrome-store href="https://github.com/jamespendry/send-to-grok-bot#readme">Add to Chrome</a>
+  </nav>
+</div></header>
+
+<main class="narrow page">
+  <a class="crumb" href="/setup"><svg viewBox="0 0 24 24" aria-hidden="true"><path fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" d="M15 5l-7 7 7 7"/></svg>Setup</a>
+  <h1>Install the extension</h1>
+  <p class="intro" style="margin-top:12px">Do this once, on a computer, in Chrome. It takes about two minutes. Every AI needs it first, and no AI can do it for you, because Chrome doesn't let anything but you add extensions.</p>
+  <div class="note">It isn't in the Chrome Web Store yet, so it takes a few extra clicks. When it's in the store, this page becomes one Add to Chrome button.</div>
+
+  <ol class="steps num">
+    <li>
+      <h2>Download it</h2>
+      <div class="actions" style="margin:4px 0 0"><a class="btn" href="/send-to-grok-bot.zip" download>Download the extension</a></div>
+    </li>
+    <li>
+      <h2>Unzip it</h2>
+      <p class="muted">Open your <span class="ui">Downloads</span> folder and double-click <span class="ui">send-to-grok-bot.zip</span>. You get a folder named <span class="ui">send-to-grok-bot</span>. On Windows, right-click the zip and choose <span class="ui">Extract All</span>.</p>
+    </li>
+    <li>
+      <h2>Open Chrome's extensions page</h2>
+      <p class="muted">Copy this, paste it into Chrome's address bar, and press Enter. Websites can't link to it directly.</p>
+      <div class="copy" style="max-width:360px">
+        <span class="val mono" id="extpage">chrome://extensions</span>
+        <button type="button" data-copy="#extpage">Copy</button>
+      </div>
+    </li>
+    <li>
+      <h2>Turn on Developer mode, then click Load unpacked</h2>
+      <p class="muted">Switch on <span class="badge">1</span> <span class="ui">Developer mode</span> at the top right. Then click <span class="badge">2</span> <span class="ui">Load unpacked</span> and choose the <span class="ui">send-to-grok-bot</span> folder from step 2.</p>
+      <figure class="shot">
+        <img src="/img/chrome-extensions.png" width="1320" height="150" alt="Chrome's extensions page with Developer mode numbered 1 and Load unpacked numbered 2.">
+      </figure>
+    </li>
+    <li>
+      <h2>Pin it (optional)</h2>
+      <p class="muted">Click the puzzle-piece icon next to Chrome's address bar, then the pin next to <span class="ui">Send to Grok Bot</span>. Its icon opens the settings.</p>
+    </li>
+  </ol>
+
+  <div class="note done"><b>Installed.</b> Now pick your AI. <a href="/setup">Choose an AI</a></div>
+</main>
+
+<footer><div class="wrap">
+  <span>Free and open source.</span>
+  <a href="https://github.com/jamespendry/send-to-grok-bot">GitHub</a>
+  <a href="/setup">Setup</a>
+  <a href="/mobile">iPhone</a>
+  <a href="/history">History</a>
+  <a href="/connect">Connect</a>
+  <a href="/privacy">Privacy</a>
+  <span class="sp"></span>
+  <span>Not affiliated with X, xAI, Anthropic, or OpenAI.</span>
+</div></footer>
+</body>
+</html>

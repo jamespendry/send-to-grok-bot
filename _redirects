@@ -2,6 +2,7 @@
 # Relative links on the pages also resolve /site.css and /img/* from those URLs.
 /                   /docs/index.html           200
 /index.html         /docs/index.html           200
+/install            /docs/install.html         200
 /connect            /docs/connect.html         200
 /connect.html       /docs/connect.html         200
 /setup              /docs/setup/index.html     200
