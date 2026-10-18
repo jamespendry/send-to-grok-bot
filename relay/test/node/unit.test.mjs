@@ -571,6 +571,9 @@ print(json.dumps({
     "method": post.get("WFHTTPMethod"),
     "bodyType": post.get("WFHTTPBodyType"),
     "keys": [p.get("WFDictionaryKey") for p in params("getvalueforkey")],
+    "setvars": len(params("setvariable")),
+    "opens": [p.get("WFInput", {}).get("Value", {}).get("Type") for p in params("openurl")],
+    "formats": [i["WFValue"]["Value"]["string"] for p in params("downloadurl") for i in p["WFJSONValues"]["Value"]["WFDictionaryFieldValueItems"] if i["WFKey"]["Value"]["string"] == "format"],
 }))
 `, filePath], { encoding: "utf8" }));
   assert.equal(parsed.name, "Send to Grok Bot");
@@ -586,8 +589,11 @@ print(json.dumps({
   assert.equal(parsed.url, "https://relay.sendtogrokbot.com/v1/open");
   assert.equal(parsed.method, "POST");
   assert.equal(parsed.bodyType, "JSON");
-  for (const key of ["notice", "openUrl", "copyText"]) assert.ok(parsed.keys.includes(key), key);
-  assert.equal(parsed.keys.filter(k => k === "openUrl").length, 4);
+  // iOS left unwired variables empty, so every input names an earlier action's output.
+  assert.deepEqual(parsed.keys, []);
+  assert.equal(parsed.setvars, 0);
+  assert.deepEqual(parsed.opens, ["ActionOutput", "ActionOutput", "ActionOutput", "ActionOutput"]);
+  assert.deepEqual(parsed.formats, ["copy", "text", "text", "text"]);
   for (const step of ["setclipboard", "notification", "openurl"]) assert.ok(parsed.actions.includes(step), step);
   const steps = read("../shortcuts/BUILD.md");
   assert.match(steps, /shortcuts sign --mode anyone/);

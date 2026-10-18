@@ -10,7 +10,7 @@
 			<key>WFWorkflowActionParameters</key>
 			<dict>
 				<key>GroupingIdentifier</key>
-				<string>914D9BF2-0321-4F5F-B7A8-35A840FCC2F5</string>
+				<string>7B330305-2472-458F-BD0F-C488A0D8E374</string>
 				<key>WFControlFlowMode</key>
 				<integer>0</integer>
 				<key>WFMenuItems</key>
@@ -30,7 +30,7 @@
 			<key>WFWorkflowActionParameters</key>
 			<dict>
 				<key>GroupingIdentifier</key>
-				<string>914D9BF2-0321-4F5F-B7A8-35A840FCC2F5</string>
+				<string>7B330305-2472-458F-BD0F-C488A0D8E374</string>
 				<key>WFControlFlowMode</key>
 				<integer>1</integer>
 				<key>WFMenuItemTitle</key>
@@ -42,6 +42,10 @@
 			<string>is.workflow.actions.downloadurl</string>
 			<key>WFWorkflowActionParameters</key>
 			<dict>
+				<key>ShowHeaders</key>
+				<false/>
+				<key>UUID</key>
+				<string>2A454ACA-F0F0-48B9-A3E4-48B05F8172C4</string>
 				<key>WFHTTPBodyType</key>
 				<string>JSON</string>
 				<key>WFHTTPMethod</key>
@@ -132,6 +136,30 @@
 									<string>WFTextTokenString</string>
 								</dict>
 							</dict>
+							<dict>
+								<key>WFItemType</key>
+								<integer>0</integer>
+								<key>WFKey</key>
+								<dict>
+									<key>Value</key>
+									<dict>
+										<key>string</key>
+										<string>format</string>
+									</dict>
+									<key>WFSerializationType</key>
+									<string>WFTextTokenString</string>
+								</dict>
+								<key>WFValue</key>
+								<dict>
+									<key>Value</key>
+									<dict>
+										<key>string</key>
+										<string>copy</string>
+									</dict>
+									<key>WFSerializationType</key>
+									<string>WFTextTokenString</string>
+								</dict>
+							</dict>
 						</array>
 					</dict>
 					<key>WFSerializationType</key>
@@ -143,47 +171,23 @@
 		</dict>
 		<dict>
 			<key>WFWorkflowActionIdentifier</key>
-			<string>is.workflow.actions.detect.dictionary</string>
-			<key>WFWorkflowActionParameters</key>
-			<dict/>
-		</dict>
-		<dict>
-			<key>WFWorkflowActionIdentifier</key>
-			<string>is.workflow.actions.setvariable</string>
+			<string>is.workflow.actions.setclipboard</string>
 			<key>WFWorkflowActionParameters</key>
 			<dict>
-				<key>WFVariableName</key>
-				<string>Response</string>
-			</dict>
-		</dict>
-		<dict>
-			<key>WFWorkflowActionIdentifier</key>
-			<string>is.workflow.actions.getvalueforkey</string>
-			<key>WFWorkflowActionParameters</key>
-			<dict>
-				<key>WFDictionaryKey</key>
-				<string>notice</string>
 				<key>WFInput</key>
 				<dict>
 					<key>Value</key>
 					<dict>
+						<key>OutputName</key>
+						<string>Contents of URL</string>
+						<key>OutputUUID</key>
+						<string>2A454ACA-F0F0-48B9-A3E4-48B05F8172C4</string>
 						<key>Type</key>
-						<string>Variable</string>
-						<key>VariableName</key>
-						<string>Response</string>
+						<string>ActionOutput</string>
 					</dict>
 					<key>WFSerializationType</key>
 					<string>WFTextTokenAttachment</string>
 				</dict>
-			</dict>
-		</dict>
-		<dict>
-			<key>WFWorkflowActionIdentifier</key>
-			<string>is.workflow.actions.setvariable</string>
-			<key>WFWorkflowActionParameters</key>
-			<dict>
-				<key>WFVariableName</key>
-				<string>Notice</string>
 			</dict>
 		</dict>
 		<dict>
@@ -192,106 +196,20 @@
 			<key>WFWorkflowActionParameters</key>
 			<dict>
 				<key>WFNotificationActionBody</key>
-				<dict>
-					<key>Value</key>
-					<dict>
-						<key>attachmentsByRange</key>
-						<dict>
-							<key>{0, 1}</key>
-							<dict>
-								<key>Type</key>
-								<string>Variable</string>
-								<key>VariableName</key>
-								<string>Notice</string>
-							</dict>
-						</dict>
-						<key>string</key>
-						<string>￼</string>
-					</dict>
-					<key>WFSerializationType</key>
-					<string>WFTextTokenString</string>
-				</dict>
+				<string>Copied. Paste it in Grok Bot and send.</string>
 				<key>WFNotificationActionTitle</key>
 				<string>Send to Grok Bot</string>
 			</dict>
 		</dict>
 		<dict>
 			<key>WFWorkflowActionIdentifier</key>
-			<string>is.workflow.actions.getvalueforkey</string>
+			<string>is.workflow.actions.gettext</string>
 			<key>WFWorkflowActionParameters</key>
 			<dict>
-				<key>WFDictionaryKey</key>
-				<string>copyText</string>
-				<key>WFInput</key>
-				<dict>
-					<key>Value</key>
-					<dict>
-						<key>Type</key>
-						<string>Variable</string>
-						<key>VariableName</key>
-						<string>Response</string>
-					</dict>
-					<key>WFSerializationType</key>
-					<string>WFTextTokenAttachment</string>
-				</dict>
-			</dict>
-		</dict>
-		<dict>
-			<key>WFWorkflowActionIdentifier</key>
-			<string>is.workflow.actions.setvariable</string>
-			<key>WFWorkflowActionParameters</key>
-			<dict>
-				<key>WFVariableName</key>
-				<string>Copy Text</string>
-			</dict>
-		</dict>
-		<dict>
-			<key>WFWorkflowActionIdentifier</key>
-			<string>is.workflow.actions.setclipboard</string>
-			<key>WFWorkflowActionParameters</key>
-			<dict>
-				<key>WFInput</key>
-				<dict>
-					<key>Value</key>
-					<dict>
-						<key>Type</key>
-						<string>Variable</string>
-						<key>VariableName</key>
-						<string>Copy Text</string>
-					</dict>
-					<key>WFSerializationType</key>
-					<string>WFTextTokenAttachment</string>
-				</dict>
-			</dict>
-		</dict>
-		<dict>
-			<key>WFWorkflowActionIdentifier</key>
-			<string>is.workflow.actions.getvalueforkey</string>
-			<key>WFWorkflowActionParameters</key>
-			<dict>
-				<key>WFDictionaryKey</key>
-				<string>openUrl</string>
-				<key>WFInput</key>
-				<dict>
-					<key>Value</key>
-					<dict>
-						<key>Type</key>
-						<string>Variable</string>
-						<key>VariableName</key>
-						<string>Response</string>
-					</dict>
-					<key>WFSerializationType</key>
-					<string>WFTextTokenAttachment</string>
-				</dict>
-			</dict>
-		</dict>
-		<dict>
-			<key>WFWorkflowActionIdentifier</key>
-			<string>is.workflow.actions.setvariable</string>
-			<key>WFWorkflowActionParameters</key>
-			<dict>
-				<key>WFVariableName</key>
-				<string>Open URL</string>
+				<key>UUID</key>
+				<string>A02C2FC4-17DB-4077-BEC8-8EBBB62C7C96</string>
+				<key>WFTextActionText</key>
+				<string>grokbot://</string>
 			</dict>
 		</dict>
 		<dict>
@@ -303,10 +221,12 @@
 				<dict>
 					<key>Value</key>
 					<dict>
+						<key>OutputName</key>
+						<string>Text</string>
+						<key>OutputUUID</key>
+						<string>A02C2FC4-17DB-4077-BEC8-8EBBB62C7C96</string>
 						<key>Type</key>
-						<string>Variable</string>
-						<key>VariableName</key>
-						<string>Open URL</string>
+						<string>ActionOutput</string>
 					</dict>
 					<key>WFSerializationType</key>
 					<string>WFTextTokenAttachment</string>
@@ -319,7 +239,7 @@
 			<key>WFWorkflowActionParameters</key>
 			<dict>
 				<key>GroupingIdentifier</key>
-				<string>914D9BF2-0321-4F5F-B7A8-35A840FCC2F5</string>
+				<string>7B330305-2472-458F-BD0F-C488A0D8E374</string>
 				<key>WFControlFlowMode</key>
 				<integer>1</integer>
 				<key>WFMenuItemTitle</key>
@@ -331,6 +251,10 @@
 			<string>is.workflow.actions.downloadurl</string>
 			<key>WFWorkflowActionParameters</key>
 			<dict>
+				<key>ShowHeaders</key>
+				<false/>
+				<key>UUID</key>
+				<string>8E72C6B4-6D3F-4EED-9AB7-196CDF1733CC</string>
 				<key>WFHTTPBodyType</key>
 				<string>JSON</string>
 				<key>WFHTTPMethod</key>
@@ -421,6 +345,30 @@
 									<string>WFTextTokenString</string>
 								</dict>
 							</dict>
+							<dict>
+								<key>WFItemType</key>
+								<integer>0</integer>
+								<key>WFKey</key>
+								<dict>
+									<key>Value</key>
+									<dict>
+										<key>string</key>
+										<string>format</string>
+									</dict>
+									<key>WFSerializationType</key>
+									<string>WFTextTokenString</string>
+								</dict>
+								<key>WFValue</key>
+								<dict>
+									<key>Value</key>
+									<dict>
+										<key>string</key>
+										<string>text</string>
+									</dict>
+									<key>WFSerializationType</key>
+									<string>WFTextTokenString</string>
+								</dict>
+							</dict>
 						</array>
 					</dict>
 					<key>WFSerializationType</key>
@@ -432,110 +380,6 @@
 		</dict>
 		<dict>
 			<key>WFWorkflowActionIdentifier</key>
-			<string>is.workflow.actions.detect.dictionary</string>
-			<key>WFWorkflowActionParameters</key>
-			<dict/>
-		</dict>
-		<dict>
-			<key>WFWorkflowActionIdentifier</key>
-			<string>is.workflow.actions.setvariable</string>
-			<key>WFWorkflowActionParameters</key>
-			<dict>
-				<key>WFVariableName</key>
-				<string>Response</string>
-			</dict>
-		</dict>
-		<dict>
-			<key>WFWorkflowActionIdentifier</key>
-			<string>is.workflow.actions.getvalueforkey</string>
-			<key>WFWorkflowActionParameters</key>
-			<dict>
-				<key>WFDictionaryKey</key>
-				<string>notice</string>
-				<key>WFInput</key>
-				<dict>
-					<key>Value</key>
-					<dict>
-						<key>Type</key>
-						<string>Variable</string>
-						<key>VariableName</key>
-						<string>Response</string>
-					</dict>
-					<key>WFSerializationType</key>
-					<string>WFTextTokenAttachment</string>
-				</dict>
-			</dict>
-		</dict>
-		<dict>
-			<key>WFWorkflowActionIdentifier</key>
-			<string>is.workflow.actions.setvariable</string>
-			<key>WFWorkflowActionParameters</key>
-			<dict>
-				<key>WFVariableName</key>
-				<string>Notice</string>
-			</dict>
-		</dict>
-		<dict>
-			<key>WFWorkflowActionIdentifier</key>
-			<string>is.workflow.actions.notification</string>
-			<key>WFWorkflowActionParameters</key>
-			<dict>
-				<key>WFNotificationActionBody</key>
-				<dict>
-					<key>Value</key>
-					<dict>
-						<key>attachmentsByRange</key>
-						<dict>
-							<key>{0, 1}</key>
-							<dict>
-								<key>Type</key>
-								<string>Variable</string>
-								<key>VariableName</key>
-								<string>Notice</string>
-							</dict>
-						</dict>
-						<key>string</key>
-						<string>￼</string>
-					</dict>
-					<key>WFSerializationType</key>
-					<string>WFTextTokenString</string>
-				</dict>
-				<key>WFNotificationActionTitle</key>
-				<string>Send to Grok Bot</string>
-			</dict>
-		</dict>
-		<dict>
-			<key>WFWorkflowActionIdentifier</key>
-			<string>is.workflow.actions.getvalueforkey</string>
-			<key>WFWorkflowActionParameters</key>
-			<dict>
-				<key>WFDictionaryKey</key>
-				<string>openUrl</string>
-				<key>WFInput</key>
-				<dict>
-					<key>Value</key>
-					<dict>
-						<key>Type</key>
-						<string>Variable</string>
-						<key>VariableName</key>
-						<string>Response</string>
-					</dict>
-					<key>WFSerializationType</key>
-					<string>WFTextTokenAttachment</string>
-				</dict>
-			</dict>
-		</dict>
-		<dict>
-			<key>WFWorkflowActionIdentifier</key>
-			<string>is.workflow.actions.setvariable</string>
-			<key>WFWorkflowActionParameters</key>
-			<dict>
-				<key>WFVariableName</key>
-				<string>Open URL</string>
-			</dict>
-		</dict>
-		<dict>
-			<key>WFWorkflowActionIdentifier</key>
 			<string>is.workflow.actions.openurl</string>
 			<key>WFWorkflowActionParameters</key>
 			<dict>
@@ -543,10 +387,12 @@
 				<dict>
 					<key>Value</key>
 					<dict>
+						<key>OutputName</key>
+						<string>Contents of URL</string>
+						<key>OutputUUID</key>
+						<string>8E72C6B4-6D3F-4EED-9AB7-196CDF1733CC</string>
 						<key>Type</key>
-						<string>Variable</string>
-						<key>VariableName</key>
-						<string>Open URL</string>
+						<string>ActionOutput</string>
 					</dict>
 					<key>WFSerializationType</key>
 					<string>WFTextTokenAttachment</string>
@@ -559,7 +405,7 @@
 			<key>WFWorkflowActionParameters</key>
 			<dict>
 				<key>GroupingIdentifier</key>
-				<string>914D9BF2-0321-4F5F-B7A8-35A840FCC2F5</string>
+				<string>7B330305-2472-458F-BD0F-C488A0D8E374</string>
 				<key>WFControlFlowMode</key>
 				<integer>1</integer>
 				<key>WFMenuItemTitle</key>
@@ -571,6 +417,10 @@
 			<string>is.workflow.actions.downloadurl</string>
 			<key>WFWorkflowActionParameters</key>
 			<dict>
+				<key>ShowHeaders</key>
+				<false/>
+				<key>UUID</key>
+				<string>EF456DE1-0210-40AF-8B7D-1A5FDB1A5B48</string>
 				<key>WFHTTPBodyType</key>
 				<string>JSON</string>
 				<key>WFHTTPMethod</key>
@@ -661,6 +511,30 @@
 									<string>WFTextTokenString</string>
 								</dict>
 							</dict>
+							<dict>
+								<key>WFItemType</key>
+								<integer>0</integer>
+								<key>WFKey</key>
+								<dict>
+									<key>Value</key>
+									<dict>
+										<key>string</key>
+										<string>format</string>
+									</dict>
+									<key>WFSerializationType</key>
+									<string>WFTextTokenString</string>
+								</dict>
+								<key>WFValue</key>
+								<dict>
+									<key>Value</key>
+									<dict>
+										<key>string</key>
+										<string>text</string>
+									</dict>
+									<key>WFSerializationType</key>
+									<string>WFTextTokenString</string>
+								</dict>
+							</dict>
 						</array>
 					</dict>
 					<key>WFSerializationType</key>
@@ -672,110 +546,6 @@
 		</dict>
 		<dict>
 			<key>WFWorkflowActionIdentifier</key>
-			<string>is.workflow.actions.detect.dictionary</string>
-			<key>WFWorkflowActionParameters</key>
-			<dict/>
-		</dict>
-		<dict>
-			<key>WFWorkflowActionIdentifier</key>
-			<string>is.workflow.actions.setvariable</string>
-			<key>WFWorkflowActionParameters</key>
-			<dict>
-				<key>WFVariableName</key>
-				<string>Response</string>
-			</dict>
-		</dict>
-		<dict>
-			<key>WFWorkflowActionIdentifier</key>
-			<string>is.workflow.actions.getvalueforkey</string>
-			<key>WFWorkflowActionParameters</key>
-			<dict>
-				<key>WFDictionaryKey</key>
-				<string>notice</string>
-				<key>WFInput</key>
-				<dict>
-					<key>Value</key>
-					<dict>
-						<key>Type</key>
-						<string>Variable</string>
-						<key>VariableName</key>
-						<string>Response</string>
-					</dict>
-					<key>WFSerializationType</key>
-					<string>WFTextTokenAttachment</string>
-				</dict>
-			</dict>
-		</dict>
-		<dict>
-			<key>WFWorkflowActionIdentifier</key>
-			<string>is.workflow.actions.setvariable</string>
-			<key>WFWorkflowActionParameters</key>
-			<dict>
-				<key>WFVariableName</key>
-				<string>Notice</string>
-			</dict>
-		</dict>
-		<dict>
-			<key>WFWorkflowActionIdentifier</key>
-			<string>is.workflow.actions.notification</string>
-			<key>WFWorkflowActionParameters</key>
-			<dict>
-				<key>WFNotificationActionBody</key>
-				<dict>
-					<key>Value</key>
-					<dict>
-						<key>attachmentsByRange</key>
-						<dict>
-							<key>{0, 1}</key>
-							<dict>
-								<key>Type</key>
-								<string>Variable</string>
-								<key>VariableName</key>
-								<string>Notice</string>
-							</dict>
-						</dict>
-						<key>string</key>
-						<string>￼</string>
-					</dict>
-					<key>WFSerializationType</key>
-					<string>WFTextTokenString</string>
-				</dict>
-				<key>WFNotificationActionTitle</key>
-				<string>Send to Grok Bot</string>
-			</dict>
-		</dict>
-		<dict>
-			<key>WFWorkflowActionIdentifier</key>
-			<string>is.workflow.actions.getvalueforkey</string>
-			<key>WFWorkflowActionParameters</key>
-			<dict>
-				<key>WFDictionaryKey</key>
-				<string>openUrl</string>
-				<key>WFInput</key>
-				<dict>
-					<key>Value</key>
-					<dict>
-						<key>Type</key>
-						<string>Variable</string>
-						<key>VariableName</key>
-						<string>Response</string>
-					</dict>
-					<key>WFSerializationType</key>
-					<string>WFTextTokenAttachment</string>
-				</dict>
-			</dict>
-		</dict>
-		<dict>
-			<key>WFWorkflowActionIdentifier</key>
-			<string>is.workflow.actions.setvariable</string>
-			<key>WFWorkflowActionParameters</key>
-			<dict>
-				<key>WFVariableName</key>
-				<string>Open URL</string>
-			</dict>
-		</dict>
-		<dict>
-			<key>WFWorkflowActionIdentifier</key>
 			<string>is.workflow.actions.openurl</string>
 			<key>WFWorkflowActionParameters</key>
 			<dict>
@@ -783,10 +553,12 @@
 				<dict>
 					<key>Value</key>
 					<dict>
+						<key>OutputName</key>
+						<string>Contents of URL</string>
+						<key>OutputUUID</key>
+						<string>EF456DE1-0210-40AF-8B7D-1A5FDB1A5B48</string>
 						<key>Type</key>
-						<string>Variable</string>
-						<key>VariableName</key>
-						<string>Open URL</string>
+						<string>ActionOutput</string>
 					</dict>
 					<key>WFSerializationType</key>
 					<string>WFTextTokenAttachment</string>
@@ -799,7 +571,7 @@
 			<key>WFWorkflowActionParameters</key>
 			<dict>
 				<key>GroupingIdentifier</key>
-				<string>914D9BF2-0321-4F5F-B7A8-35A840FCC2F5</string>
+				<string>7B330305-2472-458F-BD0F-C488A0D8E374</string>
 				<key>WFControlFlowMode</key>
 				<integer>1</integer>
 				<key>WFMenuItemTitle</key>
@@ -811,6 +583,10 @@
 			<string>is.workflow.actions.downloadurl</string>
 			<key>WFWorkflowActionParameters</key>
 			<dict>
+				<key>ShowHeaders</key>
+				<false/>
+				<key>UUID</key>
+				<string>3172B0F7-542A-4F7E-BE66-B6EF91838D6B</string>
 				<key>WFHTTPBodyType</key>
 				<string>JSON</string>
 				<key>WFHTTPMethod</key>
@@ -901,6 +677,30 @@
 									<string>WFTextTokenString</string>
 								</dict>
 							</dict>
+							<dict>
+								<key>WFItemType</key>
+								<integer>0</integer>
+								<key>WFKey</key>
+								<dict>
+									<key>Value</key>
+									<dict>
+										<key>string</key>
+										<string>format</string>
+									</dict>
+									<key>WFSerializationType</key>
+									<string>WFTextTokenString</string>
+								</dict>
+								<key>WFValue</key>
+								<dict>
+									<key>Value</key>
+									<dict>
+										<key>string</key>
+										<string>text</string>
+									</dict>
+									<key>WFSerializationType</key>
+									<string>WFTextTokenString</string>
+								</dict>
+							</dict>
 						</array>
 					</dict>
 					<key>WFSerializationType</key>
@@ -912,110 +712,6 @@
 		</dict>
 		<dict>
 			<key>WFWorkflowActionIdentifier</key>
-			<string>is.workflow.actions.detect.dictionary</string>
-			<key>WFWorkflowActionParameters</key>
-			<dict/>
-		</dict>
-		<dict>
-			<key>WFWorkflowActionIdentifier</key>
-			<string>is.workflow.actions.setvariable</string>
-			<key>WFWorkflowActionParameters</key>
-			<dict>
-				<key>WFVariableName</key>
-				<string>Response</string>
-			</dict>
-		</dict>
-		<dict>
-			<key>WFWorkflowActionIdentifier</key>
-			<string>is.workflow.actions.getvalueforkey</string>
-			<key>WFWorkflowActionParameters</key>
-			<dict>
-				<key>WFDictionaryKey</key>
-				<string>notice</string>
-				<key>WFInput</key>
-				<dict>
-					<key>Value</key>
-					<dict>
-						<key>Type</key>
-						<string>Variable</string>
-						<key>VariableName</key>
-						<string>Response</string>
-					</dict>
-					<key>WFSerializationType</key>
-					<string>WFTextTokenAttachment</string>
-				</dict>
-			</dict>
-		</dict>
-		<dict>
-			<key>WFWorkflowActionIdentifier</key>
-			<string>is.workflow.actions.setvariable</string>
-			<key>WFWorkflowActionParameters</key>
-			<dict>
-				<key>WFVariableName</key>
-				<string>Notice</string>
-			</dict>
-		</dict>
-		<dict>
-			<key>WFWorkflowActionIdentifier</key>
-			<string>is.workflow.actions.notification</string>
-			<key>WFWorkflowActionParameters</key>
-			<dict>
-				<key>WFNotificationActionBody</key>
-				<dict>
-					<key>Value</key>
-					<dict>
-						<key>attachmentsByRange</key>
-						<dict>
-							<key>{0, 1}</key>
-							<dict>
-								<key>Type</key>
-								<string>Variable</string>
-								<key>VariableName</key>
-								<string>Notice</string>
-							</dict>
-						</dict>
-						<key>string</key>
-						<string>￼</string>
-					</dict>
-					<key>WFSerializationType</key>
-					<string>WFTextTokenString</string>
-				</dict>
-				<key>WFNotificationActionTitle</key>
-				<string>Send to Grok Bot</string>
-			</dict>
-		</dict>
-		<dict>
-			<key>WFWorkflowActionIdentifier</key>
-			<string>is.workflow.actions.getvalueforkey</string>
-			<key>WFWorkflowActionParameters</key>
-			<dict>
-				<key>WFDictionaryKey</key>
-				<string>openUrl</string>
-				<key>WFInput</key>
-				<dict>
-					<key>Value</key>
-					<dict>
-						<key>Type</key>
-						<string>Variable</string>
-						<key>VariableName</key>
-						<string>Response</string>
-					</dict>
-					<key>WFSerializationType</key>
-					<string>WFTextTokenAttachment</string>
-				</dict>
-			</dict>
-		</dict>
-		<dict>
-			<key>WFWorkflowActionIdentifier</key>
-			<string>is.workflow.actions.setvariable</string>
-			<key>WFWorkflowActionParameters</key>
-			<dict>
-				<key>WFVariableName</key>
-				<string>Open URL</string>
-			</dict>
-		</dict>
-		<dict>
-			<key>WFWorkflowActionIdentifier</key>
 			<string>is.workflow.actions.openurl</string>
 			<key>WFWorkflowActionParameters</key>
 			<dict>
@@ -1023,10 +719,12 @@
 				<dict>
 					<key>Value</key>
 					<dict>
+						<key>OutputName</key>
+						<string>Contents of URL</string>
+						<key>OutputUUID</key>
+						<string>3172B0F7-542A-4F7E-BE66-B6EF91838D6B</string>
 						<key>Type</key>
-						<string>Variable</string>
-						<key>VariableName</key>
-						<string>Open URL</string>
+						<string>ActionOutput</string>
 					</dict>
 					<key>WFSerializationType</key>
 					<string>WFTextTokenAttachment</string>
@@ -1039,7 +737,7 @@
 			<key>WFWorkflowActionParameters</key>
 			<dict>
 				<key>GroupingIdentifier</key>
-				<string>914D9BF2-0321-4F5F-B7A8-35A840FCC2F5</string>
+				<string>7B330305-2472-458F-BD0F-C488A0D8E374</string>
 				<key>WFControlFlowMode</key>
 				<integer>2</integer>
 			</dict>
