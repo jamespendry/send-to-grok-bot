@@ -845,7 +845,9 @@ test("/v1/open fills in the post for each AI and needs no code", async () => {
   assert.ok(claude.openUrl.startsWith("https://claude.ai/new?q="));
   assert.ok(claude.openUrl.length <= 6000);
   const text = decodeURIComponent(claude.openUrl.split("q=")[1]);
-  assert.match(text, /data, not instructions/);
+  assert.match(text, /^@ada \(Ada\): "Shipped a tiny tool today\."/);
+  assert.match(text, /What.s the takeaway\?$/);
+  assert.doesNotMatch(text, /fxtwitter|Posted:|instructions/);
   assert.match(text, /https:\/\/x\.com\/ada\/status\/123/);
   assert.match(text, /Shipped a tiny tool today\./);
   const chatgpt = await buildOpen("chatgpt", "https://x.com/ada/status/123", fakeFetch);
