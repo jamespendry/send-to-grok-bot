@@ -43,9 +43,31 @@
     <li class="hero-step" id="step-paste">
       <h2 class="step-title">Step 2. Paste here</h2>
       <p class="muted" data-stgb-extra>Paste with Command+V (Mac) or Ctrl+V (Windows). It saves by itself when you paste.</p>
-      <label class="field-label" for="paste">Paste here</label>
-      <textarea id="paste" spellcheck="false" autocomplete="off" placeholder="Paste here"></textarea>
-      <span id="msg" role="status"></span>
+      <div id="grok-guide" class="guide" hidden>
+        <h3>Connect Grok Bot</h3>
+        <ol class="steps num">
+          <li>
+            <h2>Open the routine in Grok Bot</h2>
+            <p class="muted">Click Grok Bot's name at the top of the chat. Under <span class="ui">Routines</span>, click <span class="ui">Send to Grok Bot</span>.</p>
+            <figure class="shot"><img src="/img/grok-routines.png" width="495" height="480" alt="The bot's details pane, with the Send to Grok Bot routine circled under Routines." style="max-width:320px"></figure>
+          </li>
+          <li>
+            <h2>Copy POST to, then paste it in the box below</h2>
+            <p class="muted">Scroll the routine to <span class="ui">Webhook</span>. Copy the whole <span class="ui">POST to</span> line. The box below says "Webhook URL saved."</p>
+            <figure class="shot"><img src="/img/grok-post-to.png" width="600" height="245" alt="The routine's Webhook section with the POST to row circled. Sample values." style="max-width:420px"></figure>
+          </li>
+          <li>
+            <h2>Copy header, then paste it in the same box</h2>
+            <p class="muted">Copy the whole <span class="ui">header</span> line. The box says "Now open x.com and click the Send arrow." You're connected.</p>
+            <figure class="shot"><img src="/img/grok-header.png" width="600" height="245" alt="The routine's Webhook section with the header row circled. Sample values." style="max-width:420px"></figure>
+          </li>
+        </ol>
+      </div>
+      <div class="pastebar">
+        <label class="field-label" for="paste">Paste here</label>
+        <textarea id="paste" spellcheck="false" autocomplete="off" placeholder="Paste here"></textarea>
+        <span id="msg" role="status"></span>
+      </div>
       <p class="muted" style="margin-top:12px">Paste one thing at a time. The page says what to paste next. If Chrome asks to allow a site, choose <b>Allow</b>.</p>
     </li>
   </ol>
@@ -62,7 +84,7 @@
             <span class="val" id="grokline">Set up Send to Grok Bot for me: https://github.com/jamespendry/send-to-grok-bot</span>
             <button type="button" data-copy="#grokline">Copy</button>
           </div>
-          <span>Then click the routine, copy <b>POST to</b> and paste it above, and copy <b>header</b> and paste it above. <a href="/setup/grok">Show me where</a></span>
+          <span>Then click the routine, copy <b>POST to</b> and paste it above, and copy <b>header</b> and paste it above. <a href="/connect#grok">Show me where</a></span>
         </div>
       </div>
       <div class="row start-row">
@@ -102,6 +124,19 @@
     msg.textContent = text || '';
     msg.className = text ? (ok ? 'ok' : 'err') : '';
   }
+
+  // Arriving from the Grok Bot page (/connect#grok) shows its three steps above the box.
+  function guide() {
+    var g = document.getElementById('grok-guide');
+    var on = location.hash === '#grok';
+    if (g) g.hidden = !on;
+    var start = document.querySelector('section.start');
+    if (start) start.hidden = on;
+    document.documentElement.classList.toggle('guided', on);
+    if (on && g) g.scrollIntoView({block: 'start'});
+  }
+  guide();
+  window.addEventListener('hashchange', guide);
 
   var hash = location.hash || '';
   if (/stgb1\.|stgbr1\./i.test(hash)) {
