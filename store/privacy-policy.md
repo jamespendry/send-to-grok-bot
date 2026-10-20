@@ -20,7 +20,7 @@ The extension handles the post you choose to send. On that post's own page it al
 - a plain-text digest of those fields
 - the reply preset you picked (General, Research, Job hunt, Buy or skip, Learn later, Content ideas, or Custom) and the prompt text for that preset
 
-When you send a post, the extension requests that post, the posts it replies to, and any post it quotes from the public mirrors api.fxtwitter.com and api.vxtwitter.com, without cookies or account details, so the destination receives the full text and conversation. Only the post's public URL is sent to them.
+When you send a post, the extension requests that post, the posts it replies to, and any post it quotes from the public mirrors api.fxtwitter.com and api.vxtwitter.com, without cookies or account details, so the destination receives the full text and conversation. The address of each request holds only the public handle and status ID of the post, and of each post it replies to or quotes. No cookies, account details, or settings are sent.
 
 That data is sent only to a destination you configured. If one destination is on, the click sends it there. If more than one is on, it goes to the one you pick. The preset and prompt travel with the post so the destination follows them. Destinations are:
 
@@ -30,6 +30,8 @@ That data is sent only to a destination you configured. If one destination is on
 - **Codex.** The extension opens a chatgpt.com/codex tab with the post in the address. You press Send there.
 
 It reads a post when you click Send on it, and on a post's own page it also reads the author's thread and the reply parent shown there. It does not read direct messages. On sendtogrokbot.com/connect, pasting into the box reads that paste and saves it in the extension. It does not read other pages on that site.
+
+On every page of sendtogrokbot.com, a one-line script sets a single marker on the page so the site can show that the extension is installed. It reads nothing from the page and sends nothing. On /connect, the extension places its own paste box (an extension page, grant.html) in the page. That box is the only place the extension accepts a pasted code from the site, and only from sendtogrokbot.com.
 
 ## Tokens and keys
 
@@ -49,7 +51,7 @@ Relay is off unless you check it and paste a connect code. That code points at a
 - It does not keep a browsing history. The post URL is sent only as part of the post you chose.
 - It does not keep a copy of the post after the request is made or the tab is opened.
 
-Sites you send to (your webhook, Anthropic, OpenAI, or X) keep data under their own policies. The publisher does not control that.
+Sites you send to (your webhook, Anthropic, OpenAI, or X) keep data under their own policies. The public mirrors api.fxtwitter.com and api.vxtwitter.com also keep data under their own policies. The publisher does not control that.
 
 ## How long data stays
 
@@ -60,7 +62,7 @@ The post is held in memory only long enough to send it or to open the tab. Token
 The extension complies with the Chrome Web Store User Data Policy, including Limited Use:
 
 - Data is used only to send the post you chose to the destination you chose.
-- Data is transferred only when that transfer is the feature you asked for: the request to your webhook, Anthropic, or OpenAI, or the tab opened on Claude, ChatGPT, or Codex. It is also transferred if the law requires it, or to protect security. There is no other transfer.
+- Data is transferred only when that transfer is the feature you asked for: the request to your webhook, Anthropic, or OpenAI, the lookup of the post's public text from api.fxtwitter.com or api.vxtwitter.com, or the tab opened on Claude, ChatGPT, or Codex. It is also transferred if the law requires it, or to protect security. There is no other transfer.
 - Data is not used or transferred for personalized, re-targeted, or interest-based ads.
 - With Relay left off, the publisher does not have a server that receives this data, and no person at the publisher reads the posts you send. With Relay on, the post goes to the relay address in your connect code, which forwards it and does not keep the post text.
 
