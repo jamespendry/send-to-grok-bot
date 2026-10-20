@@ -32,3 +32,11 @@
 .stgb-toast.stgb-b-grokbot .stgb-toast-mark,.stgb-toast.stgb-b-grokbot .stgb-toast-title,.stgb-toast.stgb-b-chatgpt .stgb-toast-mark,.stgb-toast.stgb-b-chatgpt .stgb-toast-title,.stgb-toast.stgb-b-codex .stgb-toast-mark,.stgb-toast.stgb-b-codex .stgb-toast-title{color:#0f1419}
 .stgb-toast.stgb-dark.stgb-b-grokbot .stgb-toast-mark,.stgb-toast.stgb-dark.stgb-b-grokbot .stgb-toast-title,.stgb-toast.stgb-dark.stgb-b-chatgpt .stgb-toast-mark,.stgb-toast.stgb-dark.stgb-b-chatgpt .stgb-toast-title,.stgb-toast.stgb-dark.stgb-b-codex .stgb-toast-mark,.stgb-toast.stgb-dark.stgb-b-codex .stgb-toast-title{color:#fff}
 .stgb-toast.stgb-err .stgb-toast-title,.stgb-toast.stgb-err .stgb-toast-reason{color:rgb(244,33,46)}
+.stgb-menu .stgb-sep{height:1px;margin:4px 0;background:rgb(239,243,244)}
+.stgb-menu.stgb-dark .stgb-sep{background:rgb(47,51,54)}
+.stgb-menu button.stgb-style-row{font-weight:400;font-size:14px;color:#536471 !important;padding:10px 16px}
+.stgb-menu.stgb-dark button.stgb-style-row{color:#71767b !important}
+.stgb-menu .stgb-style-list{max-height:240px;overflow:auto;padding-bottom:4px}
+.stgb-menu button.stgb-style-opt{font-weight:400;font-size:14px;padding:8px 16px 8px 40px;color:#0f1419 !important;position:relative}
+.stgb-menu.stgb-dark button.stgb-style-opt{color:#e7e9ea !important}
+.stgb-menu button.stgb-style-opt[aria-checked="true"]::before{content:"";position:absolute;left:18px;top:50%;width:8px;height:8px;margin-top:-4px;border-radius:50%;background:#1d9bf0}

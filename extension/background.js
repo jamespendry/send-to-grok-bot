@@ -88,6 +88,15 @@ function chosenPrompt(s, brand) {
   return prompts.resolve(s);
 }
 
+// The default style's id as the Send menu shows it.
+function currentStyle(s) {
+  const P = self.STGB_PROMPTS;
+  if (!P) return 'general';
+  if (P.findSaved(s, s && s.promptPreset)) return s.promptPreset;
+  const r = chosenPrompt(s, '');
+  return r.id === 'custom' ? 'custom' : r.id;
+}
+
 function relayOn(s) {
   return !!(s && s.useRelay && String(s.relayCode || '').trim());
 }
@@ -164,9 +173,14 @@ async function deliver(brand, msg, s) {
   let post = {source: 'x', ...msg, version: 2, sentAt: new Date().toISOString()};
   delete post.stgbDestination;
   delete post.stgbAction;
+  delete post.stgbStyle;
   post = await enrichPost(post);
   try { post.digest = digest(post); } catch (_) { post.digest = ''; }
-  const chosen = chosenPrompt(s, brand);
+  // A style picked in the Send menu for this one post wins over the saved default.
+  const pick = typeof msg.stgbStyle === 'string' ? msg.stgbStyle : '';
+  const P = self.STGB_PROMPTS;
+  const valid = pick && P && (P.ORDER.indexOf(pick) !== -1 || P.findSaved(s, pick));
+  const chosen = valid ? P.resolve({...s, promptPreset: pick, promptText: ''}) : chosenPrompt(s, brand);
   post.preset = chosen.id;
   post.prompt = String(chosen.text || '').slice(0, 8000);
   try {
@@ -214,9 +228,12 @@ chrome.runtime.onMessage.addListener((msg, _s, reply) => {
         reply({ok: false, error: SETUP_NOTICE.none, needsSetup: true, brand: 'grokbot', title: 'Choose a destination'});
         return;
       }
-      if (items.length !== 1) {
+      // Saved styles turn the one-click send into a menu, so the style can be picked per post.
+      const P = self.STGB_PROMPTS;
+      const styles = P && P.savedList(s).length ? P.choices(s) : null;
+      if (items.length !== 1 || styles) {
         enrichFor(msg.url);
-        reply({ok: true, items});
+        reply({ok: true, items, styles, style: styles ? currentStyle(s) : ''});
         return;
       }
       reply(await deliver(items[0].brand, msg, s));

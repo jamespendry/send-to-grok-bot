@@ -89,9 +89,22 @@ function applyClaudePaste(raw, quiet) {
   if (claudeUrl && claudeToken) el.className = 'ok';
 }
 
+// Saved styles: [{id, name, text}], kept in chrome.storage.local with the rest.
+let savedStyles = [];
+
+function savedById(presetId) {
+  return globalThis.STGB_PROMPTS.findSaved({savedStyles}, presetId);
+}
+
 function promptState() {
   const preset = $('preset').value || 'general';
   const written = $('promptText').value.trim();
+  const saved = savedById(preset);
+  if (saved) {
+    // Editing a saved style and clicking Save updates that style.
+    if (written) saved.text = written;
+    return {promptPreset: preset, promptText: '', savedStyles: savedStyles.slice()};
+  }
   if (preset === 'custom') return {promptPreset: 'custom', promptText: written};
   const builtin = globalThis.STGB_PROMPTS.text(preset).trim();
   if (!written || written === builtin) return {promptPreset: preset, promptText: ''};
@@ -105,6 +118,7 @@ function formState() {
   o.claudeFireUrl = claudeUrl;
   o.claudeToken = claudeToken;
   Object.assign(o, promptState());
+  o.savedStyles = savedStyles.slice();
   const relayBox = document.getElementById('relayOn');
   const relayCode = document.getElementById('relayCode');
   o.useRelay = !!(relayBox && relayBox.checked);
@@ -127,16 +141,42 @@ function fillPresetSelect() {
     opt.textContent = globalThis.STGB_PROMPTS.label(id);
     sel.appendChild(opt);
   }
+  if (savedStyles.length) {
+    const group = document.createElement('optgroup');
+    group.label = 'My styles';
+    for (const x of savedStyles) {
+      const opt = document.createElement('option');
+      opt.value = 'saved:' + x.id;
+      opt.textContent = x.name;
+      group.appendChild(opt);
+    }
+    sel.appendChild(group);
+  }
   const custom = document.createElement('option');
   custom.value = 'custom';
   custom.textContent = 'Custom';
   sel.appendChild(custom);
 }
 
+function styleButtons() {
+  const saved = !!savedById($('preset').value);
+  $('delStyle').hidden = !saved;
+  $('saveStyle').hidden = false;
+  $('saveStyle').disabled = savedStyles.length >= globalThis.STGB_PROMPTS.MAX_STYLES;
+}
+
 function showPrompt(preset, text) {
+  const saved = savedById(preset);
+  if (saved) {
+    $('preset').value = preset;
+    $('promptText').value = saved.text;
+    styleButtons();
+    return;
+  }
   const id = preset === 'custom' || globalThis.STGB_PROMPTS.ORDER.indexOf(preset) !== -1 ? preset : 'general';
   $('preset').value = id;
   $('promptText').value = text || (id === 'custom' ? '' : globalThis.STGB_PROMPTS.text(id));
+  styleButtons();
 }
 
 function fill(local) {
@@ -147,6 +187,8 @@ function fill(local) {
   claudeToken = local.claudeToken || '';
   $('claudePaste').value = '';
   claudeLine();
+  savedStyles = globalThis.STGB_PROMPTS.savedList(local).map(x => ({id: x.id, name: String(x.name).trim(), text: String(x.text).trim()}));
+  fillPresetSelect();
   if (local.promptPreset || local.promptText) showPrompt(local.promptPreset || 'general', local.promptText || '');
   else if (local.claudePrompt || local.chatgptPrompt || local.codexPrompt) showPrompt('custom', local.claudePrompt || local.chatgptPrompt || local.codexPrompt || '');
   else showPrompt('general', '');
@@ -306,11 +348,48 @@ if (relayOn) relayOn.addEventListener('change', show);
 $('cc').addEventListener('input', () => connectMessage('', true));
 $('preset').addEventListener('change', () => {
   const id = $('preset').value;
-  if (id !== 'custom') $('promptText').value = globalThis.STGB_PROMPTS.text(id);
+  const saved = savedById(id);
+  if (saved) $('promptText').value = saved.text;
+  else if (id !== 'custom') $('promptText').value = globalThis.STGB_PROMPTS.text(id);
+  styleButtons();
 });
 $('promptText').addEventListener('input', () => {
   const id = $('preset').value;
+  if (savedById(id)) return;
   if (id !== 'custom' && $('promptText').value.trim() !== globalThis.STGB_PROMPTS.text(id).trim()) $('preset').value = 'custom';
+  styleButtons();
+});
+$('saveStyle').addEventListener('click', () => {
+  if (!$('promptText').value.trim()) { say('Write the instructions first', true); return; }
+  $('styleForm').hidden = false;
+  $('styleName').value = '';
+  $('styleName').focus();
+});
+$('styleCancel').addEventListener('click', () => { $('styleForm').hidden = true; });
+function addStyle() {
+  const name = $('styleName').value.trim().slice(0, 40);
+  const text = $('promptText').value.trim();
+  if (!name) { say('Give the style a name', true); return; }
+  if (!text) { say('Write the instructions first', true); return; }
+  if (savedStyles.some(x => x.name.toLowerCase() === name.toLowerCase())) { say('You already have a style with that name', true); return; }
+  if (savedStyles.length >= globalThis.STGB_PROMPTS.MAX_STYLES) { say('You can save up to ' + globalThis.STGB_PROMPTS.MAX_STYLES + ' styles', true); return; }
+  const style = {id: Date.now().toString(36) + Math.random().toString(36).slice(2, 6), name, text};
+  savedStyles.push(style);
+  fillPresetSelect();
+  $('preset').value = 'saved:' + style.id;
+  $('styleForm').hidden = true;
+  styleButtons();
+  persist(formState(), err => say(err ? (typeof err === 'string' ? err : 'Could not save') : 'Saved "' + name + '". It is now in the Send menu on X.', !!err));
+}
+$('styleOk').addEventListener('click', addStyle);
+$('styleName').addEventListener('keydown', e => { if (e.key === 'Enter') { e.preventDefault(); addStyle(); } });
+$('delStyle').addEventListener('click', () => {
+  const saved = savedById($('preset').value);
+  if (!saved) return;
+  savedStyles = savedStyles.filter(x => x !== saved);
+  fillPresetSelect();
+  showPrompt('general', '');
+  persist(formState(), err => say(err ? (typeof err === 'string' ? err : 'Could not save') : 'Deleted "' + saved.name + '"', !!err));
 });
 $('claudePaste').addEventListener('input', () => {
   const value = $('claudePaste').value;

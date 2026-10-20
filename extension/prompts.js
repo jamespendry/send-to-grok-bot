@@ -66,8 +66,34 @@
     return LABELS[id] || 'General';
   }
 
+  // Styles the person saved in settings: [{id, name, text}]. Chosen as promptPreset "saved:<id>".
+  var MAX_STYLES = 20;
+  function savedList(s) {
+    var list = s && Array.isArray(s.savedStyles) ? s.savedStyles : [];
+    return list.filter(function (x) { return x && typeof x.id === 'string' && String(x.name || '').trim() && String(x.text || '').trim(); }).slice(0, MAX_STYLES);
+  }
+
+  function findSaved(s, presetId) {
+    if (typeof presetId !== 'string' || presetId.indexOf('saved:') !== 0) return null;
+    var sid = presetId.slice(6), list = savedList(s);
+    for (var i = 0; i < list.length; i++) if (list[i].id === sid) return list[i];
+    return null;
+  }
+
+  // Every style the Send menu can offer: the presets, then saved styles.
+  function choices(settings) {
+    var out = ORDER.map(function (id) { return {id: id, label: label(id)}; });
+    savedList(settings).forEach(function (x) { out.push({id: 'saved:' + x.id, label: String(x.name).trim()}); });
+    return out;
+  }
+
   function resolve(settings) {
     var s = settings || {};
+    if (typeof s.promptPreset === 'string' && s.promptPreset.indexOf('saved:') === 0) {
+      var hit = findSaved(s, s.promptPreset);
+      if (hit) return {id: 'custom', text: String(hit.text).replace(/^\s+|\s+$/g, ''), name: String(hit.name).trim()};
+      return {id: 'general', text: text('general')};
+    }
     var id = s.promptPreset === 'custom' ? 'custom' : (Object.prototype.hasOwnProperty.call(CLOSES, s.promptPreset) ? s.promptPreset : 'general');
     var edited = String(s.promptText || '').replace(/^\s+|\s+$/g, '');
     if (id === 'custom') return {id: 'custom', text: edited || text('general')};
@@ -90,7 +116,7 @@
     'Never post, follow, message, email, or contact anyone. Do not commit, push, or open a pull request. Your reply is the whole job.'
   ].join('\n\n');
 
-  var api = {ORDER: ORDER, text: text, label: label, resolve: resolve, ALLOWED_SITES: ALLOWED_SITES, CLAUDE_TASK: CLAUDE_TASK};
+  var api = {ORDER: ORDER, MAX_STYLES: MAX_STYLES, text: text, label: label, resolve: resolve, choices: choices, savedList: savedList, findSaved: findSaved, ALLOWED_SITES: ALLOWED_SITES, CLAUDE_TASK: CLAUDE_TASK};
   if (typeof module !== 'undefined' && module.exports) module.exports = api;
   root.STGB_PROMPTS = api;
 })(typeof globalThis !== 'undefined' ? globalThis : this);

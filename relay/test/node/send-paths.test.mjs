@@ -164,3 +164,44 @@ test("site-connect.js does not call chrome.permissions from the content script",
   const src = read("site-connect.js").replace(/\/\/.*$/gm, "");
   assert.equal(/chrome\.permissions\./.test(src), false);
 });
+
+const STYLES = [{ id: "a1", name: "Sales lead check", text: "Is this person a sales lead? Answer yes or no first." }];
+
+test("saved styles: the default saved style goes out as the prompt", async () => {
+  const w = worker({ enabled: ["grokbot"], webhookUrl: "https://example.test/hook", senderKey: "abc", savedStyles: STYLES, promptPreset: "saved:a1" });
+  const r = await w.send({ stgbDestination: "grokbot", ...POST });
+  assert.equal(r.ok, true, JSON.stringify(r));
+  const body = JSON.parse(w.cap.find((c) => c.kind === "fetch").body);
+  assert.equal(body.preset, "custom");
+  assert.equal(body.prompt, STYLES[0].text);
+});
+
+test("saved styles: a style picked in the Send menu wins for that post, and stays out of the payload", async () => {
+  const w = worker({ enabled: ["grokbot"], webhookUrl: "https://example.test/hook", senderKey: "abc", savedStyles: STYLES, promptPreset: "general" });
+  await w.send({ stgbDestination: "grokbot", stgbStyle: "saved:a1", ...POST });
+  let body = JSON.parse(w.cap.filter((c) => c.kind === "fetch").pop().body);
+  assert.equal(body.prompt, STYLES[0].text);
+  assert.equal("stgbStyle" in body, false);
+  const w2 = worker({ enabled: ["grokbot"], webhookUrl: "https://example.test/hook", senderKey: "abc", savedStyles: STYLES, promptPreset: "saved:a1" });
+  await w2.send({ stgbDestination: "grokbot", stgbStyle: "research", ...POST });
+  body = JSON.parse(w2.cap.filter((c) => c.kind === "fetch").pop().body);
+  assert.equal(body.preset, "research");
+  // An unknown pick falls back to the saved default rather than failing.
+  const w3 = worker({ enabled: ["grokbot"], webhookUrl: "https://example.test/hook", senderKey: "abc", savedStyles: STYLES, promptPreset: "saved:a1" });
+  await w3.send({ stgbDestination: "grokbot", stgbStyle: "saved:nope", ...POST });
+  body = JSON.parse(w3.cap.filter((c) => c.kind === "fetch").pop().body);
+  assert.equal(body.prompt, STYLES[0].text);
+});
+
+test("saved styles: one destination plus saved styles opens the menu with the style list", async () => {
+  const one = worker({ enabled: ["grokbot"], webhookUrl: "https://example.test/hook", senderKey: "abc" });
+  const plain = await one.send({ stgbAction: "send", ...POST });
+  assert.equal(plain.items, undefined, "no saved styles: one click still sends");
+  const w = worker({ enabled: ["grokbot"], webhookUrl: "https://example.test/hook", senderKey: "abc", savedStyles: STYLES, promptPreset: "saved:a1" });
+  const r = await w.send({ stgbAction: "send", ...POST });
+  assert.equal(r.items.length, 1);
+  assert.equal(r.styles[r.styles.length - 1].label, "Sales lead check");
+  assert.equal(r.styles[0].id, "general");
+  assert.equal(r.style, "saved:a1");
+  assert.equal(w.cap.filter((c) => c.kind === "fetch").length, 0, "nothing is sent until a row is picked");
+});

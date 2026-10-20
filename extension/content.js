@@ -92,11 +92,48 @@
     if (menuCloser) { menuCloser(); menuCloser = null; }
     if (menuEl) { menuEl.remove(); menuEl = null; }
   }
-  function openMenu(btn, items, article) {
+  function openMenu(btn, items, article, styles, current) {
     closeMenu();
     const menu = document.createElement('div');
     menu.className = 'stgb-menu' + (xDark() ? ' stgb-dark' : '');
     menu.setAttribute('role', 'menu');
+    // Saved styles add a "Reply style" row. The pick applies to this post only.
+    let style = current || '';
+    const labelOf = id => { const hit = (styles || []).find(x => x.id === id); return hit ? hit.label : 'Custom'; };
+    let styleList = null, styleRow = null;
+    if (styles && styles.length) {
+      styleRow = document.createElement('button');
+      styleRow.type = 'button';
+      styleRow.className = 'stgb-style-row';
+      styleRow.setAttribute('aria-expanded', 'false');
+      const show = () => { styleRow.textContent = 'Reply style: ' + labelOf(style); };
+      show();
+      styleList = document.createElement('div');
+      styleList.className = 'stgb-style-list';
+      styleList.hidden = true;
+      styles.forEach(x => {
+        const opt = document.createElement('button');
+        opt.type = 'button';
+        opt.className = 'stgb-style-opt';
+        opt.setAttribute('role', 'menuitemradio');
+        opt.textContent = x.label;
+        opt.setAttribute('aria-checked', String(x.id === style));
+        opt.addEventListener('click', e => {
+          e.preventDefault(); e.stopPropagation(); e.stopImmediatePropagation();
+          style = x.id;
+          styleList.querySelectorAll('.stgb-style-opt').forEach(o => o.setAttribute('aria-checked', String(o === opt)));
+          styleList.hidden = true;
+          styleRow.setAttribute('aria-expanded', 'false');
+          show();
+        }, true);
+        styleList.appendChild(opt);
+      });
+      styleRow.addEventListener('click', e => {
+        e.preventDefault(); e.stopPropagation(); e.stopImmediatePropagation();
+        styleList.hidden = !styleList.hidden;
+        styleRow.setAttribute('aria-expanded', String(!styleList.hidden));
+      }, true);
+    }
     items.forEach(item => {
       const row = document.createElement('button');
       row.type = 'button';
@@ -108,10 +145,17 @@
       row.appendChild(label);
       row.addEventListener('click', e => {
         e.preventDefault(); e.stopPropagation(); e.stopImmediatePropagation();
-        sendTo(btn, item, article);
+        sendTo(btn, item, article, styleRow ? style : '');
       }, true);
       menu.appendChild(row);
     });
+    if (styleRow) {
+      const sep = document.createElement('div');
+      sep.className = 'stgb-sep';
+      menu.appendChild(sep);
+      menu.appendChild(styleRow);
+      menu.appendChild(styleList);
+    }
     menu.addEventListener('pointerdown', e => e.stopPropagation());
     menu.dataset.for = btn.dataset.stgbId || '';
     document.body.appendChild(menu);
@@ -449,12 +493,14 @@
     setState(btn, 'err', title);
     setTimeout(() => setState(btn, 'send', 'Send'), 5000);
   }
-  function sendTo(btn, item, article) {
+  function sendTo(btn, item, article, style) {
     const post = readArticle(article);
     closeMenu();
     if (btn.classList.contains('stgb-busy') || tooSoon(post.url, item.brand)) return;
     setState(btn, 'busy', 'Sending…');
-    chrome.runtime.sendMessage({stgbDestination: item.brand, ...post}, r => applyResult(btn, item, r));
+    const msg = {stgbDestination: item.brand, ...post};
+    if (style) msg.stgbStyle = style;
+    chrome.runtime.sendMessage(msg, r => applyResult(btn, item, r));
   }
   function bindSend(btn, article) {
     btn.dataset.stgbBound = '1';
@@ -476,9 +522,9 @@
           showToast('grokbot', 'Send to Grok Bot', 'Reload the extension, then click the post again.');
           return;
         }
-        if (r.items && r.items.length > 1) {
+        if (r.items && (r.items.length > 1 || (r.styles && r.styles.length))) {
           setState(btn, 'send', 'Send');
-          openMenu(btn, r.items, article);
+          openMenu(btn, r.items, article, r.styles, r.style);
           return;
         }
         applyResult(btn, (r.items && r.items[0]) || null, r);
