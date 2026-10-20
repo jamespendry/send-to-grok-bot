@@ -32,7 +32,7 @@
     <span class="logo grokbot"><svg><use href="/assets/logos.svg#grokbot"/></svg></span>
     <h1>Connect Grok Bot</h1>
   </div>
-  <p class="intro">Three steps on a computer. Grok Bot creates the routine for you. You copy two things into the connect page.</p>
+  <p class="intro">Grok Bot sets itself up. You send it one line, then paste two things on the next page.</p>
 
   <ol class="steps num">
     <li>
@@ -41,35 +41,16 @@
         <span class="val" id="grokline">Set up Send to Grok Bot for me: https://github.com/jamespendry/send-to-grok-bot</span>
         <button type="button" data-copy="#grokline">Copy</button>
       </div>
-      <p class="muted">Paste it into any Grok Bot chat. It creates a routine named <span class="ui">Send to Grok Bot</span> and replies when it's done. If it asks you to confirm, confirm.</p>
+      <p class="muted">Paste it into any Grok Bot chat on your computer. If it asks you to confirm, confirm.</p>
     </li>
     <li>
-      <h2>Open the routine</h2>
-      <p class="muted">Click the bot's name at the top of the chat. Under <span class="ui">Routines</span>, click <span class="badge">1</span> <span class="ui">Send to Grok Bot</span>.</p>
-      <figure class="shot">
-        <img src="/img/grok-routines.png" width="440" height="420" alt="The bot's info pane, with the Send to Grok Bot routine under Routines numbered 1." style="max-width:440px">
-      </figure>
-    </li>
-    <li>
-      <h2>Copy two lines into the connect page</h2>
-      <div class="actions" style="margin:4px 0 12px"><a class="btn" href="/connect" target="_blank" rel="noopener">Open the connect page</a></div>
-      <div class="fill">
-        <div class="fill-row"><span class="badge">1</span><div><b>POST to</b><span class="muted">Starts with <span class="mono">https://api2.cursor.sh/automations/webhook/</span>. Copy it and paste it into the connect page. It says "Webhook URL saved."</span></div></div>
-        <div class="fill-row"><span class="badge">2</span><div><b>header</b><span class="muted">Starts with <span class="mono">Authorization: Bearer crsr_</span>. Copy it and paste it into the same box. It says "Now open x.com and click the Send arrow." The <b>key</b> line (just <span class="mono">crsr_…</span>) works too.</span></div></div>
-      </div>
-      <figure class="shot">
-        <img src="/img/grok-webhook-values.png" width="630" height="497" alt="The routine's Webhook section with sample values: POST to (https://api2.cursor.sh/automations/...) numbered 1, and header (Authorization: Bearer crsr_...) numbered 2." style="max-width:630px">
-        <figcaption>Sample values, not real ones. The app cuts long values off with "…", but copying takes the whole value. Paste yours only on the connect page, never in a chat.</figcaption>
-      </figure>
-      <p class="muted">If Chrome asks to allow a site, click <span class="ui">Allow</span>.</p>
+      <h2>Wait for "routine is ready"</h2>
+      <p class="muted">Grok Bot creates a routine named <span class="ui">Send to Grok Bot</span> and tells you when it's ready. It looks like this:</p>
+      <figure class="shot wide"><img src="/img/grok-ready.png" width="860" height="320" alt="Grok Bot's reply: Created routine, Send to Grok Bot, and a message saying the routine is ready."></figure>
     </li>
   </ol>
 
-  <div class="note done"><b>You're done.</b> On x.com, click the Send arrow on any post. The icon turns green when the run starts, and the reply shows up in your Grok Bot chat.</div>
-
-  <h2>Change the reply style later</h2>
-  <p>Leave the routine as it is. In the extension settings, under <span class="ui">Replies</span>, pick Research, Job hunt, Buy or skip, Learn later, or Content ideas. The routine follows it on the next post.</p>
-  <div class="big-next"><a class="btn large" href="/try">Next: Try it</a></div>
+  <div class="big-next"><a class="btn large" href="/connect#grok">Next: Connect</a></div>
 </main>
 
 <footer><div class="wrap">

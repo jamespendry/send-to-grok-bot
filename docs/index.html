@@ -4,11 +4,11 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Send to Grok Bot</title>
-<meta name="description" content="A free Chrome extension that adds a Send button to every post on x.com. One click sends the post to Grok Bot, Claude, ChatGPT, or Codex.">
+<meta name="description" content="Stop copying X posts into your AI. One click sends the post, the thread, and the context to Grok Bot, Claude, ChatGPT, or Codex.">
 <meta name="theme-color" content="#ffffff" media="(prefers-color-scheme: light)">
 <meta name="theme-color" content="#000000" media="(prefers-color-scheme: dark)">
 <meta property="og:title" content="Send to Grok Bot">
-<meta property="og:description" content="A free Chrome extension that adds a Send button to every post on x.com. One click sends the post to Grok Bot, Claude, ChatGPT, or Codex.">
+<meta property="og:description" content="Stop copying X posts into your AI. One click sends the post, the thread, and the context to Grok Bot, Claude, ChatGPT, or Codex.">
 <meta property="og:image" content="https://sendtogrokbot.com/assets/promo/marquee-1400x560.png">
 <meta name="twitter:card" content="summary_large_image">
 <link rel="icon" href="/assets/icons/icon32.png" sizes="32x32">
@@ -29,12 +29,13 @@
   <div class="hero">
     <div>
       <h1>Send any X post to your AI in one click.</h1>
-      <p class="lede">Adds a Send button to every post on x.com. Get a useful reply from Grok Bot, Claude, ChatGPT, or Codex.</p>
-      <div class="actions">
-        <a class="btn large" href="/install">Get started</a>
+      <p class="lede">Copy the link, open the app, paste, explain what you want. Every time, for every bot. Now it's one click: your AI gets the post, the thread, and the context, and replies.</p>
+      <div class="actions hero-ctas">
+        <a class="btn large chrome" href="/install">Set up on Chrome <span class="rec">Recommended</span></a>
+        <a class="btn large secondary iphone" href="/mobile">Set up on iPhone</a>
       </div>
-      <p class="fine" style="margin-top:8px">On an iPhone? <a href="/mobile">Use the share sheet</a>.</p>
-      <p class="fine">Free. About 3 minutes. Works with Chrome on a computer.</p>
+      <p class="fine" style="margin-top:14px">Chrome is the full experience: replies arrive on their own. On iPhone, your AI opens with the post filled in.</p>
+      <p class="fine">Free. For Chrome and iPhone. Firefox coming soon.</p>
     </div>
 
     <div class="post" aria-label="An X post with the Send menu open">
@@ -74,32 +75,26 @@
   <div class="wrap">
     <div class="section-head">
       <h2>Send it where you already ask questions</h2>
-      <p>Pick one or all four. Each one shows up in the Send menu on every post.</p>
+      <p>Pick one or all three. Each one shows up in the Send menu on every post.</p>
     </div>
-    <div class="cards">
+    <div class="cards three">
       <a class="card" href="/setup/grok">
         <span class="logo grokbot"><svg><use href="/assets/logos.svg#grokbot"/></svg></span>
-        <h3>Grok Bot</h3>
-        <p>Send Grok Bot one line. It sets itself up.</p>
+        <h3>Grok Bot <span class="tag easy">Automatic</span></h3>
+        <p>Replies on its own, in your Grok Bot chat.</p>
         <span class="go">Set up Grok Bot</span>
       </a>
       <a class="card" href="/setup/claude">
         <span class="logo claude"><svg><use href="/assets/logos.svg#claude"/></svg></span>
-        <h3>Claude</h3>
-        <p>Claude replies on its own, or opens in a tab.</p>
+        <h3>Claude <span class="tag">One tap</span></h3>
+        <p>Opens a Claude chat with the post ready. Or turn on automatic replies.</p>
         <span class="go">Set up Claude</span>
       </a>
       <a class="card" href="/setup/chatgpt">
         <span class="logo chatgpt"><svg><use href="/assets/logos.svg#chatgpt"/></svg></span>
-        <h3>ChatGPT <span class="tag">No setup</span></h3>
-        <p>Opens ChatGPT with the post and the prompt already filled in.</p>
-        <span class="go">How it works</span>
-      </a>
-      <a class="card" href="/setup/codex">
-        <span class="logo codex"><svg><use href="/assets/logos.svg#codex"/></svg></span>
-        <h3>Codex <span class="tag">No setup</span></h3>
-        <p>Opens a Codex task with the post filled in. Good for repos and tools.</p>
-        <span class="go">How it works</span>
+        <h3>ChatGPT <span class="tag">One tap</span></h3>
+        <p>Opens a ChatGPT chat with the post ready. Code and repos can go to Codex instead.</p>
+        <span class="go">Set up ChatGPT</span>
       </a>
     </div>
   </div>
@@ -108,7 +103,7 @@
 <section>
   <div class="wrap">
     <div class="section-head">
-      <h2>Four steps, about three minutes</h2>
+      <h2>Four steps, once</h2>
       <p>The same steps you'll see when you click Get started.</p>
     </div>
     <div class="how four">
@@ -128,8 +123,8 @@
         <h2>A reply that fits the post</h2>
         <p>Every reply starts with a one-line takeaway. Then it answers the question you would have asked.</p>
       </div>
-      <p class="muted">Pick a style in the extension settings. General is the default.</p>
-      <div class="chips reply-chips"><span class="chip">General</span><span class="chip">Research</span><span class="chip">Job hunt</span><span class="chip">Buy or skip</span><span class="chip">Learn later</span><span class="chip">Content ideas</span></div>
+      <p class="muted">Pick a style in the extension settings, or write your own instructions. General is the default.</p>
+      <div class="chips reply-chips"><span class="chip">General</span><span class="chip">Research</span><span class="chip">Job hunt</span><span class="chip">Buy or skip</span><span class="chip">Learn later</span><span class="chip">Content ideas</span><span class="chip">Your own</span></div>
     </div>
     <div class="rows">
       <div class="row"><div class="text"><b>A tool or app</b><span>What it does, whether it is worth installing, and how to try it.</span></div></div>
@@ -142,16 +137,11 @@
 </section>
 
 <section>
-  <div class="wrap grid2">
+  <div class="wrap">
     <div class="section-head">
       <h2>Private by design</h2>
       <p>Only the post you click is sent, and only to the AI you pick. Keys stay in your browser. No analytics, no tracking, nothing sold.</p>
       <p style="margin-top:12px"><a href="/privacy">Read the privacy policy</a></p>
-    </div>
-    <div class="section-head">
-      <h2>On iPhone too</h2>
-      <p>Share a post from the X app to Grok Bot, Claude, or ChatGPT. One tap to install.</p>
-      <p style="margin-top:12px"><a href="/mobile">Set up iPhone</a></p>
     </div>
   </div>
 </section>
