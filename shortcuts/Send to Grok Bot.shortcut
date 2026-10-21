@@ -10,7 +10,7 @@
 			<key>WFWorkflowActionParameters</key>
 			<dict>
 				<key>GroupingIdentifier</key>
-				<string>33946AA0-A028-447B-93B8-5A20D54FFB78</string>
+				<string>B86417CD-B90F-4F7D-BC7C-0EACA936EFEB</string>
 				<key>WFControlFlowMode</key>
 				<integer>0</integer>
 				<key>WFMenuItems</key>
@@ -29,7 +29,7 @@
 			<key>WFWorkflowActionParameters</key>
 			<dict>
 				<key>GroupingIdentifier</key>
-				<string>33946AA0-A028-447B-93B8-5A20D54FFB78</string>
+				<string>B86417CD-B90F-4F7D-BC7C-0EACA936EFEB</string>
 				<key>WFControlFlowMode</key>
 				<integer>1</integer>
 				<key>WFMenuItemTitle</key>
@@ -44,7 +44,7 @@
 				<key>ShowHeaders</key>
 				<false/>
 				<key>UUID</key>
-				<string>45F56A95-C9FD-4C5E-A246-4F49EE1CE2A6</string>
+				<string>4A856E01-BA34-444C-AD83-8B24CA50F027</string>
 				<key>WFHTTPBodyType</key>
 				<string>JSON</string>
 				<key>WFHTTPMethod</key>
@@ -170,32 +170,24 @@
 		</dict>
 		<dict>
 			<key>WFWorkflowActionIdentifier</key>
-			<string>is.workflow.actions.gettext</string>
+			<string>is.workflow.actions.detect.text</string>
 			<key>WFWorkflowActionParameters</key>
 			<dict>
 				<key>UUID</key>
-				<string>48AD0643-4378-45BB-A183-1E56CCFEB356</string>
-				<key>WFTextActionText</key>
+				<string>28FB81F4-532F-490B-93B7-A179FDB73A62</string>
+				<key>WFInput</key>
 				<dict>
 					<key>Value</key>
 					<dict>
-						<key>attachmentsByRange</key>
-						<dict>
-							<key>{0, 1}</key>
-							<dict>
-								<key>OutputName</key>
-								<string>Contents of URL</string>
-								<key>OutputUUID</key>
-								<string>45F56A95-C9FD-4C5E-A246-4F49EE1CE2A6</string>
-								<key>Type</key>
-								<string>ActionOutput</string>
-							</dict>
-						</dict>
-						<key>string</key>
-						<string>￼</string>
+						<key>OutputName</key>
+						<string>Contents of URL</string>
+						<key>OutputUUID</key>
+						<string>4A856E01-BA34-444C-AD83-8B24CA50F027</string>
+						<key>Type</key>
+						<string>ActionOutput</string>
 					</dict>
 					<key>WFSerializationType</key>
-					<string>WFTextTokenString</string>
+					<string>WFTextTokenAttachment</string>
 				</dict>
 			</dict>
 		</dict>
@@ -211,7 +203,7 @@
 						<key>OutputName</key>
 						<string>Text</string>
 						<key>OutputUUID</key>
-						<string>48AD0643-4378-45BB-A183-1E56CCFEB356</string>
+						<string>28FB81F4-532F-490B-93B7-A179FDB73A62</string>
 						<key>Type</key>
 						<string>ActionOutput</string>
 					</dict>
@@ -232,7 +224,7 @@
 						<key>OutputName</key>
 						<string>Text</string>
 						<key>OutputUUID</key>
-						<string>48AD0643-4378-45BB-A183-1E56CCFEB356</string>
+						<string>28FB81F4-532F-490B-93B7-A179FDB73A62</string>
 						<key>Type</key>
 						<string>ActionOutput</string>
 					</dict>
@@ -247,7 +239,7 @@
 			<key>WFWorkflowActionParameters</key>
 			<dict>
 				<key>GroupingIdentifier</key>
-				<string>33946AA0-A028-447B-93B8-5A20D54FFB78</string>
+				<string>B86417CD-B90F-4F7D-BC7C-0EACA936EFEB</string>
 				<key>WFControlFlowMode</key>
 				<integer>1</integer>
 				<key>WFMenuItemTitle</key>
@@ -262,7 +254,7 @@
 				<key>ShowHeaders</key>
 				<false/>
 				<key>UUID</key>
-				<string>DE984EB9-2656-4F2E-9882-D8422DF5A53B</string>
+				<string>F8F25E24-34BB-4C0F-8B93-358EDFB0E2A4</string>
 				<key>WFHTTPBodyType</key>
 				<string>JSON</string>
 				<key>WFHTTPMethod</key>
@@ -398,7 +390,7 @@
 						<key>OutputName</key>
 						<string>Contents of URL</string>
 						<key>OutputUUID</key>
-						<string>DE984EB9-2656-4F2E-9882-D8422DF5A53B</string>
+						<string>F8F25E24-34BB-4C0F-8B93-358EDFB0E2A4</string>
 						<key>Type</key>
 						<string>ActionOutput</string>
 					</dict>
@@ -413,7 +405,7 @@
 			<key>WFWorkflowActionParameters</key>
 			<dict>
 				<key>GroupingIdentifier</key>
-				<string>33946AA0-A028-447B-93B8-5A20D54FFB78</string>
+				<string>B86417CD-B90F-4F7D-BC7C-0EACA936EFEB</string>
 				<key>WFControlFlowMode</key>
 				<integer>1</integer>
 				<key>WFMenuItemTitle</key>
@@ -428,7 +420,7 @@
 				<key>ShowHeaders</key>
 				<false/>
 				<key>UUID</key>
-				<string>645B855F-FF60-487E-8EC5-6317DE04DB3E</string>
+				<string>A70BDC8C-C7A7-4D9E-BA27-1E8CB325E4B1</string>
 				<key>WFHTTPBodyType</key>
 				<string>JSON</string>
 				<key>WFHTTPMethod</key>
@@ -564,7 +556,7 @@
 						<key>OutputName</key>
 						<string>Contents of URL</string>
 						<key>OutputUUID</key>
-						<string>645B855F-FF60-487E-8EC5-6317DE04DB3E</string>
+						<string>A70BDC8C-C7A7-4D9E-BA27-1E8CB325E4B1</string>
 						<key>Type</key>
 						<string>ActionOutput</string>
 					</dict>
@@ -579,7 +571,7 @@
 			<key>WFWorkflowActionParameters</key>
 			<dict>
 				<key>GroupingIdentifier</key>
-				<string>33946AA0-A028-447B-93B8-5A20D54FFB78</string>
+				<string>B86417CD-B90F-4F7D-BC7C-0EACA936EFEB</string>
 				<key>WFControlFlowMode</key>
 				<integer>2</integer>
 			</dict>

@@ -81,9 +81,9 @@ def send_steps(dest):
         # Its documented route is the share sheet: Grok Bot, pick a chat, Attach. The message
         # is also copied, as a fallback if the person picks a different app.
         get = ask_relay(dest, "copy")
-        # The relay's answer arrives as a file named "open". Turn it into plain text first,
+        # The relay's answer arrives as a file named "open". Get Text from Input turns it into plain text,
         # or the share sheet offers a "Text Document" that Grok Bot does not accept.
-        msg = with_uuid(act("gettext", WFTextActionText=text_of(get, "Contents of URL")))
+        msg = with_uuid(act("detect.text", WFInput=output_of(get, "Contents of URL")))
         return [get, msg,
                 act("setclipboard", WFInput=output_of(msg, "Text")),
                 act("share", WFInput=output_of(msg, "Text"))]
