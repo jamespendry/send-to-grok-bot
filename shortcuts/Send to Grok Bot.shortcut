@@ -10,7 +10,7 @@
 			<key>WFWorkflowActionParameters</key>
 			<dict>
 				<key>GroupingIdentifier</key>
-				<string>3EE63A84-3570-475E-88CE-94A5FEDB86EE</string>
+				<string>30C43AB4-500E-4DB8-831D-6701695CA190</string>
 				<key>WFControlFlowMode</key>
 				<integer>0</integer>
 				<key>WFMenuItems</key>
@@ -29,7 +29,7 @@
 			<key>WFWorkflowActionParameters</key>
 			<dict>
 				<key>GroupingIdentifier</key>
-				<string>3EE63A84-3570-475E-88CE-94A5FEDB86EE</string>
+				<string>30C43AB4-500E-4DB8-831D-6701695CA190</string>
 				<key>WFControlFlowMode</key>
 				<integer>1</integer>
 				<key>WFMenuItemTitle</key>
@@ -44,7 +44,7 @@
 				<key>ShowHeaders</key>
 				<false/>
 				<key>UUID</key>
-				<string>FFA7A768-951B-44CD-8664-71B0E88F1130</string>
+				<string>D29F7E71-E578-44FD-AE2C-D8D212A2C9FE</string>
 				<key>WFHTTPBodyType</key>
 				<string>JSON</string>
 				<key>WFHTTPMethod</key>
@@ -180,7 +180,7 @@
 						<key>OutputName</key>
 						<string>Contents of URL</string>
 						<key>OutputUUID</key>
-						<string>FFA7A768-951B-44CD-8664-71B0E88F1130</string>
+						<string>D29F7E71-E578-44FD-AE2C-D8D212A2C9FE</string>
 						<key>Type</key>
 						<string>ActionOutput</string>
 					</dict>
@@ -191,29 +191,7 @@
 		</dict>
 		<dict>
 			<key>WFWorkflowActionIdentifier</key>
-			<string>is.workflow.actions.notification</string>
-			<key>WFWorkflowActionParameters</key>
-			<dict>
-				<key>WFNotificationActionBody</key>
-				<string>Copied. In Grok Bot, tap the message box, then Paste.</string>
-				<key>WFNotificationActionTitle</key>
-				<string>Send to Grok Bot</string>
-			</dict>
-		</dict>
-		<dict>
-			<key>WFWorkflowActionIdentifier</key>
-			<string>is.workflow.actions.gettext</string>
-			<key>WFWorkflowActionParameters</key>
-			<dict>
-				<key>UUID</key>
-				<string>61B72285-7CBF-4C30-A363-87081CA9D2E2</string>
-				<key>WFTextActionText</key>
-				<string>grokbot://</string>
-			</dict>
-		</dict>
-		<dict>
-			<key>WFWorkflowActionIdentifier</key>
-			<string>is.workflow.actions.openurl</string>
+			<string>is.workflow.actions.share</string>
 			<key>WFWorkflowActionParameters</key>
 			<dict>
 				<key>WFInput</key>
@@ -221,9 +199,9 @@
 					<key>Value</key>
 					<dict>
 						<key>OutputName</key>
-						<string>Text</string>
+						<string>Contents of URL</string>
 						<key>OutputUUID</key>
-						<string>61B72285-7CBF-4C30-A363-87081CA9D2E2</string>
+						<string>D29F7E71-E578-44FD-AE2C-D8D212A2C9FE</string>
 						<key>Type</key>
 						<string>ActionOutput</string>
 					</dict>
@@ -238,7 +216,7 @@
 			<key>WFWorkflowActionParameters</key>
 			<dict>
 				<key>GroupingIdentifier</key>
-				<string>3EE63A84-3570-475E-88CE-94A5FEDB86EE</string>
+				<string>30C43AB4-500E-4DB8-831D-6701695CA190</string>
 				<key>WFControlFlowMode</key>
 				<integer>1</integer>
 				<key>WFMenuItemTitle</key>
@@ -253,7 +231,7 @@
 				<key>ShowHeaders</key>
 				<false/>
 				<key>UUID</key>
-				<string>B4CD409E-D142-42CA-8345-12F7A2DCBBEA</string>
+				<string>B079E44D-90FA-47D4-B767-7787DE72CA48</string>
 				<key>WFHTTPBodyType</key>
 				<string>JSON</string>
 				<key>WFHTTPMethod</key>
@@ -389,7 +367,7 @@
 						<key>OutputName</key>
 						<string>Contents of URL</string>
 						<key>OutputUUID</key>
-						<string>B4CD409E-D142-42CA-8345-12F7A2DCBBEA</string>
+						<string>B079E44D-90FA-47D4-B767-7787DE72CA48</string>
 						<key>Type</key>
 						<string>ActionOutput</string>
 					</dict>
@@ -404,7 +382,7 @@
 			<key>WFWorkflowActionParameters</key>
 			<dict>
 				<key>GroupingIdentifier</key>
-				<string>3EE63A84-3570-475E-88CE-94A5FEDB86EE</string>
+				<string>30C43AB4-500E-4DB8-831D-6701695CA190</string>
 				<key>WFControlFlowMode</key>
 				<integer>1</integer>
 				<key>WFMenuItemTitle</key>
@@ -419,7 +397,7 @@
 				<key>ShowHeaders</key>
 				<false/>
 				<key>UUID</key>
-				<string>9689BB9A-78BE-4DB4-89BB-B5C3C9D627C5</string>
+				<string>712DEF60-9F0B-4AC7-9B20-2824F5E18CBB</string>
 				<key>WFHTTPBodyType</key>
 				<string>JSON</string>
 				<key>WFHTTPMethod</key>
@@ -555,7 +533,7 @@
 						<key>OutputName</key>
 						<string>Contents of URL</string>
 						<key>OutputUUID</key>
-						<string>9689BB9A-78BE-4DB4-89BB-B5C3C9D627C5</string>
+						<string>712DEF60-9F0B-4AC7-9B20-2824F5E18CBB</string>
 						<key>Type</key>
 						<string>ActionOutput</string>
 					</dict>
@@ -570,7 +548,7 @@
 			<key>WFWorkflowActionParameters</key>
 			<dict>
 				<key>GroupingIdentifier</key>
-				<string>3EE63A84-3570-475E-88CE-94A5FEDB86EE</string>
+				<string>30C43AB4-500E-4DB8-831D-6701695CA190</string>
 				<key>WFControlFlowMode</key>
 				<integer>2</integer>
 			</dict>

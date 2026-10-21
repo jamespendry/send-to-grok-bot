@@ -573,6 +573,7 @@ print(json.dumps({
     "keys": [p.get("WFDictionaryKey") for p in params("getvalueforkey")],
     "setvars": len(params("setvariable")),
     "opens": [p.get("WFInput", {}).get("Value", {}).get("Type") for p in params("openurl")],
+    "shares": [p.get("WFInput", {}).get("Value", {}).get("Type") for p in params("share")],
     "formats": [i["WFValue"]["Value"]["string"] for p in params("downloadurl") for i in p["WFJSONValues"]["Value"]["WFDictionaryFieldValueItems"] if i["WFKey"]["Value"]["string"] == "format"],
 }))
 `, filePath], { encoding: "utf8" }));
@@ -592,9 +593,12 @@ print(json.dumps({
   // iOS left unwired variables empty, so every input names an earlier action's output.
   assert.deepEqual(parsed.keys, []);
   assert.equal(parsed.setvars, 0);
-  assert.deepEqual(parsed.opens, ["ActionOutput", "ActionOutput", "ActionOutput"]);
+  assert.deepEqual(parsed.opens, ["ActionOutput", "ActionOutput"]);
+  // Grok Bot has no documented link into a chat, so it goes through its share sheet.
+  assert.deepEqual(parsed.shares, ["ActionOutput"]);
+  assert.ok(!parsed.texts.includes("grokbot://"));
   assert.deepEqual(parsed.formats, ["copy", "text", "text"]);
-  for (const step of ["setclipboard", "notification", "openurl"]) assert.ok(parsed.actions.includes(step), step);
+  for (const step of ["setclipboard", "share", "openurl"]) assert.ok(parsed.actions.includes(step), step);
   const steps = read("../shortcuts/BUILD.md");
   assert.match(steps, /shortcuts sign --mode anyone/);
   assert.match(steps, /build\.py/);

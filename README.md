@@ -180,7 +180,7 @@ It now sits in Favorites, near the top of the list, every time you share.
 ### Read the reply
 
 - **Claude and ChatGPT** open with the post already filled in. If the message waits, press Send.
-- **Grok Bot:** the message is copied for you and Grok Bot opens. Tap the message box, tap Paste, and send.
+- **Grok Bot:** a share sheet opens. Tap Grok Bot, pick a chat, then tap Attach and send. The message is also copied, so you can paste it anywhere.
 
 ## Privacy
 

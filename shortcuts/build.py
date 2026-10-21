@@ -5,7 +5,7 @@
 # The shortcut needs no code. It sends the shared post link and the chosen AI to
 # relay.sendtogrokbot.com/v1/open, which answers in plain text with a link that
 # opens that AI with the post filled in. For Grok Bot it answers with the message
-# to paste; the shortcut copies it and opens the app.
+# to send; the shortcut opens the share sheet so the person picks Grok Bot and a chat.
 import plistlib, uuid
 from pathlib import Path
 
@@ -72,13 +72,13 @@ def ask_relay(dest, fmt):
 def send_steps(dest):
     # No If blocks, no variables, no link check. The relay finds the post link in whatever the X app shared.
     if dest == "grokbot":
+        # Grok Bot has no documented link into a chat (grokbot:// only opens its home screen).
+        # Its documented route is the share sheet: Grok Bot, pick a chat, Attach. The message
+        # is also copied, as a fallback if the person picks a different app.
         get = ask_relay(dest, "copy")
-        link = with_uuid(act("gettext", WFTextActionText="grokbot://"))
         return [get,
                 act("setclipboard", WFInput=output_of(get, "Contents of URL")),
-                act("notification", WFNotificationActionTitle="Send to Grok Bot", WFNotificationActionBody="Copied. In Grok Bot, tap the message box, then Paste."),
-                link,
-                act("openurl", WFInput=output_of(link, "Text"))]
+                act("share", WFInput=output_of(get, "Contents of URL"))]
     get = ask_relay(dest, "text")
     return [get, act("openurl", WFInput=output_of(get, "Contents of URL"))]
 
