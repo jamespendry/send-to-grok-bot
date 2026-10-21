@@ -11,6 +11,29 @@
 
   // On an iPhone, the iPhone button comes first; Chrome keeps its Recommended label.
   if (/iPhone|iPad|iPod/.test(navigator.userAgent)) document.documentElement.classList.add('ios');
+  // Copies inside the tap itself. iPhone Safari can refuse navigator.clipboard and leave the
+  // old clipboard in place, so the selected-text copy runs first, while the tap still counts.
+  function copyNow(text) {
+    var ta = document.createElement('textarea');
+    ta.value = text;
+    ta.setAttribute('readonly', '');
+    ta.style.cssText = 'position:fixed;top:0;left:0;width:1px;height:1px;opacity:0;font-size:16px';
+    document.body.appendChild(ta);
+    var range = document.createRange();
+    range.selectNodeContents(ta);
+    var sel = window.getSelection();
+    sel.removeAllRanges();
+    sel.addRange(range);
+    ta.setSelectionRange(0, text.length);
+    var ok = false;
+    try { ok = document.execCommand('copy'); } catch (e) { ok = false; }
+    sel.removeAllRanges();
+    ta.remove();
+    if (ok) return Promise.resolve();
+    if (navigator.clipboard && navigator.clipboard.writeText) return navigator.clipboard.writeText(text);
+    return Promise.reject(new Error('copy'));
+  }
+  window.stgbCopy = copyNow;
   // <button data-copy="#id"> copies the text of #id. data-copy-text copies a literal.
   document.addEventListener('click', function (event) {
     var btn = event.target.closest && event.target.closest('[data-copy], [data-copy-text]');
@@ -27,11 +50,7 @@
       clearTimeout(btn._t);
       btn._t = setTimeout(function () { btn.textContent = label; }, 1600);
     }
-    if (navigator.clipboard && navigator.clipboard.writeText) {
-      navigator.clipboard.writeText(text).then(function () { show('Copied'); }, function () { show('Select and copy'); });
-    } else {
-      show('Select and copy');
-    }
+    copyNow(text).then(function () { show('Copied'); }, function () { show('Select and copy'); });
   });
   // The relay page's QR code opens /mobile#code=stgbr1.... Show that code ready to copy.
   // The #fragment never reaches a server, and it is removed from the address bar here.

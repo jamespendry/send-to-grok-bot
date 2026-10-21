@@ -60,11 +60,12 @@
         <p class="muted">If a file downloads instead, open this page in Safari and tap Install again. Installed an older version? Delete it in the Shortcuts app first, so you don't end up with "Send to Grok Bot (1)".</p>
       </li>
       <li data-for="grokbot">
-        <div class="actions" style="margin:0 0 12px">
-          <button type="button" class="btn" data-copy-text="Set up Send to Grok Bot for me: https://github.com/jamespendry/send-to-grok-bot">Copy setup message</button>
-          <a class="btn secondary" href="grokbot://">Open Grok Bot</a>
+        <div class="copy" style="margin:0 0 12px">
+          <span class="val" id="grokline">Set up Send to Grok Bot for me: https://github.com/jamespendry/send-to-grok-bot</span>
+          <button type="button" data-copy="#grokline">Copy</button>
         </div>
-        <p>Paste the message into any Grok Bot chat and send it. Grok Bot makes a routine named <span class="ui">Send to Grok Bot</span>.</p>
+        <div class="actions" style="margin:0 0 12px"><a class="btn secondary" href="grokbot://">Open Grok Bot</a></div>
+        <p>Copy the message, open Grok Bot, then paste it into any chat and send it. Grok Bot makes a routine named <span class="ui">Send to Grok Bot</span>.</p>
         <p class="muted">Already have that routine, for example from the Chrome extension? Skip this step.</p>
       </li>
       <li data-for="grokbot">
@@ -219,8 +220,7 @@
       location.href = 'shortcuts://run-shortcut?name=' + encodeURIComponent('Send to Grok Bot') + '&input=clipboard';
       note.textContent = "Didn't see Connected to Grok Bot? Tap Finish again.";
     };
-    if (!navigator.clipboard || !navigator.clipboard.writeText) { say('Safari could not copy. Open this page in Safari and try again.'); return; }
-    navigator.clipboard.writeText(code).then(run, function () { say('Safari could not copy. Tap Finish again.'); });
+    window.stgbCopy(code).then(run, function () { say('Safari could not copy. Tap Finish again.'); });
   });
 })();
 </script>
