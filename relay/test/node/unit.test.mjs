@@ -543,12 +543,13 @@ test("one ready destination is sent on the click, and two destinations stay a me
   assert.match(read("../extension/content.js"), /showToast\(brand, title, ''\);\n\s*setState\(btn, 'ok'/);
 });
 
-test("the share sheet shortcut needs no code and opens the AI through /v1/open", () => {
+test("the shortcut sends in the background with a code and opens the AI without one", () => {
   const filePath = join(root, "../shortcuts/Send to Grok Bot.shortcut");
   const file = readFileSync(filePath, "utf8");
   assert.match(file, /^<\?xml version="1\.0"/);
   assert.doesNotMatch(file, /rk_[A-Za-z0-9_-]{20}/);
-  assert.doesNotMatch(file, /stgbr1|Authorization|Bearer/);
+  // It ships with no code in it; the person pastes their own when adding it.
+  assert.doesNotMatch(file, /stgbr1\.[A-Za-z0-9_-]{8}/);
   const parsed = JSON.parse(execFileSync("python3", ["-c", `
 import json, plistlib, sys
 pl = plistlib.loads(open(sys.argv[1], "rb").read())
@@ -557,7 +558,7 @@ def ident(a):
     return a.get("WFWorkflowActionIdentifier", "").rsplit(".", 1)[-1]
 def params(name):
     return [a["WFWorkflowActionParameters"] for a in actions if ident(a) == name]
-post = params("downloadurl")[0]
+posts = params("downloadurl")
 menu = [p for p in params("choosefrommenu") if p.get("WFControlFlowMode") == 0][0]
 print(json.dumps({
     "name": pl.get("WFWorkflowName"),
@@ -567,9 +568,11 @@ print(json.dumps({
     "actions": [ident(a) for a in actions],
     "texts": [p.get("WFTextActionText") for p in params("gettext")],
     "menu": menu.get("WFMenuItems"),
-    "url": post.get("WFURL"),
-    "method": post.get("WFHTTPMethod"),
-    "bodyType": post.get("WFHTTPBodyType"),
+    "urls": [p.get("WFURL") for p in posts],
+    "methods": sorted(set(p.get("WFHTTPMethod") for p in posts)),
+    "bodyTypes": sorted(set(p.get("WFHTTPBodyType") for p in posts)),
+    "auth": posts[0].get("WFHTTPHeaders", {}).get("Value", {}).get("WFDictionaryFieldValueItems", [{}])[0].get("WFValue", {}).get("Value", {}).get("attachmentsByRange", {}).get("{7, 1}", {}).get("Type"),
+    "condition": [(p.get("WFCondition"), p.get("WFConditionalActionString")) for p in params("conditional") if p.get("WFControlFlowMode") == 0],
     "keys": [p.get("WFDictionaryKey") for p in params("getvalueforkey")],
     "setvars": len(params("setvariable")),
     "opens": [p.get("WFInput", {}).get("Value", {}).get("Type") for p in params("openurl")],
@@ -580,25 +583,29 @@ print(json.dumps({
   assert.equal(parsed.name, "Send to Grok Bot");
   assert.deepEqual(parsed.types, ["ActionExtension"]);
   for (const kind of ["WFURLContentItem", "WFStringContentItem", "WFSafariWebPageContentItem"]) assert.ok(parsed.inputs.includes(kind), kind);
-  // An import question left blank broke every run ("Please choose a value for each parameter").
-  assert.deepEqual(parsed.questions, []);
-  // No link check and no If blocks: the X app's share did not pass one, so the relay finds the link.
-  assert.equal(parsed.actions[0], "choosefrommenu");
-  assert.ok(!parsed.actions.includes("conditional"));
+  // One import question fills the code. A blank one broke every run, so it defaults to "none".
+  assert.equal(parsed.questions.length, 1);
+  assert.equal(parsed.questions[0].ActionIndex, 0);
+  assert.equal(parsed.questions[0].DefaultValue, "none");
+  assert.equal(parsed.actions[0], "gettext");
+  assert.equal(parsed.texts[0].Value.string, "none");
+  assert.deepEqual(parsed.condition, [[99, "stgbr1."]]);
+  assert.equal(parsed.auth, "ActionOutput");
+  // No link check: the X app's share did not pass one, so the relay finds the link.
   assert.ok(!parsed.actions.includes("link"));
   assert.deepEqual(parsed.menu, ["Grok Bot", "Claude", "ChatGPT"]);
-  assert.equal(parsed.url, "https://relay.sendtogrokbot.com/v1/open");
-  assert.equal(parsed.method, "POST");
-  assert.equal(parsed.bodyType, "JSON");
+  assert.deepEqual(parsed.urls, ["https://relay.sendtogrokbot.com/v1/send", "https://relay.sendtogrokbot.com/v1/open", "https://relay.sendtogrokbot.com/v1/open", "https://relay.sendtogrokbot.com/v1/open"]);
+  assert.deepEqual(parsed.methods, ["POST"]);
+  assert.deepEqual(parsed.bodyTypes, ["JSON"]);
   // iOS left unwired variables empty, so every input names an earlier action's output.
   assert.deepEqual(parsed.keys, []);
   assert.equal(parsed.setvars, 0);
-  assert.deepEqual(parsed.opens, ["ActionOutput", "ActionOutput"]);
-  // Grok Bot has no documented link into a chat, so it goes through its share sheet.
-  assert.deepEqual(parsed.shares, ["ActionOutput"]);
-  assert.ok(!parsed.texts.includes("grokbot://"));
-  assert.deepEqual(parsed.formats, ["copy", "text", "text"]);
-  for (const step of ["setclipboard", "share", "openurl"]) assert.ok(parsed.actions.includes(step), step);
+  assert.deepEqual(parsed.opens, ["ActionOutput", "ActionOutput", "ActionOutput"]);
+  // The share sheet took too many taps, so without a code Grok Bot gets the message copied instead.
+  assert.deepEqual(parsed.shares, []);
+  assert.ok(parsed.texts.some(t => t.Value.string === "grokbot://"));
+  assert.deepEqual(parsed.formats, ["text", "copy", "text", "text"]);
+  for (const step of ["setclipboard", "notification", "openurl", "conditional"]) assert.ok(parsed.actions.includes(step), step);
   const steps = read("../shortcuts/BUILD.md");
   assert.match(steps, /shortcuts sign --mode anyone/);
   assert.match(steps, /build\.py/);
