@@ -543,7 +543,7 @@ test("one ready destination is sent on the click, and two destinations stay a me
   assert.match(read("../extension/content.js"), /showToast\(brand, title, ''\);\n\s*setState\(btn, 'ok'/);
 });
 
-test("the shortcut sends in the background with a code and opens the AI without one", () => {
+test("the shortcut saves the code from setup, sends in the background, and opens the AI without one", () => {
   const filePath = join(root, "../shortcuts/Send to Grok Bot.shortcut");
   const file = readFileSync(filePath, "utf8");
   assert.match(file, /^<\?xml version="1\.0"/);
@@ -572,6 +572,8 @@ print(json.dumps({
     "methods": sorted(set(p.get("WFHTTPMethod") for p in posts)),
     "bodyTypes": sorted(set(p.get("WFHTTPBodyType") for p in posts)),
     "auth": posts[0].get("WFHTTPHeaders", {}).get("Value", {}).get("WFDictionaryFieldValueItems", [{}])[0].get("WFValue", {}).get("Value", {}).get("attachmentsByRange", {}).get("{7, 1}", {}).get("Type"),
+    "saves": [(p.get("WFFileDestinationPath"), p.get("WFSaveFileOverwrite"), p.get("WFAskWhereToSave")) for p in params("save")],
+    "reads": [(p.get("WFGetFilePath"), p.get("WFFileErrorIfNotFound"), p.get("WFShowFilePicker")) for p in params("open")],
     "condition": [(p.get("WFCondition"), p.get("WFConditionalActionString")) for p in params("conditional") if p.get("WFControlFlowMode") == 0],
     "keys": [p.get("WFDictionaryKey") for p in params("getvalueforkey")],
     "setvars": len(params("setvariable")),
@@ -583,13 +585,12 @@ print(json.dumps({
   assert.equal(parsed.name, "Send to Grok Bot");
   assert.deepEqual(parsed.types, ["ActionExtension"]);
   for (const kind of ["WFURLContentItem", "WFStringContentItem", "WFSafariWebPageContentItem"]) assert.ok(parsed.inputs.includes(kind), kind);
-  // One import question fills the code. A blank one broke every run, so it defaults to "none".
-  assert.equal(parsed.questions.length, 1);
-  assert.equal(parsed.questions[0].ActionIndex, 0);
-  assert.equal(parsed.questions[0].DefaultValue, "none");
-  assert.equal(parsed.actions[0], "gettext");
-  assert.equal(parsed.texts[0].Value.string, "none");
-  assert.deepEqual(parsed.condition, [[99, "stgbr1."]]);
+  // No import question: a blank one broke every run. The setup page hands the code over instead.
+  assert.deepEqual(parsed.questions, []);
+  assert.equal(parsed.actions[0], "text");
+  assert.deepEqual(parsed.condition, [[99, "stgbr1."], [99, "stgbr1."]]);
+  assert.deepEqual(parsed.saves, [["Send to Grok Bot/connect-code.txt", true, false]]);
+  assert.deepEqual(parsed.reads, [["Send to Grok Bot/connect-code.txt", false, false]]);
   assert.equal(parsed.auth, "ActionOutput");
   // No link check: the X app's share did not pass one, so the relay finds the link.
   assert.ok(!parsed.actions.includes("link"));
@@ -722,6 +723,12 @@ test("the connect site is rooted at docs and hands the code to the extension", a
   assert.doesNotMatch(mobile, /icloud\.com\/shortcuts\/[0-9a-f]{8}/);
   assert.match(read("../scripts/build-site.sh"), /send-to-grok-bot\.shortcut/);
   assert.doesNotMatch(mobile, /rk_[A-Za-z0-9_-]{20}/);
+  // Setup stays on the iPhone: the page saves the webhook on the relay, then hands the code to the Shortcut.
+  assert.match(mobile, /RELAY \+ '\/v1\/config'/);
+  assert.match(mobile, /shortcuts:\/\/run-shortcut\?name=/);
+  assert.match(mobile, /&input=clipboard/);
+  assert.match(mobile, /Paste address/);
+  assert.match(mobile, /Paste key/);
   const history = read("../docs/history.html");
   assert.match(history, /https:\/\/relay\.sendtogrokbot\.com\/v1\/history/);
   assert.match(history, /Authorization/);

@@ -71,13 +71,18 @@ function tooMany(limited, extra = {}) {
   );
 }
 
+function withHeaders(res, extra) {
+  for (const [k, v] of Object.entries(extra)) res.headers.set(k, v);
+  return res;
+}
+
 function corsHeaders(request) {
   const origin = request.headers.get("Origin") || "";
   if (!SITE_ORIGINS.has(origin)) return {};
   return {
     "access-control-allow-origin": origin,
     vary: "Origin",
-    "access-control-allow-methods": "GET, OPTIONS",
+    "access-control-allow-methods": "GET, PUT, OPTIONS",
     "access-control-allow-headers": "Authorization, Content-Type",
     "access-control-max-age": "86400"
   };
@@ -492,7 +497,7 @@ export async function handle(request, env) {
   const url = new URL(request.url);
   const path = normalizePath(url.pathname);
   if (request.method === "OPTIONS") {
-    const extra = path === "/v1/history" ? corsHeaders(request) : {};
+    const extra = path === "/v1/history" || path === "/v1/config" ? corsHeaders(request) : {};
     return new Response(null, { status: 204, headers: { ...SECURITY, ...extra } });
   }
   if (path === "/" && request.method === "GET") {
@@ -510,14 +515,15 @@ export async function handle(request, env) {
   if (path === "/v1/open") return openPost(request, env);
   if (path !== "/v1/config" && path !== "/v1/send" && path !== "/v1/history") return json({ ok: false, error: "Nothing is here." }, 404);
   requireStorage(env);
-  const cors = path === "/v1/history" ? corsHeaders(request) : {};
+  // The site reads history and, from the iPhone setup page, saves the Grok Bot webhook.
+  const cors = path === "/v1/history" || path === "/v1/config" ? corsHeaders(request) : {};
   const ip = await takeToken(env.KV, await clientId(request, env), "ip", 300);
   if (!ip.ok) return tooMany(ip, cors);
   const who = await identify(request);
   if (who.error) return json({ ok: false, error: who.error }, who.status, cors);
   if (path === "/v1/history" && request.method === "GET") return getHistory(request, env, who, cors);
   if (path === "/v1/config" && request.method === "GET") return getConfig(request, env, who);
-  if (path === "/v1/config" && request.method === "PUT") return putConfig(request, env, who);
+  if (path === "/v1/config" && request.method === "PUT") return withHeaders(await putConfig(request, env, who), cors);
   if (path === "/v1/send" && request.method === "POST") return send(request, env, who);
   const allow = path === "/v1/send" ? "POST" : path === "/v1/history" ? "GET" : "GET, PUT";
   return json({ ok: false, error: "That method is not allowed." }, 405, { ...cors, allow });
@@ -539,7 +545,8 @@ export default {
       catch { /* ignore */ }
       let extra = {};
       try {
-        if (normalizePath(new URL(request.url).pathname) === "/v1/history") extra = corsHeaders(request);
+        const failed = normalizePath(new URL(request.url).pathname);
+        if (failed === "/v1/history" || failed === "/v1/config") extra = corsHeaders(request);
       } catch { /* ignore */ }
       return json({ ok: false, error }, 500, extra);
     }
