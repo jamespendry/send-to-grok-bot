@@ -727,8 +727,10 @@ test("the connect site is rooted at docs and hands the code to the extension", a
   assert.match(mobile, /RELAY \+ '\/v1\/config'/);
   assert.match(mobile, /shortcuts:\/\/run-shortcut\?name=/);
   assert.match(mobile, /&input=clipboard/);
-  assert.match(mobile, /Paste address/);
-  assert.match(mobile, /Paste key/);
+  // People pick their AI first; a single paste box takes the URL and the Header in either order.
+  assert.match(mobile, /data-pick="grokbot"/);
+  assert.match(mobile, /data-pick="claude"/);
+  assert.match(mobile, /id="pastebox"/);
   const history = read("../docs/history.html");
   assert.match(history, /https:\/\/relay\.sendtogrokbot\.com\/v1\/history/);
   assert.match(history, /Authorization/);

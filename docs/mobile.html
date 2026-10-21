@@ -27,80 +27,127 @@
 
 <main class="narrow page">
   <h1>Set up on iPhone</h1>
-  <p class="intro" style="margin-top:12px">Send any post from the X app to Grok Bot without leaving X. Do this once, here in Safari on your iPhone.</p>
+  <p class="intro" style="margin-top:12px">Send posts from the X app to your AI. Do this once, here in Safari on your iPhone.</p>
 
-  <ol class="steps num">
-    <li>
-      <div class="actions" style="margin:0 0 12px" id="install-link"><a class="btn large" href="https://sendtogrokbot.com/send-to-grok-bot.shortcut">Install Send to Grok Bot</a></div>
-      <p>When Shortcuts opens, tap <span class="ui">Add Shortcut</span>, then come back here.</p>
-      <p class="muted">If a file downloads instead, open this page in Safari and tap Install again. Installed an older version? Delete it in the Shortcuts app first, so you don't end up with "Send to Grok Bot (1)".</p>
-    </li>
-    <li>
-      <div class="actions" style="margin:0 0 12px">
-        <button type="button" class="btn" data-copy="#grokline">Copy setup message</button>
-        <a class="btn secondary" href="grokbot://">Open Grok Bot</a>
-      </div>
-      <span id="grokline" hidden>Set up Send to Grok Bot for me: https://github.com/jamespendry/send-to-grok-bot</span>
-      <p>Paste the message into any Grok Bot chat and send it. Grok Bot makes a routine named <span class="ui">Send to Grok Bot</span>.</p>
-      <p class="muted">Already have that routine, for example from the Chrome extension? Skip this step.</p>
-    </li>
-    <li>
-      <h2>Connect your routine</h2>
-      <p>In Grok Bot, tap <span class="ui">Grok Bot</span> at the top of the chat, then <span class="ui">Routines</span>, then <span class="ui">Send to Grok Bot</span>. Scroll to <span class="ui">Webhook</span>.</p>
-      <div class="pair" id="pair-url">
-        <p>Tap the <span class="ui">URL</span> row to copy it. Come back and tap:</p>
-        <button type="button" class="btn" id="paste-url">Paste address</button>
-        <input type="text" id="box-url" hidden autocomplete="off" autocapitalize="off" spellcheck="false" placeholder="Hold here, then tap Paste">
-        <span class="got" id="got-url" hidden>Address added</span>
-      </div>
-      <div class="pair" id="pair-key">
-        <p>Tap the <span class="ui">Header</span> row to copy it. Come back and tap:</p>
-        <button type="button" class="btn" id="paste-key">Paste key</button>
-        <input type="text" id="box-key" hidden autocomplete="off" autocapitalize="off" spellcheck="false" placeholder="Hold here, then tap Paste">
-        <span class="got" id="got-key" hidden>Key added</span>
-      </div>
-      <span id="msg" role="status"></span>
-    </li>
-    <li>
-      <div class="actions" style="margin:0 0 12px"><button type="button" class="btn large" id="finish" aria-disabled="true">Finish</button></div>
-      <p>Shortcuts opens for a moment and asks once to save a file. Tap <span class="ui">Allow</span>. You'll see <span class="ui">Connected to Grok Bot</span>.</p>
-      <p class="muted" id="finish-note">Finish turns on once the address and key are added.</p>
-    </li>
-  </ol>
+  <section id="choose">
+    <h2>Which AI do you want?</h2>
+    <div class="rows">
+      <a class="row" href="#grokbot" data-pick="grokbot">
+        <span class="logo grokbot"><svg><use href="/assets/logos.svg#grokbot"/></svg></span>
+        <span class="text"><b>Grok Bot</b><span>Sends without leaving X. You copy two things from Grok Bot.</span></span>
+        <svg class="chev" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" d="M9 6l6 6-6 6"/></svg>
+      </a>
+      <a class="row" href="#claude" data-pick="claude">
+        <span class="logo claude"><svg><use href="/assets/logos.svg#claude"/></svg></span>
+        <span class="text"><b>Claude <span class="tag">Nothing to set up</span></b><span>Claude opens with the post filled in. You press Send.</span></span>
+        <svg class="chev" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" d="M9 6l6 6-6 6"/></svg>
+      </a>
+      <a class="row" href="#chatgpt" data-pick="chatgpt">
+        <span class="logo chatgpt"><svg><use href="/assets/logos.svg#chatgpt"/></svg></span>
+        <span class="text"><b>ChatGPT <span class="tag">Nothing to set up</span></b><span>ChatGPT opens with the post filled in. You press Send.</span></span>
+        <svg class="chev" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" d="M9 6l6 6-6 6"/></svg>
+      </a>
+    </div>
+  </section>
 
-  <h2 style="margin-top:40px">Send a post</h2>
-  <p>In the X app, tap the share arrow under any post. Then:</p>
-  <div class="shots3">
-    <figure><img src="/img/iphone-step-1.png" alt="The X share panel with Share via circled"><figcaption><b>1.</b> Tap <span class="ui">Share via…</span></figcaption></figure>
-    <figure><img src="/img/iphone-step-2.png" alt="The iPhone share list with Send to Grok Bot circled"><figcaption><b>2.</b> Tap <span class="ui">Send to Grok Bot</span></figcaption></figure>
-  </div>
-  <p>A <span class="ui">Sent to Grok Bot</span> notice appears and you stay in X. Grok Bot's reply arrives in your Grok Bot chat.</p>
+  <section id="steps" hidden>
+    <p class="muted"><a href="#" id="change">Choose a different AI</a></p>
+    <h2 id="steps-title">Grok Bot</h2>
+    <ol class="steps num">
+      <li>
+        <div class="actions" style="margin:0 0 12px" id="install-link"><a class="btn large" href="https://sendtogrokbot.com/send-to-grok-bot.shortcut">Install Send to Grok Bot</a></div>
+        <p>When Shortcuts opens, tap <span class="ui">Add Shortcut</span>, then come back here.</p>
+        <p class="muted">If a file downloads instead, open this page in Safari and tap Install again. Installed an older version? Delete it in the Shortcuts app first, so you don't end up with "Send to Grok Bot (1)".</p>
+      </li>
+      <li data-for="grokbot">
+        <div class="actions" style="margin:0 0 12px">
+          <button type="button" class="btn" data-copy-text="Set up Send to Grok Bot for me: https://github.com/jamespendry/send-to-grok-bot">Copy setup message</button>
+          <a class="btn secondary" href="grokbot://">Open Grok Bot</a>
+        </div>
+        <p>Paste the message into any Grok Bot chat and send it. Grok Bot makes a routine named <span class="ui">Send to Grok Bot</span>.</p>
+        <p class="muted">Already have that routine, for example from the Chrome extension? Skip this step.</p>
+      </li>
+      <li data-for="grokbot">
+        <h3>Connect your routine</h3>
+        <p>In Grok Bot, tap <span class="ui">Grok Bot</span> at the top of the chat, then <span class="ui">Routines</span>, then <span class="ui">Send to Grok Bot</span>. Scroll to <span class="ui">Webhook</span>.</p>
+        <ol class="paste-steps">
+          <li id="need-url">Tap the <span class="ui">URL</span> row to copy it. Come back, tap the box below, then tap <span class="ui">Paste</span>.</li>
+          <li id="need-key">Tap the <span class="ui">Header</span> row to copy it. Come back, tap the box, then tap <span class="ui">Paste</span>.</li>
+        </ol>
+        <textarea id="pastebox" rows="2" autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false" placeholder="Tap here, then Paste"></textarea>
+        <span id="msg" role="status"></span>
+      </li>
+      <li data-for="grokbot">
+        <div class="actions" style="margin:0 0 12px"><button type="button" class="btn large" id="finish" aria-disabled="true">Finish</button></div>
+        <p>Shortcuts opens for a moment and asks once to save a file. Tap <span class="ui">Allow</span>. You'll see <span class="ui">Connected to Grok Bot</span>.</p>
+        <p class="muted" id="finish-note">Finish turns on once the address and key are pasted.</p>
+      </li>
+      <li data-for="claude chatgpt">
+        <h3>Sign in to the app</h3>
+        <p>Have the <span class="ui" data-name>Claude</span> app installed and signed in. That's all.</p>
+      </li>
+    </ol>
 
-  <h2 style="margin-top:32px">Put it at the top of the list</h2>
-  <ol>
-    <li>Open the share list the same way: share arrow, then <span class="ui">Share via…</span></li>
-    <li>Scroll to the very bottom and tap <span class="ui">Edit Actions</span>.</li>
-    <li>Find <span class="ui">Send to Grok Bot</span> and tap the green plus next to it. Tap <span class="ui">Done</span>.</li>
-  </ol>
+    <h2 style="margin-top:40px">Send a post</h2>
+    <p>In the X app, tap the share arrow under any post. Then:</p>
+    <div class="shots3">
+      <figure><img src="/img/iphone-step-1.png" alt="The X share panel with Share via circled"><figcaption><b>1.</b> Tap <span class="ui">Share via…</span></figcaption></figure>
+      <figure><img src="/img/iphone-step-2.png" alt="The iPhone share list with Send to Grok Bot circled"><figcaption><b>2.</b> Tap <span class="ui">Send to Grok Bot</span></figcaption></figure>
+      <figure data-for="claude chatgpt"><img src="/img/iphone-step-3.png" alt="The Send this post to menu with Grok Bot, Claude, and ChatGPT"><figcaption><b>3.</b> Pick <span class="ui" data-name>Claude</span></figcaption></figure>
+    </div>
+    <p data-for="grokbot">A <span class="ui">Sent to Grok Bot</span> notice appears and you stay in X. Grok Bot's reply arrives in your Grok Bot chat.</p>
+    <p data-for="claude chatgpt"><span data-name>Claude</span> opens with the post and its thread filled in. Press Send.</p>
 
-  <h2 style="margin-top:32px">Claude or ChatGPT instead</h2>
-  <p>Skip steps 2 to 4. When you share a post, the Shortcut asks which AI, then opens Claude or ChatGPT with the post filled in; press Send. Picking Grok Bot there copies the message and opens Grok Bot, so you paste it into a chat.</p>
+    <h2 style="margin-top:32px">Put it at the top of the list</h2>
+    <ol>
+      <li>Open the share list the same way: share arrow, then <span class="ui">Share via…</span></li>
+      <li>Scroll to the very bottom and tap <span class="ui">Edit Actions</span>.</li>
+      <li>Find <span class="ui">Send to Grok Bot</span> and tap the green plus next to it. Tap <span class="ui">Done</span>.</li>
+    </ol>
+    <p class="muted" data-for="grokbot">Once Grok Bot is connected, the Shortcut always sends to Grok Bot. Without it, the Shortcut asks which AI each time.</p>
+  </section>
 
   <p class="muted" style="margin-top:28px">Codex works from the Chrome extension. On iPhone it only opens the website, so it is not offered.</p>
-  <p class="muted">The Shortcut sends the post link to sendtogrokbot.com to look up the post's text. Once connected, the relay passes the post to your Grok Bot webhook. Your webhook key is stored encrypted on the relay, and the relay keeps a short list of recent sends (the link and author, not the text). <a href="/privacy">Privacy</a></p>
+  <p class="muted">The Shortcut sends the post link to sendtogrokbot.com to look up the post's text. For Grok Bot, the relay passes the post to your webhook; your webhook key is stored encrypted on the relay, which keeps a short list of recent sends (the link and author, not the text). <a href="/privacy">Privacy</a></p>
 </main>
 <style>
-  .pair { display: flex; flex-wrap: wrap; align-items: center; gap: 10px 12px; margin: 16px 0; }
-  .pair p { flex-basis: 100%; margin: 0; }
-  .pair input { flex: 1 1 220px; min-width: 0; min-height: 44px; padding: 0 14px; border-radius: 12px; border: 1px solid var(--line-strong); background: var(--bg); color: var(--fg); font: 16px var(--mono); }
-  .got { color: var(--ok); font-weight: 600; }
-  .pair.done .btn { background: transparent; color: var(--fg); box-shadow: inset 0 0 0 1px var(--line-strong); }
+  #choose h2, #steps h2 { font-size: 20px; }
+  #steps-title { margin-top: 4px; }
+  .paste-steps { margin: 12px 0; padding-left: 20px; }
+  .paste-steps li { margin: 6px 0; }
+  .paste-steps li.done { color: var(--ok); }
+  .paste-steps li.done::after { content: " Done"; font-weight: 600; }
+  #pastebox { min-height: 64px; font-size: 16px; }
 </style>
 <script>
 (function () {
+  var NAMES = { grokbot: 'Grok Bot', claude: 'Claude', chatgpt: 'ChatGPT' };
+  var choose = document.getElementById('choose');
+  var steps = document.getElementById('steps');
+
+  function show(pick) {
+    if (!NAMES[pick]) { choose.hidden = false; steps.hidden = true; return; }
+    choose.hidden = true;
+    steps.hidden = false;
+    document.getElementById('steps-title').textContent = NAMES[pick];
+    document.querySelectorAll('[data-for]').forEach(function (el) {
+      el.hidden = el.getAttribute('data-for').split(' ').indexOf(pick) === -1;
+    });
+    document.querySelectorAll('[data-name]').forEach(function (el) { el.textContent = NAMES[pick]; });
+    window.scrollTo(0, 0);
+  }
+  window.addEventListener('hashchange', function () { show(location.hash.slice(1)); });
+  document.getElementById('change').addEventListener('click', function (e) {
+    e.preventDefault();
+    if (history.replaceState) history.replaceState(null, '', location.pathname);
+    show('');
+  });
+  show(location.hash.slice(1));
+
   var RELAY = 'https://relay.sendtogrokbot.com';
-  var state = { url: '', key: '', code: '', saved: false, saving: false };
+  var state = { url: '', key: '', saved: false, saving: false };
   var msg = document.getElementById('msg');
+  var box = document.getElementById('pastebox');
   var finish = document.getElementById('finish');
   var note = document.getElementById('finish-note');
   function say(text, ok) { msg.textContent = text; msg.className = ok ? 'ok' : (text ? 'err' : ''); }
@@ -114,45 +161,33 @@
   var bytes = new Uint8Array(32);
   crypto.getRandomValues(bytes);
   var relayKey = 'rk_' + b64url(bytes);
-  state.code = 'stgbr1.' + b64url(new TextEncoder().encode(JSON.stringify({ v: 1, relay: RELAY, key: relayKey })));
+  var code = 'stgbr1.' + b64url(new TextEncoder().encode(JSON.stringify({ v: 1, relay: RELAY, key: relayKey })));
 
-  function readAddress(text) {
-    var found = String(text || '').match(/https:\/\/[^\s<>"']+/i);
-    if (found) return { value: found[0].replace(/[.,;)]+$/, '') };
-    if (/bearer|crsr_/i.test(text)) return { error: "That's the key. Tap the URL row in Grok Bot, then Paste address." };
-    return { error: "That isn't the address. Tap the URL row in Grok Bot to copy it, then try again." };
-  }
-  function readKey(text) {
+  // One box takes both. Whatever is pasted, it works out whether it is the address or the key.
+  function take(text) {
     var t = String(text || '').trim();
-    if (/https?:\/\//i.test(t)) return { error: "That's the address. Tap the Header row in Grok Bot, then Paste key." };
-    t = t.replace(/^authorization\s*:\s*/i, '').replace(/^bearer\s+/i, '').trim();
-    if (t.length < 8 || /\s/.test(t)) return { error: "That isn't the key. Tap the Header row in Grok Bot to copy it, then try again." };
-    return { value: t };
-  }
-
-  function accept(kind, text) {
-    var got = kind === 'url' ? readAddress(text) : readKey(text);
-    if (got.error) { say(got.error); return; }
-    state[kind] = got.value;
+    if (!t) return;
+    var url = t.match(/https:\/\/[^\s<>"']+/i);
+    if (url) {
+      state.url = url[0].replace(/[.,;)]+$/, '');
+      document.getElementById('need-url').classList.add('done');
+    } else {
+      var key = t.replace(/^authorization\s*:\s*/i, '').replace(/^bearer\s+/i, '').trim();
+      if (key.length < 8 || /\s/.test(key)) { say("That doesn't look like the URL or the Header. Copy it again in Grok Bot."); return; }
+      state.key = key;
+      document.getElementById('need-key').classList.add('done');
+    }
     state.saved = false;
-    document.getElementById('pair-' + kind).classList.add('done');
-    document.getElementById('got-' + kind).hidden = false;
-    document.getElementById('box-' + kind).hidden = true;
-    say('');
+    box.value = '';
+    box.blur();
     if (state.url && state.key) save();
+    else say(state.url ? 'Address added. Now copy the Header row.' : 'Key added. Now copy the URL row.', true);
   }
-
-  function wire(kind) {
-    var box = document.getElementById('box-' + kind);
-    document.getElementById('paste-' + kind).addEventListener('click', function () {
-      var manual = function () { box.hidden = false; box.value = ''; box.focus(); say('Hold the box, then tap Paste.', true); };
-      if (!navigator.clipboard || !navigator.clipboard.readText) return manual();
-      navigator.clipboard.readText().then(function (text) { accept(kind, text); }, manual);
-    });
-    box.addEventListener('input', function () { if (box.value.trim()) accept(kind, box.value); });
-  }
-  wire('url');
-  wire('key');
+  box.addEventListener('paste', function (e) {
+    var text = e.clipboardData && e.clipboardData.getData('text');
+    if (text) { e.preventDefault(); take(text); }
+  });
+  box.addEventListener('input', function () { var v = box.value.trim(); if (/https:\/\//i.test(v) || v.length >= 20) take(v); });
 
   function save() {
     if (state.saving) return;
@@ -164,7 +199,7 @@
       body: JSON.stringify({ grokbot: { webhookUrl: state.url, senderKey: state.key } })
     }).then(function (res) {
       return res.json().catch(function () { return {}; }).then(function (data) {
-        if (!res.ok || !data.ok) throw new Error(data.error || 'The relay did not save it. Try again.');
+        if (!res.ok || !data.ok) throw new Error(data.error || 'The relay did not save it. Paste again.');
       });
     }).then(function () {
       state.saved = true;
@@ -172,7 +207,7 @@
       note.textContent = 'Ready. Tap Finish.';
       say('Connected. Tap Finish.', true);
     }, function (err) {
-      say(err && err.message && !/fetch/i.test(err.message) ? err.message : 'Could not reach sendtogrokbot.com. Check your connection and tap Paste again.');
+      say(err && err.message && !/fetch|load/i.test(err.message) ? err.message : 'Could not reach sendtogrokbot.com. Check your connection and paste again.');
     }).then(function () { state.saving = false; });
   }
 
@@ -185,7 +220,7 @@
       note.textContent = "Didn't see Connected to Grok Bot? Tap Finish again.";
     };
     if (!navigator.clipboard || !navigator.clipboard.writeText) { say('Safari could not copy. Open this page in Safari and try again.'); return; }
-    navigator.clipboard.writeText(state.code).then(run, function () { say('Safari could not copy. Tap Finish again.'); });
+    navigator.clipboard.writeText(code).then(run, function () { say('Safari could not copy. Tap Finish again.'); });
   });
 })();
 </script>
