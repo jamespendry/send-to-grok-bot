@@ -557,6 +557,30 @@ describe("history", () => {
   });
 });
 
+describe("iPhone setup page", () => {
+  it("lets sendtogrokbot.com save the Grok Bot webhook and nobody else", async () => {
+    const key = relayKey();
+    const pre = await api("/v1/config", { method: "OPTIONS", headers: { origin: "https://sendtogrokbot.com" } });
+    expect(pre.status).toBe(204);
+    expect(pre.headers.get("access-control-allow-methods")).toContain("PUT");
+    const saved = await api("/v1/config", {
+      method: "PUT",
+      key,
+      headers: { origin: "https://sendtogrokbot.com" },
+      body: { grokbot: { webhookUrl: "https://hooks.example/hook", senderKey: "whsec_test_key" } }
+    });
+    expect(saved.status).toBe(200);
+    expect(saved.headers.get("access-control-allow-origin")).toBe("https://sendtogrokbot.com");
+    const other = await api("/v1/config", {
+      method: "PUT",
+      key: relayKey(),
+      headers: { origin: "https://evil.example" },
+      body: { grokbot: { webhookUrl: "https://hooks.example/hook" } }
+    });
+    expect(other.headers.get("access-control-allow-origin")).toBeNull();
+  });
+});
+
 describe("limits and errors", () => {
   it("rate limits sends per key", async () => {
     const key = relayKey();

@@ -150,47 +150,22 @@ If the icon turns red, a line at the bottom of the screen says why.
 
 ## iPhone
 
-Share any post from the X app to your AI. Nothing to set up, unless you want Grok Bot sends without leaving X. The iPhone offers Grok Bot, Claude, and ChatGPT. Codex works only from the Chrome extension. The same steps are at [sendtogrokbot.com/mobile](https://sendtogrokbot.com/mobile).
+Send any post from the X app to Grok Bot without leaving X, or open it in Claude or ChatGPT. Setup happens on the iPhone, at [sendtogrokbot.com/mobile](https://sendtogrokbot.com/mobile) in Safari:
 
-### Install
+1. **Install.** Tap Install Send to Grok Bot, then Add Shortcut.
+2. **Make the routine.** Tap Copy setup message, then Open Grok Bot, and paste it into a chat. Skip this if you already have the Send to Grok Bot routine.
+3. **Connect.** In Grok Bot, tap Grok Bot at the top of the chat, then Routines, then Send to Grok Bot. Tap the URL row, come back and tap Paste address. Tap the Header row, come back and tap Paste key.
+4. **Finish.** Tap Finish. Shortcuts opens for a moment; allow it to save a file. You'll see "Connected to Grok Bot".
 
-1. On your iPhone, open [sendtogrokbot.com/send-to-grok-bot.shortcut](https://sendtogrokbot.com/send-to-grok-bot.shortcut) in Safari.
-2. When Shortcuts opens, tap **Add Shortcut**. If it asks for a connect code, paste yours (see below) or leave it as `none`.
+Then, in X, tap the share arrow under a post, then Share via…, then Send to Grok Bot. A "Sent to Grok Bot" notice appears and the reply arrives in your Grok Bot chat.
 
-If your browser downloads a file instead of opening Shortcuts, open the link in Safari and try again. If you installed an older version, delete it in the Shortcuts app first, so you don't end up with "Send to Grok Bot (1)".
+| 1. Tap Share via… | 2. Tap Send to Grok Bot |
+| --- | --- |
+| ![Share via in the X share menu](docs/img/iphone-step-1.png) | ![Send to Grok Bot in the share sheet](docs/img/iphone-step-2.png) |
 
-### Send to Grok Bot without leaving X
+To keep it near the top: open the same list, scroll to the bottom, tap Edit Actions, then the green plus next to Send to Grok Bot.
 
-Optional, and done once. With a connect code, the Shortcut sends the post and its thread straight to your Grok Bot chat, and you stay in X.
-
-1. Open [relay.sendtogrokbot.com](https://relay.sendtogrokbot.com). Paste the webhook address and key from your Grok Bot routine (the same two from [Grok Bot setup](#grok-bot)), tap **Save destinations**, then **Copy code**.
-2. In the Shortcuts app, tap the three dots on Send to Grok Bot. In the first box, replace `none` with your code. Tap **Done**.
-
-The code works like a password for your Grok Bot. Don't share it or show it in a screenshot.
-
-### Share a post
-
-In the X app, tap the share arrow under any post. Then:
-
-| 1. Tap Share via… | 2. Tap Send to Grok Bot | 3. Pick your AI (skipped with a code) |
-| --- | --- | --- |
-| ![Share via in the X share menu](docs/img/iphone-step-1.png) | ![Send to Grok Bot in the share sheet](docs/img/iphone-step-2.png) | ![Choosing Grok Bot, Claude, or ChatGPT](docs/img/iphone-step-3.png) |
-
-### Put it at the top of the list
-
-Do this once, so you never scroll for it again.
-
-1. Open the share list the same way: share arrow, then Share via….
-2. Scroll to the very bottom and tap **Edit Actions**.
-3. Find Send to Grok Bot and tap the green plus next to it. Tap **Done**.
-
-It now sits in Favorites, near the top of the list, every time you share.
-
-### Read the reply
-
-- **Claude and ChatGPT** open with the post already filled in. If the message waits, press Send.
-- **Grok Bot with a connect code:** the reply lands in the chat your routine posts to, the same one the Chrome extension uses.
-- **Grok Bot without one:** the message is copied and Grok Bot opens. Open a chat, paste, and send.
+**Claude or ChatGPT:** skip steps 2 to 4. The Shortcut then asks which AI and opens it with the post filled in; press Send. Picking Grok Bot there copies the message and opens Grok Bot to paste. Codex works only from the Chrome extension.
 
 ## Privacy
 
@@ -198,7 +173,7 @@ It now sits in Favorites, near the top of the list, every time you share.
 - It does not track your browsing, use analytics, or sell data.
 - Keys and tokens stay in Chrome on your computer. They are not synced to your Google account. If you turn on the optional Relay, they are stored encrypted on the relay instead.
 - To get a post's full text, it looks the post up on the public mirrors api.fxtwitter.com and api.vxtwitter.com. Only the post's public link is sent to them.
-- The iPhone Shortcut sends the post link to sendtogrokbot.com to look up the post's text, then hands it to the app you picked. With a connect code, the relay passes it to your Grok Bot webhook and keeps a short list of recent sends (the link and author, not the text).
+- The iPhone Shortcut sends the post link to sendtogrokbot.com to look up the post's text. Once connected, the relay passes it to your Grok Bot webhook; the webhook key is stored encrypted on the relay, which keeps a short list of recent sends (the link and author, not the text).
 
 Read the full [privacy policy](https://sendtogrokbot.com/privacy).
 
@@ -241,7 +216,7 @@ Copies `docs/` to `dist/site`, builds the extension zip into it, adds `connect.j
 
 ### Relay
 
-The relay is optional for Chrome. With **Relay** checked on the options page, the extension stores one `stgbr1.` code, and the Grok Bot webhook key and Claude token stay on the relay, encrypted. With a connect code, the iPhone Shortcut posts to `/v1/send` with `format: "text"`; the relay adds the post's context, forwards it to the saved Grok Bot webhook, and answers in one line. Without one it uses `/v1/open`, which needs no code: it looks up the post and returns a link that opens Claude or ChatGPT, or text to paste into Grok Bot.
+The relay is optional for Chrome. With **Relay** checked on the options page, the extension stores one `stgbr1.` code, and the Grok Bot webhook key and Claude token stay on the relay, encrypted. Once connected (the /mobile page saves the webhook with `PUT /v1/config` and hands the code to the Shortcut, which keeps it in `Shortcuts/Send to Grok Bot/connect-code.txt` in iCloud Drive), the iPhone Shortcut posts to `/v1/send` with `format: "text"`; the relay adds the post's context, forwards it to the saved Grok Bot webhook, and answers in one line. Without one it uses `/v1/open`, which needs no code: it looks up the post and returns a link that opens Claude or ChatGPT, or text to paste into Grok Bot.
 
 ```bash
 cd relay

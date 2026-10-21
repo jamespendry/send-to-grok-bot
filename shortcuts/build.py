@@ -2,9 +2,12 @@
 # Builds shortcuts/Send to Grok Bot.shortcut (unsigned XML source).
 # Re-sign after building; see BUILD.md. Run: python3 shortcuts/build.py
 #
-# With a connect code (asked once, when the person adds the shortcut), it sends the
-# shared post to relay.sendtogrokbot.com/v1/send, which adds the full context and
-# posts it to the person's Grok Bot webhook. The person never leaves X.
+# Setup happens on sendtogrokbot.com/mobile. Its Finish button copies a connect code and
+# runs this shortcut with the clipboard as input; the shortcut saves the code to a file
+# in the Shortcuts folder of iCloud Drive and says it is connected.
+# When sharing a post, it reads that file. With a code it sends the post to
+# relay.sendtogrokbot.com/v1/send, which adds the full context and posts it to the
+# person's Grok Bot webhook, so the person never leaves X.
 # With no code it asks which AI, then sends the link to /v1/open, which answers in
 # plain text: a link that opens Claude or ChatGPT with the post filled in, or, for
 # Grok Bot, the message, which the shortcut copies before opening Grok Bot.
@@ -92,7 +95,12 @@ def send_steps(dest):
     get = ask_relay(dest, "text")
     return [get, act("openurl", WFInput=output_of(get, "Contents of URL"))]
 
-NO_CODE = "none"
+CODE_FILE = "Send to Grok Bot/connect-code.txt"
+CODE_MARK = "stgbr1."
+
+def if_contains(action, name, text, group):
+    return act("conditional", GroupingIdentifier=group, WFControlFlowMode=0, WFCondition=99,
+               WFConditionalActionString=text, WFInput={"Type": "Variable", "Variable": output_of(action, name)})
 
 def send_in_background(code):
     # The connect code goes in the Authorization header; the relay answers with one line to show.
@@ -112,16 +120,20 @@ def send_in_background(code):
                       WFNotificationActionBody=text_of(post, "Contents of URL"))]
 
 def build():
-    # The first action holds the connect code. The import question fills it in; its default
-    # is never blank, because a blank import question broke every run.
-    code = with_uuid(act("gettext", WFTextActionText=plain(NO_CODE)))
-    has_code = gid()
-    a = [code,
-         act("conditional", GroupingIdentifier=has_code, WFControlFlowMode=0, WFCondition=99,
-             WFConditionalActionString="stgbr1.", WFInput={"Type": "Variable", "Variable": output_of(code, "Text")})]
+    shared = with_uuid(act("detect.text", WFInput={"Value": {"Type": "ExtensionInput"}, "WFSerializationType": "WFTextTokenAttachment"}))
+    is_setup, has_code, menu = gid(), gid(), gid()
+    a = [shared, if_contains(shared, "Text", CODE_MARK, is_setup),
+         # Run by the setup page's Finish button: keep the code for every later share.
+         act("documentpicker.save", WFInput=output_of(shared, "Text"), WFAskWhereToSave=False,
+             WFFileDestinationPath=CODE_FILE, WFSaveFileOverwrite=True),
+         act("notification", WFNotificationActionTitle=plain("Connected to Grok Bot"),
+             WFNotificationActionBody=plain("In X, tap Share on a post, then Share via, then Send to Grok Bot.")),
+         act("conditional", GroupingIdentifier=is_setup, WFControlFlowMode=1)]
+    saved = with_uuid(act("documentpicker.open", WFShowFilePicker=False, WFGetFilePath=CODE_FILE, WFFileErrorIfNotFound=False))
+    code = with_uuid(act("detect.text", WFInput=output_of(saved, "File")))
+    a += [saved, code, if_contains(code, "Text", CODE_MARK, has_code)]
     a += send_in_background(code)
     a.append(act("conditional", GroupingIdentifier=has_code, WFControlFlowMode=1))
-    menu = gid()
     a.append(act("choosefrommenu", GroupingIdentifier=menu, WFControlFlowMode=0, WFMenuPrompt="Send this post to",
                  WFMenuItems=[t for t, _ in MENU]))
     for title, dest in MENU:
@@ -129,9 +141,7 @@ def build():
         a += send_steps(dest)
     a.append(act("choosefrommenu", GroupingIdentifier=menu, WFControlFlowMode=2))
     a.append(act("conditional", GroupingIdentifier=has_code, WFControlFlowMode=2))
-    question = {"ActionIndex": 0, "Category": "Parameter", "ParameterKey": "WFTextActionText", "DefaultValue": NO_CODE,
-                "Text": "To send to Grok Bot without leaving X, paste your connect code from relay.sendtogrokbot.com. "
-                        "To pick an AI each time instead, leave this as none."}
+    a.append(act("conditional", GroupingIdentifier=is_setup, WFControlFlowMode=2))
     return {
         "WFWorkflowName": "Send to Grok Bot",
         "WFWorkflowClientVersion": "2700.0.1",
@@ -141,7 +151,7 @@ def build():
         "WFWorkflowTypes": ["ActionExtension"],
         "WFWorkflowInputContentItemClasses": ["WFURLContentItem", "WFStringContentItem", "WFSafariWebPageContentItem"],
         "WFWorkflowHasShortcutInputVariables": True,
-        "WFWorkflowImportQuestions": [question],
+        "WFWorkflowImportQuestions": [],
         "WFWorkflowActions": a,
     }
 
