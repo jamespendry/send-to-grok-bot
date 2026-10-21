@@ -54,6 +54,11 @@ def output_of(action, name):
     return {"Value": {"Type": "ActionOutput", "OutputName": name, "OutputUUID": action["WFWorkflowActionParameters"]["UUID"]},
             "WFSerializationType": "WFTextTokenAttachment"}
 
+def text_of(action, name):
+    # The same wiring as output_of, inside a text field.
+    return {"Value": {"string": OBJ, "attachmentsByRange": {"{0, 1}": {"Type": "ActionOutput", "OutputName": name,
+            "OutputUUID": action["WFWorkflowActionParameters"]["UUID"]}}}, "WFSerializationType": "WFTextTokenString"}
+
 def with_uuid(action):
     action["WFWorkflowActionParameters"]["UUID"] = gid()
     return action
@@ -76,9 +81,12 @@ def send_steps(dest):
         # Its documented route is the share sheet: Grok Bot, pick a chat, Attach. The message
         # is also copied, as a fallback if the person picks a different app.
         get = ask_relay(dest, "copy")
-        return [get,
-                act("setclipboard", WFInput=output_of(get, "Contents of URL")),
-                act("share", WFInput=output_of(get, "Contents of URL"))]
+        # The relay's answer arrives as a file named "open". Turn it into plain text first,
+        # or the share sheet offers a "Text Document" that Grok Bot does not accept.
+        msg = with_uuid(act("gettext", WFTextActionText=text_of(get, "Contents of URL")))
+        return [get, msg,
+                act("setclipboard", WFInput=output_of(msg, "Text")),
+                act("share", WFInput=output_of(msg, "Text"))]
     get = ask_relay(dest, "text")
     return [get, act("openurl", WFInput=output_of(get, "Contents of URL"))]
 
