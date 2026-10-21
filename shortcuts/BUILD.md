@@ -8,7 +8,7 @@ python3 shortcuts/build.py && plutil -convert binary1 -o /tmp/in.shortcut "short
 
 The name has to stay **Send to Grok Bot**. That is the label in the X share sheet.
 
-The shortcut needs no code and stores nothing. It posts the shared link and the chosen AI to `https://relay.sendtogrokbot.com/v1/open`. The relay looks up the post (fxtwitter, then vxtwitter) and returns `openUrl`, a link that opens Claude or ChatGPT with the post filled in. For Grok Bot it returns `copyText`, which the shortcut copies, and `grokbot://`, which opens the app.
+The shortcut needs no code and stores nothing. It posts the shared link and the chosen AI to `https://relay.sendtogrokbot.com/v1/open`. The relay looks up the post (fxtwitter, then vxtwitter) and returns `openUrl`, a link that opens Claude or ChatGPT with the post filled in. For Grok Bot it returns `copyText`. The shortcut copies it and opens the share sheet, where the person taps Grok Bot, picks a chat and taps Attach. Grok Bot documents no link into a chat; `grokbot://` only opens its home screen, so the shortcut doesn't use it.
 
 The install link is the signed file, served from the site: https://sendtogrokbot.com/send-to-grok-bot.shortcut
 
@@ -17,4 +17,4 @@ The install link is the signed file, served from the site: https://sendtogrokbot
 1. On the iPhone, open https://sendtogrokbot.com/mobile and tap Install Send to Grok Bot.
 2. Tap Add Shortcut.
 3. In the X app, tap Share on a post, then Send to Grok Bot. Pick Grok Bot, Claude, or ChatGPT.
-4. Claude and ChatGPT open with the post filled in. Press Send. For Grok Bot, paste the copied message and send.
+4. Claude and ChatGPT open with the post filled in. Press Send. For Grok Bot, tap Grok Bot in the share sheet, pick a chat, tap Attach and send.
