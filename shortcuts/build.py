@@ -2,10 +2,12 @@
 # Builds shortcuts/Send to Grok Bot.shortcut (unsigned XML source).
 # Re-sign after building; see BUILD.md. Run: python3 shortcuts/build.py
 #
-# The shortcut needs no code. It sends the shared post link and the chosen AI to
-# relay.sendtogrokbot.com/v1/open, which answers in plain text with a link that
-# opens that AI with the post filled in. For Grok Bot it answers with the message
-# to send; the shortcut opens the share sheet so the person picks Grok Bot and a chat.
+# With a connect code (asked once, when the person adds the shortcut), it sends the
+# shared post to relay.sendtogrokbot.com/v1/send, which adds the full context and
+# posts it to the person's Grok Bot webhook. The person never leaves X.
+# With no code it asks which AI, then sends the link to /v1/open, which answers in
+# plain text: a link that opens Claude or ChatGPT with the post filled in, or, for
+# Grok Bot, the message, which the shortcut copies before opening Grok Bot.
 import plistlib, uuid
 from pathlib import Path
 
@@ -75,29 +77,61 @@ def ask_relay(dest, fmt):
         ]}, "WFSerializationType": "WFDictionaryFieldValue"}))
 
 def send_steps(dest):
-    # No If blocks, no variables, no link check. The relay finds the post link in whatever the X app shared.
+    # No variables and no link check. The relay finds the post link in whatever the X app shared.
     if dest == "grokbot":
-        # Grok Bot has no documented link into a chat (grokbot:// only opens its home screen).
-        # Its documented route is the share sheet: Grok Bot, pick a chat, Attach. The message
-        # is also copied, as a fallback if the person picks a different app.
+        # Grok Bot has no link into a chat (grokbot:// opens its home screen), so the message is copied.
         get = ask_relay(dest, "copy")
-        # The relay's answer arrives as a file named "open". Get Text from Input turns it into plain text,
-        # or the share sheet offers a "Text Document" that Grok Bot does not accept.
+        # The relay's answer arrives as a file named "open". Get Text from Input copies it as plain text.
         msg = with_uuid(act("detect.text", WFInput=output_of(get, "Contents of URL")))
+        home = with_uuid(act("gettext", WFTextActionText=plain("grokbot://")))
         return [get, msg,
                 act("setclipboard", WFInput=output_of(msg, "Text")),
-                act("share", WFInput=output_of(msg, "Text"))]
+                act("notification", WFNotificationActionTitle=plain("Copied"),
+                    WFNotificationActionBody=plain("In Grok Bot, open a chat, then paste and send.")),
+                home, act("openurl", WFInput=output_of(home, "Text"))]
     get = ask_relay(dest, "text")
     return [get, act("openurl", WFInput=output_of(get, "Contents of URL"))]
 
+NO_CODE = "none"
+
+def send_in_background(code):
+    # The connect code goes in the Authorization header; the relay answers with one line to show.
+    auth = {"Value": {"string": "Bearer " + OBJ, "attachmentsByRange": {"{7, 1}": {"Type": "ActionOutput", "OutputName": "Text",
+            "OutputUUID": code["WFWorkflowActionParameters"]["UUID"]}}}, "WFSerializationType": "WFTextTokenString"}
+    post = with_uuid(act("downloadurl", WFURL="https://relay.sendtogrokbot.com/v1/send", WFHTTPMethod="POST", WFHTTPBodyType="JSON",
+        ShowHeaders=True,
+        WFHTTPHeaders={"Value": {"WFDictionaryFieldValueItems": [
+            {"WFItemType": 0, "WFKey": plain("Authorization"), "WFValue": auth},
+        ]}, "WFSerializationType": "WFDictionaryFieldValue"},
+        WFJSONValues={"Value": {"WFDictionaryFieldValueItems": [
+            {"WFItemType": 0, "WFKey": plain("destination"), "WFValue": plain("grokbot")},
+            {"WFItemType": 0, "WFKey": plain("url"), "WFValue": shared_input()},
+            {"WFItemType": 0, "WFKey": plain("format"), "WFValue": plain("text")},
+        ]}, "WFSerializationType": "WFDictionaryFieldValue"}))
+    return [post, act("notification", WFNotificationActionTitle=plain("Send to Grok Bot"),
+                      WFNotificationActionBody=text_of(post, "Contents of URL"))]
+
 def build():
+    # The first action holds the connect code. The import question fills it in; its default
+    # is never blank, because a blank import question broke every run.
+    code = with_uuid(act("gettext", WFTextActionText=plain(NO_CODE)))
+    has_code = gid()
+    a = [code,
+         act("conditional", GroupingIdentifier=has_code, WFControlFlowMode=0, WFCondition=99,
+             WFConditionalActionString="stgbr1.", WFInput={"Type": "Variable", "Variable": output_of(code, "Text")})]
+    a += send_in_background(code)
+    a.append(act("conditional", GroupingIdentifier=has_code, WFControlFlowMode=1))
     menu = gid()
-    a = [act("choosefrommenu", GroupingIdentifier=menu, WFControlFlowMode=0, WFMenuPrompt="Send this post to",
-             WFMenuItems=[t for t, _ in MENU])]
+    a.append(act("choosefrommenu", GroupingIdentifier=menu, WFControlFlowMode=0, WFMenuPrompt="Send this post to",
+                 WFMenuItems=[t for t, _ in MENU]))
     for title, dest in MENU:
         a.append(act("choosefrommenu", GroupingIdentifier=menu, WFControlFlowMode=1, WFMenuItemTitle=title))
         a += send_steps(dest)
     a.append(act("choosefrommenu", GroupingIdentifier=menu, WFControlFlowMode=2))
+    a.append(act("conditional", GroupingIdentifier=has_code, WFControlFlowMode=2))
+    question = {"ActionIndex": 0, "Category": "Parameter", "ParameterKey": "WFTextActionText", "DefaultValue": NO_CODE,
+                "Text": "To send to Grok Bot without leaving X, paste your connect code from relay.sendtogrokbot.com. "
+                        "To pick an AI each time instead, leave this as none."}
     return {
         "WFWorkflowName": "Send to Grok Bot",
         "WFWorkflowClientVersion": "2700.0.1",
@@ -107,7 +141,7 @@ def build():
         "WFWorkflowTypes": ["ActionExtension"],
         "WFWorkflowInputContentItemClasses": ["WFURLContentItem", "WFStringContentItem", "WFSafariWebPageContentItem"],
         "WFWorkflowHasShortcutInputVariables": True,
-        "WFWorkflowImportQuestions": [],
+        "WFWorkflowImportQuestions": [question],
         "WFWorkflowActions": a,
     }
 

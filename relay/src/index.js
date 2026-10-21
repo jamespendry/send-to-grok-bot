@@ -3,7 +3,8 @@ import { encryptSecret, decryptSecret, sha256Hex } from "./crypto.js";
 import { ensureSchema, findAccount, insertAccount, updateAccount, addSend, recentSends } from "./db.js";
 import { safeLog } from "./log.js";
 import { prefilledOpenUrl } from "./open-link.js";
-import { buildOpen } from "./open.js";
+import { buildOpen, parsePostUrl } from "./open.js";
+import "../../extension/enrich.js";
 import { renderPage, setupJavaScript } from "./page.js";
 import { LIMITS, takeToken } from "./rate.js";
 import { claudeFireUrl, claudeText, parseSendBody, pointsAtRelay, publicError, webhookProblem } from "./validate.js";
@@ -363,13 +364,35 @@ function named(destination, fields) {
   return { destination, label: LABELS[destination] || destination, ...fields };
 }
 
+// The phone shortcut sends whatever the X app shared. Find the post link in it and add the
+// post's full context, the same way the extension does before it sends.
+async function phonePost(env, value) {
+  const ref = parsePostUrl(value.url);
+  if (!ref) return null;
+  let ctx = null;
+  try { ctx = await globalThis.STGB_ENRICH.fetchContext(ref.url, { fetch: contextFetch(env) }); } catch { ctx = null; }
+  const post = globalThis.STGB_ENRICH.mergePost({ url: ref.url, author: ref.user === "i" ? "" : ref.user, text: "" }, ctx);
+  return { ...post, destination: value.destination, source: "x", sentAt: new Date().toISOString() };
+}
+
+// A Shortcut shows a plain-text answer as it is, so the phone gets one line either way.
+function phoneAnswer(text) {
+  return new Response(text, { status: 200, headers: { ...SECURITY, "content-type": "text/plain; charset=utf-8" } });
+}
+
 async function send(request, env, who) {
   const limited = await takeToken(env.KV, who.keyHash, "send", LIMITS.send);
   if (!limited.ok) return tooMany(limited);
   const body = await readJson(request);
   if (body.error) return json({ ok: false, error: body.error }, body.status || 400);
+  const phone = !!(body.value && typeof body.value === "object" && body.value.format === "text");
+  if (phone) {
+    const post = await phonePost(env, body.value);
+    if (!post) return phoneAnswer("No post link came through. In the X app, tap Share on a post, then Share via, then Send to Grok Bot.");
+    body.value = post;
+  }
   const parsed = parseSendBody(body.value);
-  if (parsed.error) return json({ ok: false, error: parsed.error }, 400);
+  if (parsed.error) return phone ? phoneAnswer(parsed.error) : json({ ok: false, error: parsed.error }, 400);
   await ensureSchema(env.DB);
   const openOnly = parsed.destination === "chatgpt" || parsed.destination === "codex";
   let result;
@@ -379,6 +402,7 @@ async function send(request, env, who) {
   } else {
     const account = await findAccount(env.DB, who.keyHash);
     if (!account) {
+      if (phone) return phoneAnswer("Not sent: nothing is saved for this code yet. Add your Grok Bot webhook at relay.sendtogrokbot.com.");
       return json(named(parsed.destination, {
         ok: false,
         error: "Nothing is saved for this code yet.",
@@ -409,13 +433,24 @@ async function send(request, env, who) {
     const notice = openOnly
       ? (parsed.destination === "chatgpt" ? "Opened ChatGPT" : "Opened Codex")
       : (parsed.destination === "grokbot" ? "Sent to Grok Bot" : "Sent to Claude");
+    if (phone) return phoneAnswer(notice + ". The reply will land in your Grok Bot chat.");
     const payload = named(parsed.destination, { ok: true, notice });
     if (result.sessionUrl) payload.sessionUrl = result.sessionUrl;
     if (result.openUrl) payload.openUrl = result.openUrl;
     return json(payload);
   }
   const error = publicError(result.error);
+  if (phone) return phoneAnswer("Not sent: " + error);
   return json(named(parsed.destination, { ok: false, error, notice: error }), result.http || 502);
+}
+
+function contextFetch(env) {
+  return (u, init) => {
+    // Workers reject the credentials option, and fxtwitter asks callers to name themselves.
+    const { credentials, ...rest } = init || {};
+    const headers = { ...(rest.headers || {}), "User-Agent": "SendToGrokBot/1.0 (+https://sendtogrokbot.com)" };
+    return callOut(env, new Request(u, { ...rest, headers }));
+  };
 }
 
 // No code and nothing stored: the shortcut's open-with-the-post-filled-in path.
@@ -427,12 +462,7 @@ async function openPost(request, env) {
   const body = await readJson(request);
   if (body.error) return json({ ok: false, error: body.error, notice: body.error }, body.status || 400);
   const value = body.value || {};
-  const result = await buildOpen(String(value.destination || ""), value.url, (u, init) => {
-    // Workers reject the credentials option, and fxtwitter asks callers to name themselves.
-    const { credentials, ...rest } = init || {};
-    const headers = { ...(rest.headers || {}), "User-Agent": "SendToGrokBot/1.0 (+https://sendtogrokbot.com)" };
-    return callOut(env, new Request(u, { ...rest, headers }));
-  });
+  const result = await buildOpen(String(value.destination || ""), value.url, contextFetch(env));
   safeLog({ method: "POST", path: "/v1/open", status: result.ok ? 200 : 400, destination: result.ok ? result.destination : "", error: result.ok ? "" : "input" });
   // format "text" answers with just the link to open, and "copy" with just the text to paste.
   // A Shortcut uses a plain-text answer directly, with no dictionary to unpack.

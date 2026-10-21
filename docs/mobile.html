@@ -27,14 +27,23 @@
 
 <main class="narrow page">
   <h1>Set up on iPhone</h1>
-  <p class="intro" style="margin-top:12px">Share any post from the X app to your AI. One tap to install. Nothing to set up.</p>
+  <p class="intro" style="margin-top:12px">Share any post from the X app to your AI. One tap to install.</p>
 
   <ol class="steps num">
     <li>
       <div class="actions" style="margin:0 0 12px" id="install-link"><a class="btn large" href="https://sendtogrokbot.com/send-to-grok-bot.shortcut">Install Send to Grok Bot</a></div>
-      <p>Open this page on your iPhone and tap <span class="ui">Install Send to Grok Bot</span>. When Shortcuts opens, tap <span class="ui">Add Shortcut</span>.</p>
+      <p>Open this page on your iPhone and tap <span class="ui">Install Send to Grok Bot</span>. When Shortcuts opens, tap <span class="ui">Add Shortcut</span>. If it asks for a connect code, paste yours (see the next step) or leave it as <span class="ui">none</span>.</p>
       <p class="muted">If your browser downloads a file instead of opening Shortcuts, open this page in Safari and tap Install again.</p>
       <p class="muted">Installed an older version? Delete it in the Shortcuts app first, so you don't end up with "Send to Grok Bot (1)".</p>
+    </li>
+    <li>
+      <h2>Send to Grok Bot without leaving X</h2>
+      <p>Optional, and done once. With a connect code, the Shortcut sends the post and its thread straight to your Grok Bot chat. You stay in X and get a short "Sent" notice.</p>
+      <ol>
+        <li>Open <a href="https://relay.sendtogrokbot.com">relay.sendtogrokbot.com</a>. Paste the webhook address and key from your Grok Bot routine (the same two from <a href="/setup/grok">Grok Bot setup</a>), tap <span class="ui">Save destinations</span>, then tap <span class="ui">Copy code</span>.</li>
+        <li>In the Shortcuts app, tap the three dots on <span class="ui">Send to Grok Bot</span>. In the first box, replace <span class="ui">none</span> with your code. Tap <span class="ui">Done</span>.</li>
+      </ol>
+      <p class="muted">The code is like a password for your Grok Bot. Don't share it or post it in a screenshot.</p>
     </li>
     <li>
       <h2>Share a post</h2>
@@ -42,7 +51,7 @@
       <div class="shots3">
         <figure><img src="/img/iphone-step-1.png" alt="The X share panel with Share via circled"><figcaption><b>1.</b> Tap <span class="ui">Share via…</span></figcaption></figure>
         <figure><img src="/img/iphone-step-2.png" alt="The iPhone share list with Send to Grok Bot circled"><figcaption><b>2.</b> Tap <span class="ui">Send to Grok Bot</span></figcaption></figure>
-        <figure><img src="/img/iphone-step-3.png" alt="The Send this post to menu with Grok Bot, Claude, and ChatGPT"><figcaption><b>3.</b> Pick your AI</figcaption></figure>
+        <figure><img src="/img/iphone-step-3.png" alt="The Send this post to menu with Grok Bot, Claude, and ChatGPT"><figcaption><b>3.</b> Pick your AI (skipped with a connect code)</figcaption></figure>
       </div>
     </li>
     <li>
@@ -58,12 +67,13 @@
     <li>
       <h2>Read the reply</h2>
       <p>Claude and ChatGPT open with the post already filled in. If the message waits, press Send.</p>
-      <p>For Grok Bot, a share sheet opens. Tap <span class="ui">Grok Bot</span>, pick a chat, then tap <span class="ui">Attach</span> and send. Don't see Grok Bot? Swipe the app row to <span class="ui">More</span> and turn it on. The message is also copied, so you can paste it anywhere.</p>
+      <p>With a connect code, Grok Bot's reply lands in the chat your routine posts to, the same one the Chrome extension uses.</p>
+      <p>Without one, the message is copied and Grok Bot opens. Open a chat, paste, and send.</p>
     </li>
   </ol>
 
   <p class="muted" style="margin-top:28px">Codex works from the Chrome extension. On iPhone it only opens the website, so it is not in the menu.</p>
-  <p class="muted">The Shortcut sends the post link to sendtogrokbot.com to look up the post's text, then hands it to the app you picked. Nothing is saved. <a href="/privacy">Privacy</a></p>
+  <p class="muted">The Shortcut sends the post link to sendtogrokbot.com to look up the post's text, then hands it to the app you picked. With a connect code, the relay passes it to your Grok Bot webhook and keeps a short list of recent sends (the link and author, not the text). <a href="/privacy">Privacy</a></p>
 </main>
 
 <footer><div class="wrap">
