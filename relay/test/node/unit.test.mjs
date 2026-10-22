@@ -603,7 +603,8 @@ print(json.dumps({
   // iOS left unwired variables empty, so every input names an earlier action's output.
   assert.deepEqual(parsed.keys, []);
   assert.equal(parsed.setvars, 0);
-  assert.deepEqual(parsed.opens, ["ActionOutput", "ActionOutput", "ActionOutput"]);
+  // Setup ends by opening Grok Bot, where the test answer arrives; then one open per menu AI.
+  assert.deepEqual(parsed.opens, ["ActionOutput", "ActionOutput", "ActionOutput", "ActionOutput"]);
   // The share sheet took too many taps, so without a code Grok Bot gets the message copied instead.
   assert.deepEqual(parsed.shares, []);
   assert.ok(parsed.texts.some(t => t.Value.string === "grokbot://"));
@@ -739,6 +740,7 @@ test("the connect site is rooted at docs and hands the code to the extension", a
   assert.ok(mobile.lastIndexOf("Install Send to Grok Bot") < mobile.indexOf('id="finish"'));
   assert.match(mobile, /not <span class="ui">Allow Once<\/span>/);
   assert.match(mobile, /id="startover"/);
+  assert.match(read("../scripts/build-site.sh"), /site\.js\?v=|\/assets\/\{n\}\?v=/);
   assert.match(mobile, /method: 'DELETE'/);
   // A variable named show once replaced the page's show() and broke the page in Chrome.
   assert.doesNotMatch(mobile, /var show\b/);

@@ -124,11 +124,15 @@ def send_in_background(code, test=False):
 def build():
     shared = with_uuid(act("detect.text", WFInput={"Value": {"Type": "ExtensionInput"}, "WFSerializationType": "WFTextTokenAttachment"}))
     is_setup, has_input, has_code, menu = gid(), gid(), gid(), gid()
+    grok_home = with_uuid(act("gettext", WFTextActionText=plain("grokbot://")))
     a = [shared, if_contains(shared, "Text", CODE_MARK, is_setup),
          # Run by the setup page's Finish button: keep the code for every later share.
          act("documentpicker.save", WFInput=output_of(shared, "Text"), WFAskWhereToSave=False,
              WFFileDestinationPath=CODE_FILE, WFSaveFileOverwrite=True),
          *send_in_background(shared, test=True),
+         # End setup in Grok Bot, where the test's answer is arriving.
+         grok_home,
+         act("openurl", WFInput=output_of(grok_home, "Text")),
          act("conditional", GroupingIdentifier=is_setup, WFControlFlowMode=1),
          # Run with nothing shared, for example when the setup page's handoff came through empty.
          # Say so, instead of showing the menu, which reads like setup worked.
