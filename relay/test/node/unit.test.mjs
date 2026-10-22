@@ -591,8 +591,8 @@ print(json.dumps({
   assert.deepEqual(parsed.condition, [[99, "stgbr1."], [100, null], [99, "stgbr1."]]);
   // Setup sends a test right away, and an empty run says so instead of showing the menu.
   assert.ok(parsed.actions.includes("exit"));
-  assert.deepEqual(parsed.saves, [["Send to Grok Bot/connect-code.txt", true, false]]);
-  assert.deepEqual(parsed.reads, [["Send to Grok Bot/connect-code.txt", false, false]]);
+  assert.deepEqual(parsed.saves, [["Send to Grok Bot connect code.txt", true, false]]);
+  assert.deepEqual(parsed.reads, [["Send to Grok Bot connect code.txt", false, false]]);
   assert.equal(parsed.auth, "ActionOutput");
   // No link check: the X app's share did not pass one, so the relay finds the link.
   assert.ok(!parsed.actions.includes("link"));
@@ -733,7 +733,8 @@ test("the connect site is rooted at docs and hands the code to the extension", a
   assert.doesNotMatch(mobile, /input=clipboard/);
   assert.doesNotMatch(mobile, /stgbCopy/);
   // Chrome and Firefox work too: they get the download's extra taps spelled out.
-  assert.match(mobile, /class="only-other"/);
+  assert.match(mobile, /class="only-chrome"/);
+  assert.match(mobile, /class="only-firefox"/);
   assert.doesNotMatch(mobile, /x-safari-https/);
   assert.match(mobile, /text\/uri-list/);
   assert.match(read("../docs/iphone-test.html"), /input=text&text=check/);

@@ -57,7 +57,8 @@
       <li>
         <div class="actions" style="margin:0 0 12px" id="install-link"><a class="btn large" href="https://sendtogrokbot.com/send-to-grok-bot.shortcut">Install Send to Grok Bot</a></div>
         <p class="only-safari">When Shortcuts opens, tap <span class="ui">Add Shortcut</span>, then come back here.</p>
-        <p class="only-other" hidden><span data-browser>Chrome</span> downloads the Shortcut first. At the bottom of the screen, tap <span class="ui">Open in…</span>, then <span class="ui">Shortcuts</span>, then <span class="ui">Add Shortcut</span>. Then come back here.</p>
+        <p class="only-chrome" hidden>Chrome downloads the Shortcut first. At the bottom of the screen, tap <span class="ui">Open in…</span>, then <span class="ui">Shortcuts</span>, then <span class="ui">Add Shortcut</span>. Then come back here.</p>
+        <p class="only-firefox" hidden><span data-browser>Firefox</span> downloads the Shortcut first. Open its <span class="ui">Downloads</span> (in the menu), tap <span class="ui">Send to Grok Bot.shortcut</span>, choose <span class="ui">Shortcuts</span>, then tap <span class="ui">Add Shortcut</span>. Then come back here. If that doesn't work, open this page in Safari.</p>
         <p class="muted">Installed an older version? Delete it in the Shortcuts app first, so you don't end up with "Send to Grok Bot (1)".</p>
       </li>
       <li data-for="grokbot">
@@ -80,7 +81,7 @@
       </li>
       <li data-for="grokbot">
         <div class="actions" style="margin:0 0 12px"><button type="button" class="btn large" id="finish" aria-disabled="true">Finish</button></div>
-        <p>Shortcuts opens and sends Grok Bot a test. iPhone asks a few questions the first time: open Shortcuts, save a file, send to relay.sendtogrokbot.com, show notifications. Tap <span class="ui">Allow</span> or <span class="ui">Always Allow</span> each time<span class="only-other" hidden>, including when <span data-browser>Chrome</span> asks to open Shortcuts</span>.</p>
+        <p>Shortcuts opens and sends Grok Bot a test. iPhone asks a few questions the first time: open Shortcuts, save a file, send to relay.sendtogrokbot.com, show notifications. Tap <span class="ui">Allow</span>, <span class="ui">Always Allow</span> or <span class="ui">Open</span> each time.</p>
         <p>You'll see <span class="ui">Connected</span>, and a test message waits in Grok Bot. That's setup done.</p>
         <p class="muted" id="finish-note">Finish turns on once the URL and Header are pasted.</p>
       </li>
@@ -125,14 +126,16 @@
 <script>
 (function () {
   var NAMES = { grokbot: 'Grok Bot', claude: 'Claude', chatgpt: 'ChatGPT' };
-  // Every iPhone browser works. Chrome, Firefox and Edge download the Shortcut as a file
-  // first instead of opening Shortcuts, so they get the two extra taps spelled out.
+  // Every iPhone browser can set this up. Chrome, Firefox and Edge download the Shortcut
+  // as a file instead of opening Shortcuts, and each shows the download in its own place.
   var other = (navigator.userAgent.match(/CriOS|FxiOS|EdgiOS|OPiOS/) || [''])[0];
   if (other) {
-    var name = { CriOS: 'Chrome', FxiOS: 'Firefox', EdgiOS: 'Edge', OPiOS: 'Opera' }[other];
+    var show = other === 'CriOS' ? '.only-chrome' : '.only-firefox';
     document.querySelectorAll('.only-safari').forEach(function (el) { el.hidden = true; });
-    document.querySelectorAll('.only-other').forEach(function (el) { el.hidden = false; });
-    document.querySelectorAll('[data-browser]').forEach(function (el) { el.textContent = name; });
+    document.querySelectorAll(show).forEach(function (el) { el.hidden = false; });
+    document.querySelectorAll('[data-browser]').forEach(function (el) {
+      el.textContent = { FxiOS: 'Firefox', EdgiOS: 'Edge', OPiOS: 'Opera' }[other] || 'Your browser';
+    });
   }
   var choose = document.getElementById('choose');
   var steps = document.getElementById('steps');
@@ -214,8 +217,10 @@
   box.addEventListener('blur', function () { if (box.value.trim()) take(box.value); });
 
   function save() {
-    if (state.saving) return;
+    // A paste that lands while a save is running is saved right after it.
+    if (state.saving) { state.again = true; return; }
     state.saving = true;
+    state.again = false;
     say('Connecting…', true);
     fetch(RELAY + '/v1/config', {
       method: 'PUT',
@@ -226,13 +231,17 @@
         if (!res.ok || !data.ok) throw new Error(data.error || 'The relay did not save it. Paste again.');
       });
     }).then(function () {
+      if (state.again) return;
       state.saved = true;
       finish.setAttribute('aria-disabled', 'false');
       note.textContent = 'Ready. Tap Finish.';
       say('Connected. Tap Finish.', true);
     }, function (err) {
       say(err && err.message && !/fetch|load/i.test(err.message) ? err.message : 'Could not reach sendtogrokbot.com. Check your connection and paste again.');
-    }).then(function () { state.saving = false; });
+    }).then(function () {
+      state.saving = false;
+      if (state.again) save();
+    });
   }
 
   // Finish hands the code to the Shortcut inside the link itself, not through the clipboard,
