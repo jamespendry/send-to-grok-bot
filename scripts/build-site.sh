@@ -32,6 +32,18 @@ done
 grep -q 'id="paste"' "$out/connect.html" && grep -q 'id="msg"' "$out/connect.html" \
   || { echo "connect.html lost an id that extension/site-connect.js needs"; exit 1; }
 cp "shortcuts/Send to Grok Bot (signed).shortcut" "$out/send-to-grok-bot.shortcut"
+# Assets are cached for an hour, so a phone could run a new page with an old site.js.
+# Stamp each page's site.js and site.css links with a hash of the file.
+python3 - "$out" <<'STAMP'
+import glob, hashlib, sys
+root = sys.argv[1]
+stamps = {n: hashlib.sha256(open(f"{root}/assets/{n}", "rb").read()).hexdigest()[:10] for n in ("site.js", "site.css")}
+for f in glob.glob(root + "/**/*.html", recursive=True):
+    s = open(f).read()
+    for n, h in stamps.items():
+        s = s.replace(f'/assets/{n}"', f'/assets/{n}?v={h}"')
+    open(f, "w").write(s)
+STAMP
 test -f "$out/connect.html"
 test -f "$out/send-to-grok-bot.shortcut"
 test -f "$out/connect.js"
