@@ -157,7 +157,7 @@ Send any post from the X app to Grok Bot without leaving X, or open it in Claude
 3. **Connect.** In Grok Bot, tap Grok Bot at the top of the chat, then Routines, then Send to Grok Bot. Tap the URL row, come back, tap the box and Paste. Do the same with the Header row.
 4. **Finish.** Tap Finish. Shortcuts opens and sends Grok Bot a test; tap Allow (or Always Allow) on each one-time question. You'll see "Connected", and a test message waits in Grok Bot.
 
-Then, in X, tap the share arrow under a post, then Share via…, then Send to Grok Bot. A "Sent to Grok Bot" notice appears and the reply arrives in your Grok Bot chat.
+Then, in X, tap the share arrow under a post, then Share via…, then Send to Grok Bot. A "Sent to Grok Bot" notice appears and you stay in X. Turn on Notifications in Grok Bot (tap Grok Bot at the top of the chat) to get a ping when the reply is ready.
 
 | 1. Tap Share via… | 2. Tap Send to Grok Bot |
 | --- | --- |
