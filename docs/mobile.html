@@ -27,12 +27,7 @@
 
 <main class="narrow page">
   <h1>Set up on iPhone</h1>
-  <p class="intro" style="margin-top:12px">Send posts from the X app to your AI. Do this once, here in Safari on your iPhone.</p>
-  <div class="notice" id="not-safari" hidden>
-    <p><b>Open this page in Safari.</b> Shortcuts installs from Safari, not from this browser.</p>
-    <div class="actions" style="margin:12px 0 0"><a class="btn" id="to-safari" href="x-safari-https://sendtogrokbot.com/mobile">Open in Safari</a></div>
-    <p class="muted" style="margin:10px 0 0">If nothing happens, open Safari and go to sendtogrokbot.com/mobile.</p>
-  </div>
+  <p class="intro" style="margin-top:12px">Send posts from the X app to your AI. Do this once, here on your iPhone, in Safari, Chrome, or Firefox.</p>
 
   <section id="choose">
     <h2>Which AI do you want?</h2>
@@ -61,8 +56,9 @@
     <ol class="steps num">
       <li>
         <div class="actions" style="margin:0 0 12px" id="install-link"><a class="btn large" href="https://sendtogrokbot.com/send-to-grok-bot.shortcut">Install Send to Grok Bot</a></div>
-        <p>When Shortcuts opens, tap <span class="ui">Add Shortcut</span>, then come back here.</p>
-        <p class="muted">If a file downloads instead, open this page in Safari and tap Install again. Installed an older version? Delete it in the Shortcuts app first, so you don't end up with "Send to Grok Bot (1)".</p>
+        <p class="only-safari">When Shortcuts opens, tap <span class="ui">Add Shortcut</span>, then come back here.</p>
+        <p class="only-other" hidden><span data-browser>Chrome</span> downloads the Shortcut first. At the bottom of the screen, tap <span class="ui">Open in…</span>, then <span class="ui">Shortcuts</span>, then <span class="ui">Add Shortcut</span>. Then come back here.</p>
+        <p class="muted">Installed an older version? Delete it in the Shortcuts app first, so you don't end up with "Send to Grok Bot (1)".</p>
       </li>
       <li data-for="grokbot">
         <h3>Make the routine in Grok Bot</h3>
@@ -84,7 +80,7 @@
       </li>
       <li data-for="grokbot">
         <div class="actions" style="margin:0 0 12px"><button type="button" class="btn large" id="finish" aria-disabled="true">Finish</button></div>
-        <p>Shortcuts opens and sends Grok Bot a test. iPhone asks a few questions the first time: open Shortcuts, save a file, send to relay.sendtogrokbot.com, show notifications. Tap <span class="ui">Allow</span> or <span class="ui">Always Allow</span> each time.</p>
+        <p>Shortcuts opens and sends Grok Bot a test. iPhone asks a few questions the first time: open Shortcuts, save a file, send to relay.sendtogrokbot.com, show notifications. Tap <span class="ui">Allow</span> or <span class="ui">Always Allow</span> each time<span class="only-other" hidden>, including when <span data-browser>Chrome</span> asks to open Shortcuts</span>.</p>
         <p>You'll see <span class="ui">Connected</span>, and a test message waits in Grok Bot. That's setup done.</p>
         <p class="muted" id="finish-note">Finish turns on once the URL and Header are pasted.</p>
       </li>
@@ -125,16 +121,18 @@
   .paste-steps li.done::after { content: " Done"; font-weight: 600; }
   #pastebox { min-height: 64px; font-size: 16px; }
   .sayline { -webkit-user-select: all; user-select: all; font-weight: 600; font-size: 17px; padding: 14px 16px; border-radius: 12px; background: var(--soft, rgba(127,127,127,.12)); margin: 12px 0; }
-  .notice { border: 1px solid var(--line, rgba(127,127,127,.3)); border-radius: 14px; padding: 16px; margin: 20px 0; }
-  .notice p { margin: 0; }
 </style>
 <script>
 (function () {
   var NAMES = { grokbot: 'Grok Bot', claude: 'Claude', chatgpt: 'ChatGPT' };
-  // Chrome, Firefox and Edge on iPhone download the Shortcut as a file and can't run it.
-  if (/iPhone|iPad|iPod/.test(navigator.userAgent) && /CriOS|FxiOS|EdgiOS|OPiOS/.test(navigator.userAgent)) {
-    document.getElementById('not-safari').hidden = false;
-    document.getElementById('to-safari').href = 'x-safari-https://sendtogrokbot.com/mobile' + location.hash;
+  // Every iPhone browser works. Chrome, Firefox and Edge download the Shortcut as a file
+  // first instead of opening Shortcuts, so they get the two extra taps spelled out.
+  var other = (navigator.userAgent.match(/CriOS|FxiOS|EdgiOS|OPiOS/) || [''])[0];
+  if (other) {
+    var name = { CriOS: 'Chrome', FxiOS: 'Firefox', EdgiOS: 'Edge', OPiOS: 'Opera' }[other];
+    document.querySelectorAll('.only-safari').forEach(function (el) { el.hidden = true; });
+    document.querySelectorAll('.only-other').forEach(function (el) { el.hidden = false; });
+    document.querySelectorAll('[data-browser]').forEach(function (el) { el.textContent = name; });
   }
   var choose = document.getElementById('choose');
   var steps = document.getElementById('steps');

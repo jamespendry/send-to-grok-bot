@@ -732,7 +732,9 @@ test("the connect site is rooted at docs and hands the code to the extension", a
   assert.match(mobile, /&input=text&text=/);
   assert.doesNotMatch(mobile, /input=clipboard/);
   assert.doesNotMatch(mobile, /stgbCopy/);
-  assert.match(mobile, /id="not-safari"/);
+  // Chrome and Firefox work too: they get the download's extra taps spelled out.
+  assert.match(mobile, /class="only-other"/);
+  assert.doesNotMatch(mobile, /x-safari-https/);
   assert.match(mobile, /text\/uri-list/);
   assert.match(read("../docs/iphone-test.html"), /input=text&text=check/);
   assert.match(read("../docs/_redirects"), /\/iphone-test\s+\/iphone-test\.html\s+200/);

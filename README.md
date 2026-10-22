@@ -150,7 +150,7 @@ If the icon turns red, a line at the bottom of the screen says why.
 
 ## iPhone
 
-Send any post from the X app to Grok Bot without leaving X, or open it in Claude or ChatGPT. Setup happens on the iPhone, at [sendtogrokbot.com/mobile](https://sendtogrokbot.com/mobile) in Safari:
+Send any post from the X app to Grok Bot without leaving X, or open it in Claude or ChatGPT. Setup happens on the iPhone, at [sendtogrokbot.com/mobile](https://sendtogrokbot.com/mobile) in Safari, Chrome, or Firefox (Chrome and Firefox download the Shortcut first: tap Open in…, then Shortcuts):
 
 1. **Install.** Tap Install Send to Grok Bot, then Add Shortcut.
 2. **Make the routine.** Open Grok Bot and send it: "Create a routine named Send to Grok Bot with a webhook trigger." Skip this if you already have the routine.
