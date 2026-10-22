@@ -28,6 +28,22 @@ const SITE_ORIGINS = new Set([
   "https://www.sendtogrokbot.com"
 ]);
 
+// What Grok Bot's webhook answered, in words a person can act on. They show on the iPhone
+// as "Not sent: ..." and in the extension's error line.
+const GROK_ERRORS = {
+  401: "Grok Bot didn't accept the key. The routine may have been deleted or changed. Set it up again at sendtogrokbot.com.",
+  403: "Grok Bot didn't accept the key. The routine may have been deleted or changed. Set it up again at sendtogrokbot.com.",
+  404: "Grok Bot can't find the routine. It may have been deleted. Set it up again at sendtogrokbot.com.",
+  410: "Grok Bot can't find the routine. It may have been deleted. Set it up again at sendtogrokbot.com.",
+  429: "Grok Bot is busy. Wait a minute, then share again."
+};
+
+function grokError(status) {
+  if (GROK_ERRORS[status]) return GROK_ERRORS[status];
+  if (status >= 500) return "Grok Bot had a problem on its side. Share again in a moment.";
+  return "Grok Bot turned the post away (error " + status + "). If it keeps happening, set it up again at sendtogrokbot.com.";
+}
+
 const CLAUDE_ERRORS = {
   400: "Bad request or routine paused",
   401: "Token invalid for this routine",
@@ -267,7 +283,7 @@ async function forwardGrok(env, request, account, keyHash, payload) {
   }
   await discard(res);
   if (res.ok) return { ok: true, http: 200, error: "" };
-  return { ok: false, http: 502, error: "HTTP " + res.status };
+  return { ok: false, http: 502, error: grokError(res.status) };
 }
 
 async function forwardClaude(env, account, keyHash, payload) {
