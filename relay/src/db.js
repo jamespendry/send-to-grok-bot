@@ -46,6 +46,14 @@ export async function updateAccount(db, row) {
   ).bind(row.grokWebhookUrl, row.grokSenderKey, row.claudeFireUrl, row.claudeToken, row.updatedAt, row.keyHash).run();
 }
 
+// Forgets a code: its saved destinations and its send history.
+export async function deleteAccount(db, keyHash) {
+  await db.batch([
+    db.prepare("DELETE FROM accounts WHERE key_hash = ?").bind(keyHash),
+    db.prepare("DELETE FROM sends WHERE key_hash = ?").bind(keyHash)
+  ]);
+}
+
 export async function addSend(db, row) {
   await db.batch([
     db.prepare(
