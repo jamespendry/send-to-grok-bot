@@ -1,0 +1,158 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>iPhone check</title>
+<meta name="robots" content="noindex">
+<meta name="theme-color" content="#ffffff" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#000000" media="(prefers-color-scheme: dark)">
+<link rel="icon" href="/assets/icons/icon32.png" sizes="32x32">
+<link rel="stylesheet" href="/assets/site.css">
+<script src="/assets/site.js" defer></script>
+</head>
+<body>
+<header class="top"><div class="wrap">
+  <a class="brand" href="/"><img src="/assets/icons/icon48.png" alt="" width="28" height="28"><span>Send to Grok Bot</span></a>
+</div></header>
+
+<main class="narrow page">
+  <h1>iPhone check</h1>
+  <p class="intro" style="margin-top:12px">Three quick checks that tell us what works on your iPhone. Nothing here is saved or sent anywhere. When you're done, take a screenshot of the results at the bottom.</p>
+  <p class="muted" id="browser"></p>
+
+  <section>
+    <h2>1. Copy</h2>
+    <p>For each row: tap <span class="ui">Copy</span>, then tap the box next to it and tap <span class="ui">Paste</span>.</p>
+    <div class="trow" data-method="old"><button type="button" class="btn secondary small">Copy</button><input type="text" placeholder="Paste here" autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false"><b class="res"></b></div>
+    <div class="trow" data-method="editable"><button type="button" class="btn secondary small">Copy</button><input type="text" placeholder="Paste here" autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false"><b class="res"></b></div>
+    <div class="trow" data-method="api"><button type="button" class="btn secondary small">Copy</button><input type="text" placeholder="Paste here" autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false"><b class="res"></b></div>
+  </section>
+
+  <section>
+    <h2>2. Paste from Grok Bot</h2>
+    <p>In Grok Bot, open the Send to Grok Bot routine and tap the <span class="ui">URL</span> row. Come back, tap the box, then <span class="ui">Paste</span>. Then do the same with the <span class="ui">Header</span> row. Only the kind of data and its length show here, never the value.</p>
+    <textarea id="probe" rows="2" placeholder="Tap here, then Paste" autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false" style="font-size:16px"></textarea>
+    <ul id="probe-out" class="muted"></ul>
+  </section>
+
+  <section>
+    <h2>3. Hand off to Shortcuts</h2>
+    <p>This runs your Send to Grok Bot Shortcut with the word "check". It doesn't change your setup. Tap <span class="ui">Allow</span> if asked.</p>
+    <div class="actions" style="margin:12px 0"><button type="button" class="btn" id="handoff">Run the Shortcut</button></div>
+    <p>Then tap what you saw:</p>
+    <div class="actions" style="margin:12px 0;flex-wrap:wrap">
+      <button type="button" class="btn secondary small" data-saw="ok">"No post link came through" or a menu</button>
+      <button type="button" class="btn secondary small" data-saw="empty">"Nothing came through"</button>
+      <button type="button" class="btn secondary small" data-saw="none">Nothing happened</button>
+    </div>
+  </section>
+
+  <section>
+    <h2>Results</h2>
+    <pre id="results" style="white-space:pre-wrap;font-size:14px"></pre>
+  </section>
+</main>
+<style>
+  .trow { display: flex; gap: 10px; align-items: center; margin: 10px 0; }
+  .trow input { flex: 1; min-width: 0; font-size: 16px; padding: 8px 10px; }
+  .trow .res { width: 4.5em; }
+</style>
+<script>
+(function () {
+  var ua = navigator.userAgent;
+  var browser = /CriOS/.test(ua) ? 'Chrome' : /FxiOS/.test(ua) ? 'Firefox' : /EdgiOS/.test(ua) ? 'Edge' : /Safari/.test(ua) ? 'Safari' : 'Other';
+  var ios = (ua.match(/OS (\d+)_(\d+)/) || []).slice(1).join('.');
+  document.getElementById('browser').textContent = 'Browser: ' + browser + (ios ? ', iOS ' + ios : '');
+  var results = { browser: browser + (ios ? ' iOS ' + ios : ''), copy: {}, paste: [], handoff: '' };
+  function show() {
+    var r = results, lines = ['Browser: ' + r.browser];
+    ['old', 'editable', 'api'].forEach(function (m) { lines.push('Copy ' + m + ': ' + (r.copy[m] || 'not tried')); });
+    r.paste.forEach(function (p, i) { lines.push('Paste ' + (i + 1) + ': ' + p); });
+    lines.push('Shortcuts handoff: ' + (r.handoff || 'not tried'));
+    document.getElementById('results').textContent = lines.join('\n');
+  }
+  show();
+
+  // Three ways to copy, each with its own word so the paste shows which one landed.
+  function selectAndCopy(text, editable) {
+    var ta = document.createElement('textarea');
+    ta.value = text;
+    if (editable) {
+      ta.contentEditable = 'true';
+      ta.style.cssText = 'position:fixed;top:0;left:0;width:2px;height:2px;padding:0;border:0;opacity:0.01;font-size:16px';
+    } else {
+      ta.setAttribute('readonly', '');
+      ta.style.cssText = 'position:fixed;top:0;left:0;width:1px;height:1px;opacity:0;font-size:16px';
+    }
+    document.body.appendChild(ta);
+    if (editable) ta.focus({ preventScroll: true });
+    var range = document.createRange();
+    range.selectNodeContents(ta);
+    var sel = window.getSelection();
+    sel.removeAllRanges();
+    sel.addRange(range);
+    ta.setSelectionRange(0, text.length);
+    var ok = false;
+    try { ok = document.execCommand('copy'); } catch (e) {}
+    sel.removeAllRanges();
+    ta.blur();
+    ta.remove();
+    return ok;
+  }
+  document.querySelectorAll('.trow').forEach(function (row) {
+    var m = row.getAttribute('data-method');
+    var word = 'check-' + m + '-' + Math.random().toString(36).slice(2, 6);
+    var input = row.querySelector('input'), res = row.querySelector('.res');
+    row.querySelector('button').addEventListener('click', function () {
+      if (m === 'api') {
+        if (!navigator.clipboard || !navigator.clipboard.writeText) { res.textContent = 'No API'; results.copy[m] = 'no clipboard API'; show(); return; }
+        navigator.clipboard.writeText(word).then(function () { res.textContent = 'Paste'; }, function (e) { res.textContent = 'Refused'; results.copy[m] = 'refused: ' + (e && e.name); show(); });
+      } else {
+        res.textContent = selectAndCopy(word, m === 'editable') ? 'Paste' : 'Said no';
+      }
+    });
+    input.addEventListener('input', function () {
+      var v = input.value.trim();
+      if (!v) return;
+      var pass = v === word;
+      res.textContent = pass ? 'Works' : 'Wrong';
+      results.copy[m] = pass ? 'works' : (/^check-/.test(v) ? 'pasted another row' : 'pasted something else (' + v.length + ' chars)');
+      show();
+    });
+  });
+
+  // What a paste from Grok Bot actually carries: kinds and lengths, never the value.
+  var probe = document.getElementById('probe'), out = document.getElementById('probe-out');
+  probe.addEventListener('paste', function (e) {
+    var d = e.clipboardData, parts = [];
+    if (d) Array.prototype.forEach.call(d.types || [], function (t) {
+      var v = ''; try { v = d.getData(t) || ''; } catch (err) {}
+      var kind = /https:\/\//.test(v) ? 'has a link' : /crsr_|bearer/i.test(v) ? 'has a key' : '';
+      parts.push(t + ' ' + v.length + (kind ? ' ' + kind : ''));
+    });
+    setTimeout(function () {
+      var inBox = probe.value.trim();
+      var line = (parts.join(', ') || 'no types offered') + '; box got ' + inBox.length + ' chars';
+      results.paste.push(line);
+      var li = document.createElement('li'); li.textContent = line; out.appendChild(li);
+      probe.value = '';
+      show();
+    }, 80);
+  });
+
+  document.getElementById('handoff').addEventListener('click', function () {
+    results.handoff = 'opened, waiting for your answer';
+    show();
+    location.href = 'shortcuts://run-shortcut?name=' + encodeURIComponent('Send to Grok Bot') + '&input=text&text=check';
+  });
+  document.querySelectorAll('[data-saw]').forEach(function (b) {
+    b.addEventListener('click', function () {
+      results.handoff = { ok: 'works (the Shortcut got the text)', empty: 'Shortcut ran but got no text', none: 'Shortcuts did not open' }[b.getAttribute('data-saw')];
+      show();
+    });
+  });
+})();
+</script>
+</body>
+</html>

@@ -16,9 +16,12 @@
   function copyNow(text) {
     var ta = document.createElement('textarea');
     ta.value = text;
-    ta.setAttribute('readonly', '');
-    ta.style.cssText = 'position:fixed;top:0;left:0;width:1px;height:1px;opacity:0;font-size:16px';
+    // iPhone selects nothing in a read-only or invisible field, and then copies nothing while
+    // still reporting success. So the field is editable, on screen, and focused.
+    ta.contentEditable = 'true';
+    ta.style.cssText = 'position:fixed;top:0;left:0;width:2px;height:2px;padding:0;border:0;opacity:0.01;font-size:16px';
     document.body.appendChild(ta);
+    ta.focus({ preventScroll: true });
     var range = document.createRange();
     range.selectNodeContents(ta);
     var sel = window.getSelection();
@@ -28,6 +31,7 @@
     var ok = false;
     try { ok = document.execCommand('copy'); } catch (e) { ok = false; }
     sel.removeAllRanges();
+    ta.blur();
     ta.remove();
     if (ok) return Promise.resolve();
     if (navigator.clipboard && navigator.clipboard.writeText) return navigator.clipboard.writeText(text);

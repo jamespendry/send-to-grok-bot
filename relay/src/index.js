@@ -391,7 +391,19 @@ async function send(request, env, who) {
   const body = await readJson(request);
   if (body.error) return json({ ok: false, error: body.error }, body.status || 400);
   const phone = !!(body.value && typeof body.value === "object" && body.value.format === "text");
-  if (phone) {
+  const setupTest = phone && body.value.test === "setup";
+  if (setupTest) {
+    // Run once by the Shortcut at the end of iPhone setup. It proves the code, the relay and the
+    // webhook all work, and it brings up iOS's one-time permission questions during setup.
+    body.value = {
+      destination: "grokbot",
+      source: "setup",
+      url: "https://sendtogrokbot.com/mobile",
+      author: "sendtogrokbot",
+      text: "Test from Send to Grok Bot: your iPhone is connected. Reply with one short line saying the connection works. From now on, posts you share from X arrive here.",
+      sentAt: new Date().toISOString()
+    };
+  } else if (phone) {
     const post = await phonePost(env, body.value);
     if (!post) return phoneAnswer("No post link came through. In the X app, tap Share on a post, then Share via, then Send to Grok Bot.");
     body.value = post;
@@ -407,7 +419,7 @@ async function send(request, env, who) {
   } else {
     const account = await findAccount(env.DB, who.keyHash);
     if (!account) {
-      if (phone) return phoneAnswer("Not sent: nothing is saved for this code yet. Add your Grok Bot webhook at relay.sendtogrokbot.com.");
+      if (phone) return phoneAnswer("Not connected yet: paste the URL and Header on sendtogrokbot.com/mobile, then tap Finish again.");
       return json(named(parsed.destination, {
         ok: false,
         error: "Nothing is saved for this code yet.",
@@ -438,6 +450,7 @@ async function send(request, env, who) {
     const notice = openOnly
       ? (parsed.destination === "chatgpt" ? "Opened ChatGPT" : "Opened Codex")
       : (parsed.destination === "grokbot" ? "Sent to Grok Bot" : "Sent to Claude");
+    if (setupTest) return phoneAnswer("Connected. Open Grok Bot: a test message is in your Send to Grok Bot chat.");
     if (phone) return phoneAnswer(notice + ". The reply will land in your Grok Bot chat.");
     const payload = named(parsed.destination, { ok: true, notice });
     if (result.sessionUrl) payload.sessionUrl = result.sessionUrl;
@@ -445,6 +458,7 @@ async function send(request, env, who) {
     return json(payload);
   }
   const error = publicError(result.error);
+  if (setupTest) return phoneAnswer("Saved, but Grok Bot did not accept the test: " + error + " Copy the URL and Header again and tap Finish again.");
   if (phone) return phoneAnswer("Not sent: " + error);
   return json(named(parsed.destination, { ok: false, error, notice: error }), result.http || 502);
 }

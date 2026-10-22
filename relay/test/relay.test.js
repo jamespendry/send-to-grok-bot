@@ -315,6 +315,27 @@ describe("send", () => {
     expect(none.text).toContain("No post link came through");
   });
 
+  it("sends a setup test from the phone so the person sees it work", async () => {
+    const key = relayKey();
+    const code = connectCode(key);
+    const ip = nextIp();
+    const calls = [];
+    const outbound = async request => {
+      calls.push(request.url);
+      calls.body = await request.text();
+      return new Response("{}", { status: 200 });
+    };
+    const before = await api("/v1/send", { method: "POST", key: code, ip, outbound, body: { destination: "grokbot", test: "setup", format: "text" } });
+    expect(before.text).toContain("Not connected yet");
+    await saveGrok(key, ip);
+    const res = await api("/v1/send", { method: "POST", key: code, ip, outbound, body: { destination: "grokbot", test: "setup", format: "text" } });
+    expect(res.status).toBe(200);
+    expect(res.text).toContain("Connected. Open Grok Bot");
+    const forwarded = JSON.parse(calls.body);
+    expect(forwarded.source).toBe("setup");
+    expect(forwarded.text).toContain("your iPhone is connected");
+  });
+
   it("forwards a Grok Bot webhook with the bearer key and without the destination field", async () => {
     const key = relayKey();
     const ip = nextIp();
