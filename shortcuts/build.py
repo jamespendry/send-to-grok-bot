@@ -96,7 +96,7 @@ def send_steps(dest):
     get = ask_relay(dest, "text")
     return [get, act("openurl", WFInput=output_of(get, "Contents of URL"))]
 
-CODE_FILE = "Send to Grok Bot/connect-code.txt"
+CODE_FILE = "Send to Grok Bot connect code.txt"
 CODE_MARK = "stgbr1."
 
 def if_contains(action, name, text, group):
