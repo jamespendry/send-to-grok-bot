@@ -719,10 +719,11 @@ test("the connect site is rooted at docs and hands the code to the extension", a
   assert.match(read("../README.md"), /npx wrangler deploy --config site\/wrangler\.toml/);
   const mobile = read("../docs/mobile.html");
   assert.match(mobile, /id="install-link"/);
-  assert.match(mobile, /https:\/\/sendtogrokbot\.com\/send-to-grok-bot\.shortcut/);
+  // The iCloud link opens Shortcuts from any iPhone browser; the file stays as a fallback.
+  assert.match(mobile, /href="https:\/\/www\.icloud\.com\/shortcuts\/[0-9a-f]{32}"/);
+  assert.match(mobile, /href="\/send-to-grok-bot\.shortcut"/);
   assert.match(mobile, /Add Shortcut/);
   assert.doesNotMatch(mobile, /not published yet/);
-  assert.doesNotMatch(mobile, /icloud\.com\/shortcuts\/[0-9a-f]{8}/);
   assert.match(read("../scripts/build-site.sh"), /send-to-grok-bot\.shortcut/);
   assert.doesNotMatch(mobile, /rk_[A-Za-z0-9_-]{20}/);
   // Setup stays on the iPhone: the page saves the webhook on the relay, then hands the code to the Shortcut.
@@ -733,8 +734,12 @@ test("the connect site is rooted at docs and hands the code to the extension", a
   assert.doesNotMatch(mobile, /input=clipboard/);
   assert.doesNotMatch(mobile, /stgbCopy/);
   // Chrome and Firefox work too: they get the download's extra taps spelled out.
-  assert.match(mobile, /class="only-chrome"/);
-  assert.match(mobile, /class="only-firefox"/);
+  // Grok Bot installs right before Finish, so the Shortcut is there when Finish runs it.
+  assert.ok(mobile.indexOf('id="pastebox"') < mobile.lastIndexOf("Install Send to Grok Bot"));
+  assert.ok(mobile.lastIndexOf("Install Send to Grok Bot") < mobile.indexOf('id="finish"'));
+  assert.match(mobile, /not <span class="ui">Allow Once<\/span>/);
+  assert.match(mobile, /id="startover"/);
+  assert.match(mobile, /method: 'DELETE'/);
   // A variable named show once replaced the page's show() and broke the page in Chrome.
   assert.doesNotMatch(mobile, /var show\b/);
   // Setup survives the page reloading while the person is in Grok Bot.

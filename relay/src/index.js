@@ -1,6 +1,6 @@
 import { relayKeyFromToken } from "./connect-code.js";
 import { encryptSecret, decryptSecret, sha256Hex } from "./crypto.js";
-import { ensureSchema, findAccount, insertAccount, updateAccount, addSend, recentSends } from "./db.js";
+import { ensureSchema, findAccount, insertAccount, updateAccount, deleteAccount, addSend, recentSends } from "./db.js";
 import { safeLog } from "./log.js";
 import { prefilledOpenUrl } from "./open-link.js";
 import { buildOpen, parsePostUrl } from "./open.js";
@@ -82,7 +82,7 @@ function corsHeaders(request) {
   return {
     "access-control-allow-origin": origin,
     vary: "Origin",
-    "access-control-allow-methods": "GET, PUT, OPTIONS",
+    "access-control-allow-methods": "GET, PUT, DELETE, OPTIONS",
     "access-control-allow-headers": "Authorization, Content-Type",
     "access-control-max-age": "86400"
   };
@@ -365,6 +365,14 @@ async function putConfig(request, env, who) {
   return json({ ok: true });
 }
 
+// The iPhone page's Start over: the old code stops working, even if someone saw it.
+async function deleteConfig(env, who) {
+  await ensureSchema(env.DB);
+  await deleteAccount(env.DB, who.keyHash);
+  safeLog({ method: "DELETE", path: "/v1/config", status: 200 });
+  return json({ ok: true });
+}
+
 function named(destination, fields) {
   return { destination, label: LABELS[destination] || destination, ...fields };
 }
@@ -538,8 +546,9 @@ export async function handle(request, env) {
   if (path === "/v1/history" && request.method === "GET") return getHistory(request, env, who, cors);
   if (path === "/v1/config" && request.method === "GET") return getConfig(request, env, who);
   if (path === "/v1/config" && request.method === "PUT") return withHeaders(await putConfig(request, env, who), cors);
+  if (path === "/v1/config" && request.method === "DELETE") return withHeaders(await deleteConfig(env, who), cors);
   if (path === "/v1/send" && request.method === "POST") return send(request, env, who);
-  const allow = path === "/v1/send" ? "POST" : path === "/v1/history" ? "GET" : "GET, PUT";
+  const allow = path === "/v1/send" ? "POST" : path === "/v1/history" ? "GET" : "GET, PUT, DELETE";
   return json({ ok: false, error: "That method is not allowed." }, 405, { ...cors, allow });
 }
 

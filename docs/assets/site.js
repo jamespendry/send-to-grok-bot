@@ -11,9 +11,15 @@
 
   // On an iPhone, the iPhone button comes first; Chrome keeps its Recommended label.
   if (/iPhone|iPad|iPod/.test(navigator.userAgent)) document.documentElement.classList.add('ios');
-  // Copies inside the tap itself. iPhone Safari can refuse navigator.clipboard and leave the
-  // old clipboard in place, so the selected-text copy runs first, while the tap still counts.
+  // Copies inside the tap itself. The clipboard API goes first: on iPhone the selected-text
+  // copy reported success while leaving the clipboard empty. The older way is the fallback.
   function copyNow(text) {
+    if (navigator.clipboard && navigator.clipboard.writeText && window.isSecureContext) {
+      return navigator.clipboard.writeText(text).catch(function () { return selectCopy(text); });
+    }
+    return selectCopy(text);
+  }
+  function selectCopy(text) {
     var ta = document.createElement('textarea');
     ta.value = text;
     // iPhone selects nothing in a read-only or invisible field, and then copies nothing while

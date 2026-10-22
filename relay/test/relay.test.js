@@ -334,6 +334,12 @@ describe("send", () => {
     const forwarded = JSON.parse(calls.body);
     expect(forwarded.source).toBe("setup");
     expect(forwarded.text).toContain("your iPhone is connected");
+
+    // Start over forgets the code, so a code someone saw stops working.
+    const gone = await api("/v1/config", { method: "DELETE", key, ip });
+    expect(gone.status).toBe(200);
+    const after = await api("/v1/send", { method: "POST", key: code, ip, outbound, body: { destination: "grokbot", test: "setup", format: "text" } });
+    expect(after.text).toContain("Not connected yet");
   });
 
   it("forwards a Grok Bot webhook with the bearer key and without the destination field", async () => {

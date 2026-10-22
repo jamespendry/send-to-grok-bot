@@ -22,3 +22,7 @@ The install link is the signed file, served from the site: https://sendtogrokbot
 3. In the X app, tap Share on a post, then Send to Grok Bot. Pick Grok Bot, Claude, or ChatGPT.
 4. Claude and ChatGPT open with the post filled in. Press Send. For Grok Bot without a code, open a chat in Grok Bot and paste.
 5. Connected: run steps 2 to 4 on sendtogrokbot.com/mobile, check "Connected to Grok Bot", share a post, and check the "Sent to Grok Bot" notice and the reply in the routine's Grok Bot chat.
+
+## The iCloud install link
+
+/mobile installs from an iCloud link (`https://www.icloud.com/shortcuts/…`), because it opens Shortcuts with Add Shortcut from Safari, Chrome and Firefox, while the file downloads first in every iPhone browser. The file stays as a fallback link. After any change to the Shortcut, install the new signed file on an iPhone, then in Shortcuts press and hold it, Share, Copy iCloud Link, and replace both links in `docs/mobile.html`. The old link keeps serving the old version.
