@@ -735,6 +735,10 @@ test("the connect site is rooted at docs and hands the code to the extension", a
   // Chrome and Firefox work too: they get the download's extra taps spelled out.
   assert.match(mobile, /class="only-chrome"/);
   assert.match(mobile, /class="only-firefox"/);
+  // A variable named show once replaced the page's show() and broke the page in Chrome.
+  assert.doesNotMatch(mobile, /var show\b/);
+  // Setup survives the page reloading while the person is in Grok Bot.
+  assert.match(mobile, /localStorage', 'stgb-mobile'/);
   assert.doesNotMatch(mobile, /x-safari-https/);
   assert.match(mobile, /text\/uri-list/);
   assert.match(read("../docs/iphone-test.html"), /input=text&text=check/);

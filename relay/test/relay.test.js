@@ -330,7 +330,7 @@ describe("send", () => {
     await saveGrok(key, ip);
     const res = await api("/v1/send", { method: "POST", key: code, ip, outbound, body: { destination: "grokbot", test: "setup", format: "text" } });
     expect(res.status).toBe(200);
-    expect(res.text).toContain("Connected. Open Grok Bot");
+    expect(res.text).toContain("Connected. Grok Bot got a test");
     const forwarded = JSON.parse(calls.body);
     expect(forwarded.source).toBe("setup");
     expect(forwarded.text).toContain("your iPhone is connected");

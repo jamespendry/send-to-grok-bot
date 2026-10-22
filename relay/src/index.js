@@ -450,7 +450,7 @@ async function send(request, env, who) {
     const notice = openOnly
       ? (parsed.destination === "chatgpt" ? "Opened ChatGPT" : "Opened Codex")
       : (parsed.destination === "grokbot" ? "Sent to Grok Bot" : "Sent to Claude");
-    if (setupTest) return phoneAnswer("Connected. Open Grok Bot: a test message is in your Send to Grok Bot chat.");
+    if (setupTest) return phoneAnswer("Connected. Grok Bot got a test and will answer it in your Send to Grok Bot chat.");
     if (phone) return phoneAnswer(notice + ". The reply will land in your Grok Bot chat.");
     const payload = named(parsed.destination, { ok: true, notice });
     if (result.sessionUrl) payload.sessionUrl = result.sessionUrl;

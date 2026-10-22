@@ -58,7 +58,7 @@
         <div class="actions" style="margin:0 0 12px" id="install-link"><a class="btn large" href="https://sendtogrokbot.com/send-to-grok-bot.shortcut">Install Send to Grok Bot</a></div>
         <p class="only-safari">When Shortcuts opens, tap <span class="ui">Add Shortcut</span>, then come back here.</p>
         <p class="only-chrome" hidden>Chrome downloads the Shortcut first. At the bottom of the screen, tap <span class="ui">Open in…</span>, then <span class="ui">Shortcuts</span>, then <span class="ui">Add Shortcut</span>. Then come back here.</p>
-        <p class="only-firefox" hidden><span data-browser>Firefox</span> downloads the Shortcut first. Open its <span class="ui">Downloads</span> (in the menu), tap <span class="ui">Send to Grok Bot.shortcut</span>, choose <span class="ui">Shortcuts</span>, then tap <span class="ui">Add Shortcut</span>. Then come back here. If that doesn't work, open this page in Safari.</p>
+        <p class="only-firefox" hidden><span data-browser>Firefox</span> downloads the Shortcut first. Open its menu, then <span class="ui">Downloads</span>. Swipe left on <span class="ui">Send to Grok Bot.shortcut</span>, tap <span class="ui">Share</span>, choose <span class="ui">Shortcuts</span>, then tap <span class="ui">Add Shortcut</span>. Then come back here. If that doesn't work, open this page in Safari.</p>
         <p class="muted">Installed an older version? Delete it in the Shortcuts app first, so you don't end up with "Send to Grok Bot (1)".</p>
       </li>
       <li data-for="grokbot">
@@ -66,7 +66,7 @@
         <p>Open Grok Bot and send it this line in any chat. Type it, or press and hold it here to copy it.</p>
         <p class="sayline" id="grokline">Create a routine named Send to Grok Bot with a webhook trigger.</p>
         <div class="actions" style="margin:0 0 12px"><a class="btn secondary" href="grokbot://">Open Grok Bot</a></div>
-        <p class="muted">Grok Bot answers "Creating the Send to Grok Bot routine now." Already have that routine, for example from the Chrome extension? Skip this step.</p>
+        <p class="muted">Wait until Grok Bot says the routine is made. Already have that routine, for example from the Chrome extension? Skip this step.</p>
       </li>
       <li data-for="grokbot">
         <h3>Connect your routine</h3>
@@ -81,8 +81,8 @@
       </li>
       <li data-for="grokbot">
         <div class="actions" style="margin:0 0 12px"><button type="button" class="btn large" id="finish" aria-disabled="true">Finish</button></div>
-        <p>Shortcuts opens and sends Grok Bot a test. iPhone asks a few questions the first time: open Shortcuts, save a file, send to relay.sendtogrokbot.com, show notifications. Tap <span class="ui">Allow</span>, <span class="ui">Always Allow</span> or <span class="ui">Open</span> each time.</p>
-        <p>You'll see <span class="ui">Connected</span>, and a test message waits in Grok Bot. That's setup done.</p>
+        <p>Shortcuts opens and sends Grok Bot a test. iPhone asks a few questions the first time: open Shortcuts, save a file, send to relay.sendtogrokbot.com, show notifications. Tap <span class="ui">Allow</span>, <span class="ui">Always Allow</span> or <span class="ui">Open</span> each time. iCloud Drive needs to be on, because the Shortcut keeps its connection there.</p>
+        <p>You'll see <span class="ui">Connected</span>, and Grok Bot answers the test in a moment. That's setup done.</p>
         <p class="muted" id="finish-note">Finish turns on once the URL and Header are pasted.</p>
       </li>
       <li data-for="claude chatgpt">
@@ -130,9 +130,9 @@
   // as a file instead of opening Shortcuts, and each shows the download in its own place.
   var other = (navigator.userAgent.match(/CriOS|FxiOS|EdgiOS|OPiOS/) || [''])[0];
   if (other) {
-    var show = other === 'CriOS' ? '.only-chrome' : '.only-firefox';
+    var steps = other === 'CriOS' ? '.only-chrome' : '.only-firefox';
     document.querySelectorAll('.only-safari').forEach(function (el) { el.hidden = true; });
-    document.querySelectorAll(show).forEach(function (el) { el.hidden = false; });
+    document.querySelectorAll(steps).forEach(function (el) { el.hidden = false; });
     document.querySelectorAll('[data-browser]').forEach(function (el) {
       el.textContent = { FxiOS: 'Firefox', EdgiOS: 'Edge', OPiOS: 'Opera' }[other] || 'Your browser';
     });
@@ -172,10 +172,23 @@
     for (var i = 0; i < bytes.length; i++) bin += String.fromCharCode(bytes[i]);
     return btoa(bin).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
   }
-  // One relay key per visit, so pasting again updates the same connection.
-  var bytes = new Uint8Array(32);
-  crypto.getRandomValues(bytes);
-  var relayKey = 'rk_' + b64url(bytes);
+  // iPhone can reload this page while the person is off copying in Grok Bot, so setup
+  // survives a reload: the relay key and "saved" stay on this phone, and a pasted URL or
+  // Header waits in this tab only until both are saved on the relay.
+  function load(store, k) { try { return JSON.parse(window[store].getItem(k) || 'null'); } catch (e) { return null; } }
+  function keep(store, k, v) { try { if (v == null) window[store].removeItem(k); else window[store].setItem(k, JSON.stringify(v)); } catch (e) {} }
+  var kept = load('localStorage', 'stgb-mobile') || {};
+  var relayKey = kept.relayKey;
+  if (!/^rk_[A-Za-z0-9_-]{43}$/.test(relayKey || '')) {
+    var bytes = new Uint8Array(32);
+    crypto.getRandomValues(bytes);
+    relayKey = 'rk_' + b64url(bytes);
+  }
+  keep('localStorage', 'stgb-mobile', { relayKey: relayKey, saved: !!kept.saved });
+  function remember() {
+    keep('localStorage', 'stgb-mobile', { relayKey: relayKey, saved: state.saved });
+    keep('sessionStorage', 'stgb-mobile-paste', state.saved ? null : { url: state.url, key: state.key });
+  }
   var code = 'stgbr1.' + b64url(new TextEncoder().encode(JSON.stringify({ v: 1, relay: RELAY, key: relayKey })));
 
   // One box takes both. Whatever is pasted, it works out whether it is the address or the key.
@@ -196,6 +209,7 @@
       got.textContent = 'Header: ' + key.slice(0, 5) + '•••••• (' + key.length + ' characters)';
     }
     state.saved = false;
+    remember();
     box.value = '';
     box.blur();
     if (state.url && state.key) save();
@@ -203,6 +217,20 @@
   }
   // Grok Bot copies the URL as a link, not as text, so read every kind the paste offers.
   // If none is readable, let the paste land in the box and pick it up from there.
+  // Bring back what this phone already did.
+  (function () {
+    var held = load('sessionStorage', 'stgb-mobile-paste') || {};
+    if (kept.saved) {
+      state.saved = true;
+      ['need-url', 'need-key'].forEach(function (id) { document.getElementById(id).classList.add('done'); });
+      finish.setAttribute('aria-disabled', 'false');
+      note.textContent = 'Ready. Tap Finish.';
+      say('Saved earlier. Tap Finish, or paste again to change it.', true);
+    } else {
+      if (held.url) take(held.url);
+      if (held.key) take(held.key);
+    }
+  })();
   box.addEventListener('paste', function (e) {
     var d = e.clipboardData, text = '';
     if (d) ['text/plain', 'text/uri-list', 'text', 'url', 'text/html'].some(function (t) {
@@ -233,9 +261,10 @@
     }).then(function () {
       if (state.again) return;
       state.saved = true;
+      remember();
       finish.setAttribute('aria-disabled', 'false');
       note.textContent = 'Ready. Tap Finish.';
-      say('Connected. Tap Finish.', true);
+      say('Saved. Tap Finish to test it.', true);
     }, function (err) {
       say(err && err.message && !/fetch|load/i.test(err.message) ? err.message : 'Could not reach sendtogrokbot.com. Check your connection and paste again.');
     }).then(function () {
