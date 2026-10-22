@@ -28,6 +28,11 @@
 <main class="narrow page">
   <h1>Set up on iPhone</h1>
   <p class="intro" style="margin-top:12px">Send posts from the X app to your AI. Do this once, here in Safari on your iPhone.</p>
+  <div class="notice" id="not-safari" hidden>
+    <p><b>Open this page in Safari.</b> Shortcuts installs from Safari, not from this browser.</p>
+    <div class="actions" style="margin:12px 0 0"><a class="btn" id="to-safari" href="x-safari-https://sendtogrokbot.com/mobile">Open in Safari</a></div>
+    <p class="muted" style="margin:10px 0 0">If nothing happens, open Safari and go to sendtogrokbot.com/mobile.</p>
+  </div>
 
   <section id="choose">
     <h2>Which AI do you want?</h2>
@@ -60,13 +65,11 @@
         <p class="muted">If a file downloads instead, open this page in Safari and tap Install again. Installed an older version? Delete it in the Shortcuts app first, so you don't end up with "Send to Grok Bot (1)".</p>
       </li>
       <li data-for="grokbot">
-        <div class="copy" style="margin:0 0 12px">
-          <span class="val" id="grokline">Set up Send to Grok Bot for me: https://github.com/jamespendry/send-to-grok-bot</span>
-          <button type="button" data-copy="#grokline">Copy</button>
-        </div>
+        <h3>Make the routine in Grok Bot</h3>
+        <p>Open Grok Bot and send it this line in any chat. Type it, or press and hold it here to copy it.</p>
+        <p class="sayline" id="grokline">Create a routine named Send to Grok Bot with a webhook trigger.</p>
         <div class="actions" style="margin:0 0 12px"><a class="btn secondary" href="grokbot://">Open Grok Bot</a></div>
-        <p>Copy the message, open Grok Bot, then paste it into any chat and send it. Grok Bot makes a routine named <span class="ui">Send to Grok Bot</span>.</p>
-        <p class="muted">Already have that routine, for example from the Chrome extension? Skip this step.</p>
+        <p class="muted">Grok Bot answers "Creating the Send to Grok Bot routine now." Already have that routine, for example from the Chrome extension? Skip this step.</p>
       </li>
       <li data-for="grokbot">
         <h3>Connect your routine</h3>
@@ -77,11 +80,13 @@
         </ol>
         <textarea id="pastebox" rows="2" autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false" placeholder="Tap here, then Paste"></textarea>
         <span id="msg" role="status"></span>
+        <p class="muted" id="got"></p>
       </li>
       <li data-for="grokbot">
         <div class="actions" style="margin:0 0 12px"><button type="button" class="btn large" id="finish" aria-disabled="true">Finish</button></div>
-        <p>Shortcuts opens for a moment and asks once to save a file. Tap <span class="ui">Allow</span>. You'll see <span class="ui">Connected to Grok Bot</span>.</p>
-        <p class="muted" id="finish-note">Finish turns on once the address and key are pasted.</p>
+        <p>Shortcuts opens and sends Grok Bot a test. iPhone asks a few questions the first time: open Shortcuts, save a file, send to relay.sendtogrokbot.com, show notifications. Tap <span class="ui">Allow</span> or <span class="ui">Always Allow</span> each time.</p>
+        <p>You'll see <span class="ui">Connected</span>, and a test message waits in Grok Bot. That's setup done.</p>
+        <p class="muted" id="finish-note">Finish turns on once the URL and Header are pasted.</p>
       </li>
       <li data-for="claude chatgpt">
         <h3>Sign in to the app</h3>
@@ -119,10 +124,18 @@
   .paste-steps li.done { color: var(--ok); }
   .paste-steps li.done::after { content: " Done"; font-weight: 600; }
   #pastebox { min-height: 64px; font-size: 16px; }
+  .sayline { -webkit-user-select: all; user-select: all; font-weight: 600; font-size: 17px; padding: 14px 16px; border-radius: 12px; background: var(--soft, rgba(127,127,127,.12)); margin: 12px 0; }
+  .notice { border: 1px solid var(--line, rgba(127,127,127,.3)); border-radius: 14px; padding: 16px; margin: 20px 0; }
+  .notice p { margin: 0; }
 </style>
 <script>
 (function () {
   var NAMES = { grokbot: 'Grok Bot', claude: 'Claude', chatgpt: 'ChatGPT' };
+  // Chrome, Firefox and Edge on iPhone download the Shortcut as a file and can't run it.
+  if (/iPhone|iPad|iPod/.test(navigator.userAgent) && /CriOS|FxiOS|EdgiOS|OPiOS/.test(navigator.userAgent)) {
+    document.getElementById('not-safari').hidden = false;
+    document.getElementById('to-safari').href = 'x-safari-https://sendtogrokbot.com/mobile' + location.hash;
+  }
   var choose = document.getElementById('choose');
   var steps = document.getElementById('steps');
 
@@ -165,6 +178,7 @@
   var code = 'stgbr1.' + b64url(new TextEncoder().encode(JSON.stringify({ v: 1, relay: RELAY, key: relayKey })));
 
   // One box takes both. Whatever is pasted, it works out whether it is the address or the key.
+  var got = document.getElementById('got');
   function take(text) {
     var t = String(text || '').trim();
     if (!t) return;
@@ -172,11 +186,13 @@
     if (url) {
       state.url = url[0].replace(/[.,;)]+$/, '');
       document.getElementById('need-url').classList.add('done');
+      got.textContent = 'URL: ' + state.url.replace(/^https:\/\//, '').slice(0, 32) + '…';
     } else {
       var key = t.replace(/^authorization\s*:\s*/i, '').replace(/^bearer\s+/i, '').trim();
       if (key.length < 8 || /\s/.test(key)) { say("That doesn't look like the URL or the Header. Copy it again in Grok Bot."); return; }
       state.key = key;
       document.getElementById('need-key').classList.add('done');
+      got.textContent = 'Header: ' + key.slice(0, 5) + '•••••• (' + key.length + ' characters)';
     }
     state.saved = false;
     box.value = '';
@@ -184,11 +200,20 @@
     if (state.url && state.key) save();
     else say(state.url ? 'Address added. Now copy the Header row.' : 'Key added. Now copy the URL row.', true);
   }
+  // Grok Bot copies the URL as a link, not as text, so read every kind the paste offers.
+  // If none is readable, let the paste land in the box and pick it up from there.
   box.addEventListener('paste', function (e) {
-    var text = e.clipboardData && e.clipboardData.getData('text');
-    if (text) { e.preventDefault(); take(text); }
+    var d = e.clipboardData, text = '';
+    if (d) ['text/plain', 'text/uri-list', 'text', 'url', 'text/html'].some(function (t) {
+      try { text = d.getData(t) || ''; } catch (err) { text = ''; }
+      if (t === 'text/html') text = text.replace(/<[^>]*>/g, ' ');
+      return text.trim();
+    });
+    if (text.trim()) { e.preventDefault(); take(text); }
+    else setTimeout(function () { if (box.value.trim()) take(box.value); }, 50);
   });
   box.addEventListener('input', function () { var v = box.value.trim(); if (/https:\/\//i.test(v) || v.length >= 20) take(v); });
+  box.addEventListener('blur', function () { if (box.value.trim()) take(box.value); });
 
   function save() {
     if (state.saving) return;
@@ -212,15 +237,13 @@
     }).then(function () { state.saving = false; });
   }
 
-  // Finish copies the code, then runs the Shortcut with the clipboard as its input.
-  // The Shortcut saves it. The code never shows on screen.
+  // Finish hands the code to the Shortcut inside the link itself, not through the clipboard,
+  // which iPhone browsers don't fill reliably. The Shortcut saves it and sends a test.
   finish.addEventListener('click', function () {
     if (!state.saved) return;
-    var run = function () {
-      location.href = 'shortcuts://run-shortcut?name=' + encodeURIComponent('Send to Grok Bot') + '&input=clipboard';
-      note.textContent = "Didn't see Connected to Grok Bot? Tap Finish again.";
-    };
-    window.stgbCopy(code).then(run, function () { say('Safari could not copy. Tap Finish again.'); });
+    location.href = 'shortcuts://run-shortcut?name=' + encodeURIComponent('Send to Grok Bot') +
+      '&input=text&text=' + encodeURIComponent(code);
+    note.textContent = "Didn't see Connected? Tap Finish again.";
   });
 })();
 </script>

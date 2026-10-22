@@ -2,9 +2,10 @@
 # Builds shortcuts/Send to Grok Bot.shortcut (unsigned XML source).
 # Re-sign after building; see BUILD.md. Run: python3 shortcuts/build.py
 #
-# Setup happens on sendtogrokbot.com/mobile. Its Finish button copies a connect code and
-# runs this shortcut with the clipboard as input; the shortcut saves the code to a file
-# in the Shortcuts folder of iCloud Drive and says it is connected.
+# Setup happens on sendtogrokbot.com/mobile. Its Finish button runs this shortcut with the
+# connect code as text input (no clipboard). The shortcut saves the code to a file in the
+# Shortcuts folder of iCloud Drive, then sends a test to Grok Bot through the relay, so the
+# person sees it work and answers iOS's one-time questions during setup, not on a first share.
 # When sharing a post, it reads that file. With a code it sends the post to
 # relay.sendtogrokbot.com/v1/send, which adds the full context and posts it to the
 # person's Grok Bot webhook, so the person never leaves X.
@@ -102,7 +103,7 @@ def if_contains(action, name, text, group):
     return act("conditional", GroupingIdentifier=group, WFControlFlowMode=0, WFCondition=99,
                WFConditionalActionString=text, WFInput={"Type": "Variable", "Variable": output_of(action, name)})
 
-def send_in_background(code):
+def send_in_background(code, test=False):
     # The connect code goes in the Authorization header; the relay answers with one line to show.
     auth = {"Value": {"string": "Bearer " + OBJ, "attachmentsByRange": {"{7, 1}": {"Type": "ActionOutput", "OutputName": "Text",
             "OutputUUID": code["WFWorkflowActionParameters"]["UUID"]}}}, "WFSerializationType": "WFTextTokenString"}
@@ -113,6 +114,7 @@ def send_in_background(code):
         ]}, "WFSerializationType": "WFDictionaryFieldValue"},
         WFJSONValues={"Value": {"WFDictionaryFieldValueItems": [
             {"WFItemType": 0, "WFKey": plain("destination"), "WFValue": plain("grokbot")},
+            {"WFItemType": 0, "WFKey": plain("test"), "WFValue": plain("setup")} if test else
             {"WFItemType": 0, "WFKey": plain("url"), "WFValue": shared_input()},
             {"WFItemType": 0, "WFKey": plain("format"), "WFValue": plain("text")},
         ]}, "WFSerializationType": "WFDictionaryFieldValue"}))
@@ -121,14 +123,22 @@ def send_in_background(code):
 
 def build():
     shared = with_uuid(act("detect.text", WFInput={"Value": {"Type": "ExtensionInput"}, "WFSerializationType": "WFTextTokenAttachment"}))
-    is_setup, has_code, menu = gid(), gid(), gid()
+    is_setup, has_input, has_code, menu = gid(), gid(), gid(), gid()
     a = [shared, if_contains(shared, "Text", CODE_MARK, is_setup),
          # Run by the setup page's Finish button: keep the code for every later share.
          act("documentpicker.save", WFInput=output_of(shared, "Text"), WFAskWhereToSave=False,
              WFFileDestinationPath=CODE_FILE, WFSaveFileOverwrite=True),
-         act("notification", WFNotificationActionTitle=plain("Connected to Grok Bot"),
-             WFNotificationActionBody=plain("In X, tap Share on a post, then Share via, then Send to Grok Bot.")),
-         act("conditional", GroupingIdentifier=is_setup, WFControlFlowMode=1)]
+         *send_in_background(shared, test=True),
+         act("conditional", GroupingIdentifier=is_setup, WFControlFlowMode=1),
+         # Run with nothing shared, for example when the setup page's handoff came through empty.
+         # Say so, instead of showing the menu, which reads like setup worked.
+         act("conditional", GroupingIdentifier=has_input, WFControlFlowMode=0, WFCondition=100,
+             WFInput={"Type": "Variable", "Variable": output_of(shared, "Text")}),
+         act("conditional", GroupingIdentifier=has_input, WFControlFlowMode=1),
+         act("notification", WFNotificationActionTitle=plain("Nothing came through"),
+             WFNotificationActionBody=plain("Setting up? Go back to sendtogrokbot.com/mobile and tap Finish again. Sending? In X, tap Share on a post, then Share via, then Send to Grok Bot.")),
+         act("exit"),
+         act("conditional", GroupingIdentifier=has_input, WFControlFlowMode=2)]
     saved = with_uuid(act("documentpicker.open", WFShowFilePicker=False, WFGetFilePath=CODE_FILE, WFFileErrorIfNotFound=False))
     code = with_uuid(act("detect.text", WFInput=output_of(saved, "File")))
     a += [saved, code, if_contains(code, "Text", CODE_MARK, has_code)]

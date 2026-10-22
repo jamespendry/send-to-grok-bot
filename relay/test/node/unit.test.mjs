@@ -588,14 +588,16 @@ print(json.dumps({
   // No import question: a blank one broke every run. The setup page hands the code over instead.
   assert.deepEqual(parsed.questions, []);
   assert.equal(parsed.actions[0], "text");
-  assert.deepEqual(parsed.condition, [[99, "stgbr1."], [99, "stgbr1."]]);
+  assert.deepEqual(parsed.condition, [[99, "stgbr1."], [100, null], [99, "stgbr1."]]);
+  // Setup sends a test right away, and an empty run says so instead of showing the menu.
+  assert.ok(parsed.actions.includes("exit"));
   assert.deepEqual(parsed.saves, [["Send to Grok Bot/connect-code.txt", true, false]]);
   assert.deepEqual(parsed.reads, [["Send to Grok Bot/connect-code.txt", false, false]]);
   assert.equal(parsed.auth, "ActionOutput");
   // No link check: the X app's share did not pass one, so the relay finds the link.
   assert.ok(!parsed.actions.includes("link"));
   assert.deepEqual(parsed.menu, ["Grok Bot", "Claude", "ChatGPT"]);
-  assert.deepEqual(parsed.urls, ["https://relay.sendtogrokbot.com/v1/send", "https://relay.sendtogrokbot.com/v1/open", "https://relay.sendtogrokbot.com/v1/open", "https://relay.sendtogrokbot.com/v1/open"]);
+  assert.deepEqual(parsed.urls, ["https://relay.sendtogrokbot.com/v1/send", "https://relay.sendtogrokbot.com/v1/send", "https://relay.sendtogrokbot.com/v1/open", "https://relay.sendtogrokbot.com/v1/open", "https://relay.sendtogrokbot.com/v1/open"]);
   assert.deepEqual(parsed.methods, ["POST"]);
   assert.deepEqual(parsed.bodyTypes, ["JSON"]);
   // iOS left unwired variables empty, so every input names an earlier action's output.
@@ -605,7 +607,7 @@ print(json.dumps({
   // The share sheet took too many taps, so without a code Grok Bot gets the message copied instead.
   assert.deepEqual(parsed.shares, []);
   assert.ok(parsed.texts.some(t => t.Value.string === "grokbot://"));
-  assert.deepEqual(parsed.formats, ["text", "copy", "text", "text"]);
+  assert.deepEqual(parsed.formats, ["text", "text", "copy", "text", "text"]);
   for (const step of ["setclipboard", "notification", "openurl", "conditional"]) assert.ok(parsed.actions.includes(step), step);
   const steps = read("../shortcuts/BUILD.md");
   assert.match(steps, /shortcuts sign --mode anyone/);
@@ -726,7 +728,14 @@ test("the connect site is rooted at docs and hands the code to the extension", a
   // Setup stays on the iPhone: the page saves the webhook on the relay, then hands the code to the Shortcut.
   assert.match(mobile, /RELAY \+ '\/v1\/config'/);
   assert.match(mobile, /shortcuts:\/\/run-shortcut\?name=/);
-  assert.match(mobile, /&input=clipboard/);
+  // The code rides in the link, not the clipboard, which iPhone browsers don't fill reliably.
+  assert.match(mobile, /&input=text&text=/);
+  assert.doesNotMatch(mobile, /input=clipboard/);
+  assert.doesNotMatch(mobile, /stgbCopy/);
+  assert.match(mobile, /id="not-safari"/);
+  assert.match(mobile, /text\/uri-list/);
+  assert.match(read("../docs/iphone-test.html"), /input=text&text=check/);
+  assert.match(read("../docs/_redirects"), /\/iphone-test\s+\/iphone-test\.html\s+200/);
   // People pick their AI first; a single paste box takes the URL and the Header in either order.
   assert.match(mobile, /data-pick="grokbot"/);
   assert.match(mobile, /data-pick="claude"/);
