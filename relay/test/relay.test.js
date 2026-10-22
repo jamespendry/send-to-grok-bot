@@ -315,6 +315,23 @@ describe("send", () => {
     expect(none.text).toContain("No post link came through");
   });
 
+  it("explains a refused webhook in plain words instead of an HTTP code", async () => {
+    const key = relayKey();
+    const code = connectCode(key);
+    const ip = nextIp();
+    await saveGrok(key, ip);
+    const answers = { 401: "didn't accept the key", 404: "can't find the routine", 503: "problem on its side" };
+    for (const [status, words] of Object.entries(answers)) {
+      const outbound = async request => request.url.startsWith("https://hooks.example/")
+        ? new Response("no", { status: Number(status) })
+        : new Response("", { status: 503 });
+      const res = await api("/v1/send", { method: "POST", key: code, ip, outbound, body: { destination: "grokbot", url: "https://x.com/jack/status/20", format: "text" } });
+      expect(res.text).toContain("Not sent: Grok Bot");
+      expect(res.text).toContain(words);
+      expect(res.text).not.toContain("HTTP");
+    }
+  });
+
   it("sends a setup test from the phone so the person sees it work", async () => {
     const key = relayKey();
     const code = connectCode(key);
