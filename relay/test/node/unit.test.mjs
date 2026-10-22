@@ -740,6 +740,8 @@ test("the connect site is rooted at docs and hands the code to the extension", a
   assert.ok(mobile.lastIndexOf("Install Send to Grok Bot") < mobile.indexOf('id="finish"'));
   assert.match(mobile, /not <span class="ui">Allow Once<\/span>/);
   assert.match(mobile, /id="startover"/);
+  // Shares stay in X; Grok Bot's own notification says when the reply is ready (decided 2026-10-22).
+  assert.match(mobile, /turn on <span class="ui">Notifications<\/span>/);
   assert.match(read("../scripts/build-site.sh"), /site\.js\?v=|\/assets\/\{n\}\?v=/);
   assert.match(mobile, /method: 'DELETE'/);
   // A variable named show once replaced the page's show() and broke the page in Chrome.
