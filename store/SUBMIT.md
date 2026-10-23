@@ -4,7 +4,7 @@ Click-by-click for the developer dashboard. Every value is ready to paste. Nothi
 
 Before you start:
 
-1. The upload zip is `dist/send-to-grok-bot-1.2.8.zip` (66,960 bytes, 25 files). Rebuild with `scripts/package.sh` if the extension changes. The script checks the manifest, file list, size, icons, and that there is no remote code.
+1. The upload zip is `dist/send-to-grok-bot-1.2.8.zip` (67,684 bytes, 25 files). Rebuild with `scripts/package.sh` if the extension changes. The script checks the manifest, file list, size, icons, and that there is no remote code.
 2. This branch edits the privacy policy (new disclosure sentences, see `store/permissions.md`, "Policy additions"). Merge this PR and deploy the site first, so https://sendtogrokbot.com/privacy matches what you tell the dashboard. Reviewers read that page.
 3. Sign in to https://chrome.google.com/webstore/devconsole with the Google account that holds the developer registration. Review mail goes to that account's contact email.
 
