@@ -756,11 +756,16 @@ test("the connect site is rooted at docs and hands the code to the extension", a
   assert.match(mobile, /localStorage', 'stgb-mobile'/);
   assert.doesNotMatch(mobile, /x-safari-https/);
   assert.match(mobile, /text\/uri-list/);
+  // The iPhone flow matches Chrome's: a progress bar, one screen per step, and Grok Bot sets itself up from the GitHub line.
+  assert.match(mobile, /class="flow"/);
+  for (const screen of ["choose", "grokbot", "shortcut", "try"]) assert.match(mobile, new RegExp(`data-screen="${screen}"`));
+  assert.match(mobile, /Set up Send to Grok Bot on my iPhone: https:\/\/github\.com\/jamespendry\/send-to-grok-bot/);
+  assert.match(read("../AGENTS.md"), /Switch back to sendtogrokbot\.com\/mobile/);
   assert.match(read("../docs/iphone-test.html"), /input=text&text=check/);
   assert.match(read("../docs/_redirects"), /\/iphone-test\s+\/iphone-test\.html\s+200/);
   // People pick their AI first; a single paste box takes the URL and the Header in either order.
-  assert.match(mobile, /data-pick="grokbot"/);
-  assert.match(mobile, /data-pick="claude"/);
+  assert.match(mobile, /href="#grokbot"/);
+  assert.match(mobile, /href="#claude\/shortcut"/);
   assert.match(mobile, /id="pastebox"/);
   const history = read("../docs/history.html");
   assert.match(history, /https:\/\/relay\.sendtogrokbot\.com\/v1\/history/);
