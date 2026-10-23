@@ -11,6 +11,39 @@
 
   // On an iPhone, the iPhone button comes first; Chrome keeps its Recommended label.
   if (/iPhone|iPad|iPod/.test(navigator.userAgent)) document.documentElement.classList.add('ios');
+  // Copies inside the tap itself. The clipboard API goes first: on iPhone the selected-text
+  // copy reported success while leaving the clipboard empty. The older way is the fallback.
+  function copyNow(text) {
+    if (navigator.clipboard && navigator.clipboard.writeText && window.isSecureContext) {
+      return navigator.clipboard.writeText(text).catch(function () { return selectCopy(text); });
+    }
+    return selectCopy(text);
+  }
+  function selectCopy(text) {
+    var ta = document.createElement('textarea');
+    ta.value = text;
+    // iPhone selects nothing in a read-only or invisible field, and then copies nothing while
+    // still reporting success. So the field is editable, on screen, and focused.
+    ta.contentEditable = 'true';
+    ta.style.cssText = 'position:fixed;top:0;left:0;width:2px;height:2px;padding:0;border:0;opacity:0.01;font-size:16px';
+    document.body.appendChild(ta);
+    ta.focus({ preventScroll: true });
+    var range = document.createRange();
+    range.selectNodeContents(ta);
+    var sel = window.getSelection();
+    sel.removeAllRanges();
+    sel.addRange(range);
+    ta.setSelectionRange(0, text.length);
+    var ok = false;
+    try { ok = document.execCommand('copy'); } catch (e) { ok = false; }
+    sel.removeAllRanges();
+    ta.blur();
+    ta.remove();
+    if (ok) return Promise.resolve();
+    if (navigator.clipboard && navigator.clipboard.writeText) return navigator.clipboard.writeText(text);
+    return Promise.reject(new Error('copy'));
+  }
+  window.stgbCopy = copyNow;
   // <button data-copy="#id"> copies the text of #id. data-copy-text copies a literal.
   document.addEventListener('click', function (event) {
     var btn = event.target.closest && event.target.closest('[data-copy], [data-copy-text]');
@@ -27,11 +60,33 @@
       clearTimeout(btn._t);
       btn._t = setTimeout(function () { btn.textContent = label; }, 1600);
     }
-    if (navigator.clipboard && navigator.clipboard.writeText) {
-      navigator.clipboard.writeText(text).then(function () { show('Copied'); }, function () { show('Select and copy'); });
-    } else {
-      show('Select and copy');
-    }
+    copyNow(text).then(function () { show('Copied'); }, function () { show('Select and copy'); });
+  });
+  // Setup pages: <button data-stgb-enable="chatgpt"> is handled by the extension, which
+  // adds that AI to the Send menu and answers with a stgb-enabled event.
+  document.addEventListener('click', function (event) {
+    var btn = event.target.closest && event.target.closest('[data-stgb-enable]');
+    if (!btn) return;
+    var msg = document.querySelector('.stgb-enable-msg');
+    clearTimeout(btn._t);
+    btn._t = setTimeout(function () {
+      if (btn.dataset.stgbState === 'on' || !msg) return;
+      msg.className = 'stgb-enable-msg err';
+      msg.textContent = "The extension didn't answer. It may be an older version: add it in the extension's settings instead, as below.";
+    }, 1500);
+  });
+  document.addEventListener('stgb-enabled', function () {
+    var msg = document.querySelector('.stgb-enable-msg');
+    document.querySelectorAll('[data-stgb-enable]').forEach(function (btn) {
+      if (btn.dataset.stgbState !== 'on') return;
+      clearTimeout(btn._t);
+      btn.textContent = 'Added';
+      btn.setAttribute('aria-disabled', 'true');
+      if (msg) {
+        msg.className = 'stgb-enable-msg ok';
+        msg.textContent = 'Done. ' + (btn.dataset.name || 'It') + ' is in the Send menu on every post. Reload any x.com tab you already have open.';
+      }
+    });
   });
   // The relay page's QR code opens /mobile#code=stgbr1.... Show that code ready to copy.
   // The #fragment never reaches a server, and it is removed from the address bar here.

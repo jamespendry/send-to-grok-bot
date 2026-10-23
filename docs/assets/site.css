@@ -291,6 +291,9 @@ textarea:focus { outline: none; border-color: var(--link); box-shadow: 0 0 0 1px
 #msg { display: block; margin-top: 12px; font-weight: 600; min-height: 1.5em; }
 #msg.ok { color: var(--ok); }
 #msg.err { color: var(--err); }
+.stgb-enable-msg:empty { display: none; }
+.stgb-enable-msg.ok { color: var(--ok); font-weight: 600; }
+.stgb-enable-msg.err { color: var(--err); }
 .status { display: flex; gap: 10px; align-items: flex-start; }
 .status::before { content: ""; width: 8px; height: 8px; border-radius: 50%; background: var(--line-strong); margin-top: 7px; flex: none; }
 html[data-stgb-ready] .status::before { background: var(--ok); }
@@ -500,3 +503,20 @@ main figure img, main .shot img, main .shots3 img {
   box-shadow: 0 1px 2px rgba(15, 20, 25, .06), 0 12px 32px rgba(15, 20, 25, .12);
 }
 @media (max-width: 520px) { main figure img, main .shot img, main .shots3 img { padding: 6px; border-radius: 12px; } }
+
+/* Hero: a real post (@bot, shown with permission) with the Send menu open */
+.post-wrap { margin: 0; justify-self: center; width: 100%; max-width: 480px; }
+.post-wrap figcaption { margin-top: 10px; text-align: center; font-size: 13px; color: var(--muted); }
+.post-wrap figcaption a { color: inherit; text-decoration: underline; text-underline-offset: 2px; }
+.post.real img.avatar { background: none; object-fit: cover; }
+.post.real .post-name { display: inline-flex; align-items: center; gap: 3px; }
+.post.real .verified { width: 18px; height: 18px; }
+.post.real .post-body { margin: 6px 0 0 50px; }
+.post.real .post-body + .post-body { margin-top: 14px; }
+.post-media { margin: 12px 0 4px 50px; border: 1px solid var(--line); border-radius: 16px; overflow: hidden; aspect-ratio: 16 / 9; background: #f5a03c; }
+.post-media video { display: block; width: 100%; height: 100%; object-fit: cover; }
+.post.real .menu { left: auto; right: -14px; bottom: 54px; }
+@media (max-width: 520px) { .post.real .menu { right: 6px; bottom: 50px; width: 210px; } .post.real .menu div { padding: 9px 14px; font-size: 14px; } .post-media { margin-left: 0; } .post.real .post-body { margin-left: 0; } }
+main .post-wrap img.avatar { padding: 0; border: 0; box-shadow: none; background: none; border-radius: 8px; width: 40px; height: 40px; }
+.post.real .menu { bottom: 22px; }
+@media (max-width: 520px) { .post.real .menu { bottom: 18px; } }

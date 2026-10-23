@@ -48,23 +48,8 @@ summary{cursor:pointer;font-weight:600}
   <span id="cm" role="status"></span>
 </div>
 
-<details id="more">
-<summary>More options</summary>
-<p>Check a destination to list it when you click a post. The menu sends to the one you pick. The button on X stays on each post even when nothing is filled in. Free. Nothing to buy.</p>
-<div class="notice">
-  <p>Clicking Send on a post reads that post and, on its own page, the author's thread and the post it replies to. That includes the text, link, author, quoted post, links, and media addresses the page already shows, plus the reply preset you pick below. It is sent only to the destination you pick. Keys and tokens stay on this device and are sent only to sign in to that destination. No analytics. Nothing is sold. Click Save to store these settings on this device.</p>
-  <p class="policy"><a href="https://sendtogrokbot.com/privacy" target="_blank" rel="noopener">Privacy policy</a></p>
-</div>
-
-<div class="connect">
-  <h2>Replies</h2>
-  <label class="field" for="preset">Preset</label>
-  <select id="preset"></select>
-  <label class="field" for="promptText">Prompt</label>
-  <textarea id="promptText" spellcheck="true"></textarea>
-  <p class="hint">General is the default. It classifies the post and starts with a one-line takeaway. Pick another preset, or edit the text and it becomes Custom. The choice is sent with the post. Paste General into a Grok Bot routine or a Claude task once, and this page can switch the reply later.</p>
-</div>
-
+<h2 class="where">Where posts go</h2>
+<p class="hint">Check each AI you want in the Send menu on X, then click Save. ChatGPT and Codex need nothing else.</p>
 <div class="dest">
   <label class="check"><input type="checkbox" data-dest="grokbot"> Send to Grok Bot</label>
   <div class="fields" data-for="grokbot" hidden>
@@ -114,6 +99,22 @@ summary{cursor:pointer;font-weight:600}
   </div>
 </div>
 
+<details id="more">
+<summary>More options</summary>
+<div class="notice">
+  <p>Clicking Send on a post reads that post and, on its own page, the author's thread and the post it replies to. That includes the text, link, author, quoted post, links, and media addresses the page already shows, plus the reply preset you pick below. It is sent only to the destination you pick. Keys and tokens stay on this device and are sent only to sign in to that destination. No analytics. Nothing is sold. Click Save to store these settings on this device.</p>
+  <p class="policy"><a href="https://sendtogrokbot.com/privacy" target="_blank" rel="noopener">Privacy policy</a></p>
+</div>
+
+<div class="connect">
+  <h2>Replies</h2>
+  <label class="field" for="preset">Preset</label>
+  <select id="preset"></select>
+  <label class="field" for="promptText">Prompt</label>
+  <textarea id="promptText" spellcheck="true"></textarea>
+  <p class="hint">General is the default. It classifies the post and starts with a one-line takeaway. Pick another preset, or edit the text and it becomes Custom. The choice is sent with the post. Paste General into a Grok Bot routine or a Claude task once, and this page can switch the reply later.</p>
+</div>
+
 <div class="dest">
   <label class="check"><input type="checkbox" id="relayOn"> Relay</label>
   <div class="fields" id="relayFields" hidden>
@@ -121,9 +122,9 @@ summary{cursor:pointer;font-weight:600}
     <textarea id="relayCode" spellcheck="false" autocomplete="off" placeholder="stgbr1...."></textarea>
   </div>
 </div>
+</details>
 
 <button id="s">Save</button><span id="m"></span>
-</details>
 <script src="hosts.js"></script>
 <script src="connect.js"></script>
 <script src="prompts.js"></script>

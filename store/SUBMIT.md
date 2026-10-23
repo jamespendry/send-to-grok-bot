@@ -1,17 +1,17 @@
 # Submit Send to Grok Bot to the Chrome Web Store
 
-Click-by-click for the developer dashboard. Every value is ready to paste. Nothing here submits for you. Version in this upload: **1.2.7**.
+Click-by-click for the developer dashboard. Every value is ready to paste. Nothing here submits for you. Version in this upload: **1.2.8**.
 
 Before you start:
 
-1. The upload zip is `dist/send-to-grok-bot-1.2.7.zip` (66,960 bytes, 25 files). Rebuild with `scripts/package.sh` if the extension changes. The script checks the manifest, file list, size, icons, and that there is no remote code.
+1. The upload zip is `dist/send-to-grok-bot-1.2.8.zip` (66,960 bytes, 25 files). Rebuild with `scripts/package.sh` if the extension changes. The script checks the manifest, file list, size, icons, and that there is no remote code.
 2. This branch edits the privacy policy (new disclosure sentences, see `store/permissions.md`, "Policy additions"). Merge this PR and deploy the site first, so https://sendtogrokbot.com/privacy matches what you tell the dashboard. Reviewers read that page.
 3. Sign in to https://chrome.google.com/webstore/devconsole with the Google account that holds the developer registration. Review mail goes to that account's contact email.
 
 ## 1. Upload the package
 
 1. Items, then **Add new item**.
-2. Choose `dist/send-to-grok-bot-1.2.7.zip` and upload. Chrome runs an install check. If it fails, stop and fix the package.
+2. Choose `dist/send-to-grok-bot-1.2.8.zip` and upload. Chrome runs an install check. If it fails, stop and fix the package.
 3. The item opens as a draft. Fill in the tabs below.
 
 ## 2. Store listing tab

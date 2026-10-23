@@ -31,7 +31,7 @@ That data is sent only to a destination you configured. If one destination is on
 
 It reads a post when you click Send on it, and on a post's own page it also reads the author's thread and the reply parent shown there. It does not read direct messages. On sendtogrokbot.com/connect, pasting into the box reads that paste and saves it in the extension. It does not read other pages on that site.
 
-On every page of sendtogrokbot.com, a one-line script sets a single marker on the page so the site can show that the extension is installed. It reads nothing from the page and sends nothing. On /connect, the extension places its own paste box (an extension page, grant.html) in the page. That box is the only place the extension accepts a pasted code from the site, and only from sendtogrokbot.com.
+On every page of sendtogrokbot.com, a short script sets a single marker on the page so the site can show that the extension is installed. When you click an Add button on a setup page, such as Add ChatGPT, it adds that AI (ChatGPT, Codex, or Claude in a tab) to the Send menu in the extension. That changes only the list of AIs in your settings. It reads nothing else from the page and sends nothing. On /connect, the extension places its own paste box (an extension page, grant.html) in the page. That box is the only place the extension accepts a pasted code from the site, and only from sendtogrokbot.com.
 
 ## Tokens and keys
 

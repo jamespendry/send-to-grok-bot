@@ -217,17 +217,6 @@ function usePaste(raw, fromClick) {
   }, 'Choose Allow to finish.');
 }
 
-function configured(local) {
-  const s = local || {};
-  if (String(s.webhookUrl || '').trim()) return true;
-  if (String(s.senderKey || '').trim()) return true;
-  if (String(s.claudeFireUrl || '').trim() || String(s.claudeToken || '').trim()) return true;
-  if (String(s.chatgptTriggerId || '').trim() || String(s.chatgptToken || '').trim()) return true;
-  if (String(s.relayCode || '').trim()) return true;
-  if (String(s.codexEnvironment || '').trim()) return true;
-  return false;
-}
-
 function settingsProblem(o) {
   if (o.useRelay) {
     if (!self.STGB_RELAY) return 'Relay code could not be checked';
@@ -285,8 +274,6 @@ async function load() {
   local = migrated.settings;
   fill(local);
   settingsLoaded = true;
-  const more = document.getElementById('more');
-  if (more) more.open = configured(local);
   let notice = '';
   try {
     const session = await new Promise(resolve => chrome.storage.session.get('setupNotice', resolve));

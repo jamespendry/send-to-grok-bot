@@ -54,7 +54,7 @@ Free. Open source at github.com/jamespendry/send-to-grok-bot.
 
 Send to Grok Bot is not affiliated with, endorsed by, or sponsored by X, xAI, Anthropic, or OpenAI. Grok, Claude, ChatGPT, Codex, and X are trademarks of their owners.
 
-## What is new (1.2.7)
+## What is new (1.2.8)
 
 Safe to leave blank. If you want text:
 

@@ -28,3 +28,4 @@
 /connect.js         /extension/connect.js      200
 /prompts.js         /extension/prompts.js      200
 /img/*              /docs/img/:splat           200
+/iphone-test        /docs/iphone-test.html     200

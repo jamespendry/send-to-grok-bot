@@ -273,6 +273,92 @@ describe("send", () => {
     expect(forwarded.destination).toBeUndefined();
   });
 
+  it("sends from the phone in the background and answers in one line of text", async () => {
+    const key = relayKey();
+    const code = connectCode(key);
+    const ip = nextIp();
+    await saveGrok(key, ip);
+    const calls = [];
+    const outbound = async request => {
+      calls.push(request.url);
+      if (request.url.startsWith("https://hooks.example/")) {
+        calls.body = await request.text();
+        return new Response("{}", { status: 200 });
+      }
+      // The post mirrors are down; the post still goes out with its link.
+      return new Response("", { status: 503 });
+    };
+    const res = await api("/v1/send", {
+      method: "POST",
+      key: code,
+      ip,
+      outbound,
+      body: { destination: "grokbot", url: "Look at this https://x.com/jack/status/20?s=46 via X", format: "text" }
+    });
+    expect(res.status).toBe(200);
+    expect(res.headers.get("content-type")).toContain("text/plain");
+    expect(res.text).toBe("Sent to Grok Bot. The reply will land in your Grok Bot chat.");
+    expect(calls.filter(u => u.startsWith("https://hooks.example/"))).toHaveLength(1);
+    const forwarded = JSON.parse(calls.body);
+    expect(forwarded.url).toBe("https://x.com/jack/status/20");
+    expect(forwarded.author).toBe("jack");
+    expect(forwarded.destination).toBeUndefined();
+
+    const none = await api("/v1/send", {
+      method: "POST",
+      key: code,
+      ip,
+      outbound,
+      body: { destination: "grokbot", url: "no link here", format: "text" }
+    });
+    expect(none.status).toBe(200);
+    expect(none.text).toContain("No post link came through");
+  });
+
+  it("explains a refused webhook in plain words instead of an HTTP code", async () => {
+    const key = relayKey();
+    const code = connectCode(key);
+    const ip = nextIp();
+    await saveGrok(key, ip);
+    const answers = { 401: "didn't accept the key", 404: "can't find the routine", 503: "problem on its side" };
+    for (const [status, words] of Object.entries(answers)) {
+      const outbound = async request => request.url.startsWith("https://hooks.example/")
+        ? new Response("no", { status: Number(status) })
+        : new Response("", { status: 503 });
+      const res = await api("/v1/send", { method: "POST", key: code, ip, outbound, body: { destination: "grokbot", url: "https://x.com/jack/status/20", format: "text" } });
+      expect(res.text).toContain("Not sent: Grok Bot");
+      expect(res.text).toContain(words);
+      expect(res.text).not.toContain("HTTP");
+    }
+  });
+
+  it("sends a setup test from the phone so the person sees it work", async () => {
+    const key = relayKey();
+    const code = connectCode(key);
+    const ip = nextIp();
+    const calls = [];
+    const outbound = async request => {
+      calls.push(request.url);
+      calls.body = await request.text();
+      return new Response("{}", { status: 200 });
+    };
+    const before = await api("/v1/send", { method: "POST", key: code, ip, outbound, body: { destination: "grokbot", test: "setup", format: "text" } });
+    expect(before.text).toContain("Not connected yet");
+    await saveGrok(key, ip);
+    const res = await api("/v1/send", { method: "POST", key: code, ip, outbound, body: { destination: "grokbot", test: "setup", format: "text" } });
+    expect(res.status).toBe(200);
+    expect(res.text).toContain("Connected. Grok Bot got a test");
+    const forwarded = JSON.parse(calls.body);
+    expect(forwarded.source).toBe("setup");
+    expect(forwarded.text).toContain("your iPhone is connected");
+
+    // Start over forgets the code, so a code someone saw stops working.
+    const gone = await api("/v1/config", { method: "DELETE", key, ip });
+    expect(gone.status).toBe(200);
+    const after = await api("/v1/send", { method: "POST", key: code, ip, outbound, body: { destination: "grokbot", test: "setup", format: "text" } });
+    expect(after.text).toContain("Not connected yet");
+  });
+
   it("forwards a Grok Bot webhook with the bearer key and without the destination field", async () => {
     const key = relayKey();
     const ip = nextIp();
@@ -512,6 +598,30 @@ describe("history", () => {
     expect(bad.text).not.toContain("rk_");
     const method = await api("/v1/history", { method: "POST", key: code, body: {} });
     expect(method.status).toBe(405);
+  });
+});
+
+describe("iPhone setup page", () => {
+  it("lets sendtogrokbot.com save the Grok Bot webhook and nobody else", async () => {
+    const key = relayKey();
+    const pre = await api("/v1/config", { method: "OPTIONS", headers: { origin: "https://sendtogrokbot.com" } });
+    expect(pre.status).toBe(204);
+    expect(pre.headers.get("access-control-allow-methods")).toContain("PUT");
+    const saved = await api("/v1/config", {
+      method: "PUT",
+      key,
+      headers: { origin: "https://sendtogrokbot.com" },
+      body: { grokbot: { webhookUrl: "https://hooks.example/hook", senderKey: "whsec_test_key" } }
+    });
+    expect(saved.status).toBe(200);
+    expect(saved.headers.get("access-control-allow-origin")).toBe("https://sendtogrokbot.com");
+    const other = await api("/v1/config", {
+      method: "PUT",
+      key: relayKey(),
+      headers: { origin: "https://evil.example" },
+      body: { grokbot: { webhookUrl: "https://hooks.example/hook" } }
+    });
+    expect(other.headers.get("access-control-allow-origin")).toBeNull();
   });
 });
 

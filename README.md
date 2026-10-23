@@ -1,125 +1,260 @@
 # Send to Grok Bot
 
-A Chrome extension that puts a button on every post on X. You click the button, pick where the post should go, and that tool reads it. It is free. There is nothing to buy.
+Send any post on X to your AI with one click.
 
-If you are an AI agent and someone asked you to set this up, stop here and follow [AGENTS.md](AGENTS.md). Grok Bot sends one message after the routine exists. Claude stays one step at a time.
+Tired of copying and pasting X posts into Grok Bot, Claude, ChatGPT, or Codex? Send to Grok Bot adds a Send button to every post on x.com. Click it, pick your AI, and the post goes there. It works on a computer in Chrome, and on iPhone through the share sheet (the menu that opens when you tap Share).
 
-People who use Grok Bot can paste this one line into the bot:
+It is free and open source. There is nothing to buy and no account to make.
+
+If you are an AI agent and someone asked you to set this up, read [AGENTS.md](AGENTS.md) instead.
+
+### [Download the extension](https://sendtogrokbot.com/send-to-grok-bot.zip)
+
+For Chrome on a Mac or Windows computer. On an iPhone, skip to [iPhone](#iphone).
+
+The same steps, with buttons that check your progress, are at [sendtogrokbot.com](https://sendtogrokbot.com/install).
+
+## 1. Install in Chrome
+
+Send to Grok Bot is not in the Chrome Web Store yet, so Chrome needs a few extra clicks. You do this once.
+
+1. **Download it.** Click [Download the extension](https://sendtogrokbot.com/send-to-grok-bot.zip).
+2. **Unzip it.** Open your Downloads folder and double-click `send-to-grok-bot.zip`. You get a folder called `send-to-grok-bot`. Leave it there. On Windows, right-click the zip, then choose Extract All.
+3. **Open Chrome's extensions page.** Copy this, paste it into the address bar at the top of Chrome, and press Enter:
+
+   ```
+   chrome://extensions
+   ```
+
+4. **Turn on Developer mode, then click Load unpacked.** Developer mode is a switch at the top right of that page. It lets Chrome load an extension from a folder on your computer. Switch it on, then click **Load unpacked** and choose the `send-to-grok-bot` folder from your Downloads.
+
+   ![Developer mode switch at the top right of chrome://extensions](docs/img/chrome-devmode.png)
+
+   ![The Load unpacked button](docs/img/chrome-load-unpacked.png)
+
+5. **Refresh.** A card named Send to Grok Bot now shows on the extensions page. If you have x.com open, refresh it so the button appears.
+
+## 2. Choose your AI
+
+Pick one. You can add more later. Chrome on a computer is the full experience: all four AIs work there.
+
+| AI | What you need | Where the reply shows up |
+| --- | --- | --- |
+| [Grok Bot](#grok-bot) | The Grok Bot desktop app. Grok Bot sets itself up. You copy two lines. | In your Grok Bot chat. |
+| [Claude](#claude) | A paid Claude plan (Pro or Max) to have Claude reply on its own. Any plan, including free, to open Claude in a tab instead. | On claude.ai, under Scheduled, Send to Claude, History. Or in a new tab. |
+| [ChatGPT](#chatgpt) | Nothing to set up. Check one box. | A new ChatGPT tab with the post filled in. You press Send. |
+| [Codex](#codex) | Nothing to set up. Check one box. | A new Codex task with the post filled in. You press Send. |
+
+### Grok Bot
+
+Do this on a computer.
+
+1. **Send Grok Bot this line.** Paste it into any Grok Bot chat:
+
+   ```
+   Set up Send to Grok Bot for me: https://github.com/jamespendry/send-to-grok-bot
+   ```
+
+   It creates a routine named Send to Grok Bot and replies when it's done. A routine is a task Grok Bot runs by itself each time a post arrives. If it asks you to confirm, confirm.
+
+2. **Open the routine.** Click the bot's name at the top of the chat. Under **Routines**, click **Send to Grok Bot**.
+
+   ![Grok Bot's Routines list with Send to Grok Bot](docs/img/grok-routines.png)
+
+3. **Copy two lines into the connect page.** Open [sendtogrokbot.com/connect](https://sendtogrokbot.com/connect).
+   - Copy **POST to**. It starts with `https://api2.cursor.sh/automations/webhook/`. Paste it into the box on the connect page. It says "Webhook URL saved."
+   - Copy **header**. It starts with `Authorization: Bearer crsr_`. Paste it into the same box. It says "Now open x.com and click the arrow." The **key** line works too.
+
+   ![The routine's POST to, key, and header fields, with sample values](docs/img/grok-webhook-values.png)
+
+   The pictures show sample values, not real ones. The app cuts long values off with "…", but copying takes the whole value. Paste yours only on the connect page, never in a chat. If Chrome asks to allow a site, click Allow.
+
+You're done. On x.com, click the Send arrow on any post. The icon turns green when the run starts, and the reply shows up in your Grok Bot chat.
+
+To change the reply style later, leave the routine as it is. In the extension settings, under **Replies**, pick Research, Job hunt, Buy or skip, Learn later, or Content ideas. The routine follows it on the next post.
+
+### Claude
+
+There are two ways. Pick one.
+
+**Claude replies on its own.** This needs a paid Claude plan (Pro or Max). You make a task on claude.ai that runs each time you send a post.
+
+1. **Start a new task.** Open Claude's [Scheduled page](https://claude.ai/code/routines). At the top right, click **New task**, then **Set up manually**.
+
+   ![Claude's Scheduled page with New task and Set up manually](docs/img/claude-step1-new-task.png)
+
+2. **Fill in the form.**
+   - **Name:** type `Send to Claude`.
+   - **Instructions:** click the Send to Grok Bot icon in Chrome to open its settings. Check **Send to Claude**, then click **Copy task prompt**. Paste it into the big box.
+   - **Trigger:** click Schedule and choose **API**.
+   - Click **Create**. Leave everything else as it is.
+
+   ![The new task form](docs/img/claude-step1-form.png)
+
+3. **Paste your Claude key on the connect page.** Claude now shows your key in a box called **API token**. Claude shows it only once. Click its copy button, open [sendtogrokbot.com/connect](https://sendtogrokbot.com/connect), and paste it into the box. It saves as soon as you paste. Then go back to Claude and click **Done**.
+
+   ![The API token box, with a sample token](docs/img/claude-step2-token.png)
+
+4. **Paste the task link too.** Claude opens your new task. Under **Triggers**, click the copy button next to **API**. Paste it into the same box on the connect page. If Chrome asks to allow api.anthropic.com, click Allow.
+
+   ![The task page, with the copy button next to API](docs/img/claude-step2-fire-url.png)
+
+Keep the token private. Paste it only on the connect page, never in a chat or an email.
+
+You're done. Open x.com, refresh, click the Send arrow on any post, and choose Send to Claude. The icon turns green when Claude starts. To read the reply, open the [Scheduled page](https://claude.ai/code/routines), then Send to Claude. Each post you send is a line under **History**.
+
+![A task's History list on claude.ai](docs/img/claude-history.png)
+
+If you use Claude in Chrome, Claude can make the task and connect the extension for you. It never sees your token. Send Claude this line, then click Allow when Chrome asks:
 
 ```
-Set up Send to Grok Bot for me: https://github.com/jamespendry/send-to-grok-bot
+Set up Send to Grok Bot for me, with Claude: https://github.com/jamespendry/send-to-grok-bot
 ```
 
-The bot creates a webhook routine with the General prompt. It cannot read the webhook key. After the routine exists it sends one message. Install the extension first: `https://sendtogrokbot.com/install`. Then open the routine from Routines in the bot's info pane. Copy **POST to** and paste it at `https://sendtogrokbot.com/connect`. Then copy **header** and paste it in the same box. With the extension installed, each paste saves. The website (`/`, `/install`, `/setup`, `/setup/grok`, `/setup/claude`, `/setup/chatgpt`, `/setup/codex`, `/try`, `/mobile`, `/history`, `/connect`, `/privacy`) is in [docs/](docs/). To publish it: `bash scripts/build-site.sh`, then `npx wrangler deploy --config site/wrangler.toml`. [site/README.md](site/README.md) has the details.
+Lost the token, or Claude says it's invalid? On the Scheduled page, open Send to Claude. Click the small arrow next to its name, then **Edit**. Under Trigger, click **Regenerate** and copy the new token. The old one stops working. Paste the new token on the [connect page](https://sendtogrokbot.com/connect).
 
-Store listing text, promo images, and the upload steps are in [store/](store/). `scripts/package.sh` writes the zip.
+**Claude opens in a tab.** Works on any plan, including free. On sendtogrokbot.com/setup/claude, open **Rather skip all of this?** and click **Add Claude, opening in a tab**. Or open the extension settings, check **Send to Claude**, leave the box labeled Fire URL and token empty, and click **Save**. Clicking a post opens Claude in a new tab with the post filled in. You press Send.
 
-## Set it up
+### ChatGPT
 
-Install the extension first: https://sendtogrokbot.com/install. It is not in the Chrome Web Store yet. You need Chrome on a computer.
+Nothing to set up.
 
-### Open the settings
+1. On sendtogrokbot.com/setup/chatgpt, click **Add ChatGPT**. Or open the extension settings, check **Send to ChatGPT**, and click **Save**.
+2. On x.com, click the Send arrow on any post and choose Send to ChatGPT. ChatGPT opens in a new tab with the post and your reply style already filled in.
+3. Press Send in ChatGPT. Make sure you're signed in to ChatGPT in this browser.
 
-Click the Send to Grok Bot icon on the Chrome toolbar. If you did not pin it, it is in the puzzle-piece menu.
+On ChatGPT Business or Enterprise, posts can run on a workspace agent instead of opening a tab. In the extension, under Send to ChatGPT, open **Workspace agent** and paste the API trigger ID and access token. Most people can skip this.
 
-You should see a page titled **Send to Grok Bot**, with a box labeled **Paste here** at the top. Replies, destinations, and Save are under **More options**.
+### Codex
 
-![The options page, with the paste box at the top](docs/img/07-options.png)
+Nothing to set up.
 
-### Turn on a destination
+1. On sendtogrokbot.com/setup/codex, click **Add Codex**. Or open the extension settings, check **Send to Codex**, and click **Save**.
+2. On x.com, click the Send arrow on any post and choose Send to Codex. Codex opens a new task with the post and your reply style already filled in. It works well for tools, repos, and how-tos.
+3. Press Send in Codex. Make sure you're signed in to Codex in this browser.
 
-For Grok Bot, paste the webhook URL into **Paste here**, then paste the Authorization header into the same box. Either order works. The same pastes work on `https://sendtogrokbot.com/connect`. If the extension is installed, each paste saves.
+If you already have a Codex environment and branch, you can fill them in under Send to Codex, **Environment and branch**. Leave them blank and Codex still opens.
 
-After the first value you should see: Webhook URL saved. Now paste the Authorization header. After the second: Now open x.com and click the arrow. Paste those two values only on this page or on that connect page, not into a chat. Another paste later adds another destination. It does not erase the ones already saved.
+## 3. Try it
 
-If you do not have a link:
+1. Open [x.com](https://x.com/home). If it's already open, refresh the page once so the button appears.
+2. Click the Send arrow on any post. It's the small arrow at the right end of the row under each post. If you set up more than one AI, pick one from the menu.
+3. See the reply:
+   - **Grok Bot:** the reply arrives in your Grok Bot chat.
+   - **Claude:** on claude.ai, open Scheduled, then Send to Claude. Each post is a line under History. Use Discuss in chat to keep talking.
+   - **ChatGPT or Codex:** a new tab opens with the post filled in. Press Send there.
 
-- **ChatGPT** needs no setup. Check **Send to ChatGPT** and click **Save**. You should see the word Saved. No password. Clicking a post opens ChatGPT with the post filled in. You press Send.
-- **Codex** needs no setup. Check **Send to Codex** and click **Save**. You should see the word Saved. No password. Clicking a post opens Codex with the post filled in. You press Send.
-- **Grok Bot**: paste the webhook URL into **Paste here**, then the Authorization header. You should see: Now open x.com and click the arrow. Where those two values are is in the Grok Bot section below. The separate URL and key fields are under **More options**.
-- **Claude**, opening a tab: check **Send to Claude**, leave the box empty, and click **Save**. You should see the word Saved.
-- **Claude**, a routine: check **Send to Claude**. Paste the Fire URL and the token into the one box, in any order. Click **Save**. You should see the word Saved. The Claude section below is the click path.
+Every reply starts with a link to the post, so you can always find it again.
 
-Saving a webhook, a Claude routine, or a ChatGPT agent asks Chrome for access to that site only. Opening Claude, ChatGPT, or Codex in a tab does not. A webhook address has to be https. If Chrome asks you to allow the site, choose Allow.
+If the icon turns red, a line at the bottom of the screen says why.
 
-![One destination checked, with its fields filled in, and the word Saved](docs/img/08-destinations.png)
+## iPhone
 
-## Try it
+Send any post from the X app to Grok Bot without leaving X, or open it in Claude or ChatGPT. Setup happens on the iPhone, at [sendtogrokbot.com/mobile](https://sendtogrokbot.com/mobile) in Safari, Chrome, or Firefox (Chrome and Firefox download the Shortcut first: tap Open in…, then Shortcuts):
 
-Open [x.com](https://x.com) and refresh. On a post, look at the row with reply, repost, like, and share. Click the arrow icon in that row.
+1. **Install.** Tap Install Send to Grok Bot, then Add Shortcut.
+2. **Make the routine.** Open Grok Bot and send it: "Create a routine named Send to Grok Bot with a webhook trigger." Skip this if you already have the routine.
+3. **Connect.** In Grok Bot, tap Grok Bot at the top of the chat, then Routines, then Send to Grok Bot. Tap the URL row, come back, tap the box and Paste. Do the same with the Header row.
+4. **Finish.** Tap Finish. Shortcuts opens and sends Grok Bot a test; tap Allow (or Always Allow) on each one-time question. You'll see "Connected", and a test message waits in Grok Bot.
 
-You should see a menu with the destinations you turned on. Click one.
+Then, in X, tap the share arrow under a post, then Share via…, then Send to Grok Bot. A "Sent to Grok Bot" notice appears and you stay in X. Turn on Notifications in Grok Bot (tap Grok Bot at the top of the chat) to get a ping when the reply is ready.
 
-- Grok Bot or a Claude routine: the icon turns green when the send is accepted.
-- ChatGPT, Codex, or Claude with the routine fields left blank: a new tab opens with the post already written in the box. You press Send.
-
-If the icon turns red, a line at the bottom of the screen says why. The button is on every post even when nothing is filled in. If a destination is not set up, clicking it opens this settings page and says what to paste.
-
-![The arrow icon in an X post's action row](docs/img/09-post-button.png)
-
-![The destination menu open on a post](docs/img/10-menu.png)
-
-## Screenshots to take
-
-The pictures above are placeholders. Take these and save them under `docs/img/` with these file names.
-
-| File | What to capture |
+| 1. Tap Share via… | 2. Tap Send to Grok Bot |
 | --- | --- |
-| `docs/img/07-options.png` | The options page, showing the paste box at the top |
-| `docs/img/08-destinations.png` | A destination checked, its fields, and the word Saved |
-| `docs/img/09-post-button.png` | The arrow icon in an X post's action row |
-| `docs/img/10-menu.png` | The destination menu open on a post |
-| `docs/img/grok-routines-webhook.png` | Grok Bot info pane, Routines, Send to Grok Bot open. Webhook shows POST to, key, and header. Blur the key and header |
-| `docs/img/connect-page.png` | sendtogrokbot.com/connect with Step 1, the paste box, and no Connect button. No real secret |
-| `docs/img/claude-scheduled-tasks.png` | claude.ai left sidebar, Routines, page titled Scheduled tasks. Blur account details |
-| `docs/img/options-replies.png` | Options page, Replies preset menu, and the Claude box with Copy task prompt |
+| ![Share via in the X share menu](docs/img/iphone-step-1.png) | ![Send to Grok Bot in the share sheet](docs/img/iphone-step-2.png) |
 
-`docs/img/claude-routine-overview.png` and `docs/img/claude-routine-api-trigger.png` are already in the repo. They are blurred. Use them for the task page and the Edit dialog. Do not retake them unless the screen has changed.
+To keep it near the top: open the same list, scroll to the bottom, tap Edit Actions, then the green plus next to Send to Grok Bot.
 
-## Where the paste comes from
+**Claude or ChatGPT:** skip steps 2 to 4. The Shortcut then asks which AI and opens it with the post filled in; press Send. Picking Grok Bot there copies the message and opens Grok Bot to paste. Codex works only from the Chrome extension.
 
-Grok Bot cannot read the webhook key, so it does not hand you a connect link. After it creates the routine, you open the routine's detail pane, copy **POST to**, and paste it at `https://sendtogrokbot.com/connect`. Then you copy **header** (or **key**) and paste it in the same box. Either order works. The page does not upload what you paste.
+## Privacy
 
-The same box accepts a Claude Fire URL and token pasted together, in any order. It accepts a `trig_` id. The options page accepts those same pastes. A Claude, ChatGPT, or Codex connection code can still be pasted there. It starts with `stgb1.`. Grok Bot setup does not use one.
+- The extension sends only the posts you click, and only to the AI you pick. On a post's own page it also sends the author's thread and the post it replies to.
+- It does not track your browsing, use analytics, or sell data.
+- Keys and tokens stay in Chrome on your computer. They are not synced to your Google account. If you turn on the optional Relay, they are stored encrypted on the relay instead.
+- To get a post's full text, it looks the post up on the public mirrors api.fxtwitter.com and api.vxtwitter.com. Only the post's public link is sent to them.
+- The iPhone Shortcut sends the post link to sendtogrokbot.com to look up the post's text. Once connected, the relay passes it to your Grok Bot webhook; the webhook key is stored encrypted on the relay, which keeps a short list of recent sends (the link and author, not the text).
 
-`options.html#stgb1.` and `options.html#connect=stgb1.` also fill the options page, and then the page removes the hash. Links that start with `chrome-extension://` do not open reliably from a web page.
+Read the full [privacy policy](https://sendtogrokbot.com/privacy).
 
-The page stores the address and the key in `chrome.storage.local` on this computer. It does not keep the link.
+Not affiliated with X, xAI, Anthropic, or OpenAI.
 
-## Website
+## For developers
 
-`docs/` is the site for sendtogrokbot.com. Build it, then deploy the folder as a Cloudflare Worker with static assets:
+### Repository layout
+
+| Folder | What it is |
+| --- | --- |
+| [`extension/`](extension/) | The Chrome extension (Manifest V3). `destinations/` has one file per AI. |
+| [`docs/`](docs/) | The sendtogrokbot.com website. [site/README.md](site/README.md) maps each URL to its file. |
+| [`site/`](site/) | `wrangler.toml` that serves the built site as a Cloudflare Worker with static assets. |
+| [`relay/`](relay/) | Cloudflare Worker at relay.sendtogrokbot.com, for the iPhone Shortcut and the optional relay mode. |
+| [`shortcuts/`](shortcuts/) | The iPhone Shortcut: `build.py` and the signed file the site serves. |
+| [`prompts/`](prompts/) | Reply presets. [general.md](prompts/general.md) is the default and the Grok Bot routine prompt. |
+| [`plugin/`](plugin/) | The Grok Bot marketplace plugin. Form answers are in [plugin/SUBMIT.md](plugin/SUBMIT.md). |
+| [`store/`](store/) | Chrome Web Store listing text, promo images, privacy policy source, and upload steps. |
+| [`scripts/`](scripts/) | `package.sh` (extension zip) and `build-site.sh` (website). |
+| [AGENTS.md](AGENTS.md), [CLAUDE.md](CLAUDE.md) | Setup steps for an AI agent that is asked to set this up for someone. |
+
+### Extension zip
 
 ```bash
-scripts/build-site.sh
+bash scripts/package.sh
+```
+
+Writes `dist/send-to-grok-bot-<version>.zip` with `manifest.json` at the root. It checks every JavaScript file, the manifest permissions, the icons, the exact list of files in the zip, and that the store listing and privacy policy still match. The site serves this zip as `/send-to-grok-bot.zip`.
+
+### Website
+
+```bash
+bash scripts/build-site.sh
+```
+
+Copies `docs/` to `dist/site`, builds the extension zip into it, adds `connect.js`, `prompts.js`, the icons, the logo sprite, and the signed Shortcut, then fails if a page has unbalanced tags or `/connect` lost an id the extension needs. Open `dist/site` with any static server to check it. Short URLs such as `/install` come from `docs/_redirects`, so a plain static server needs the `.html` name.
+
+`extension/site-connect.js` runs on `sendtogrokbot.com/connect` and saves what you paste there into the extension. Keep the `paste`, `msg`, `installed`, and `install-steps` ids and the `data-stgb-ready` attribute on that page. The build checks `paste` and `msg`.
+
+### Relay
+
+The relay is optional for Chrome. With **Relay** checked on the options page, the extension stores one `stgbr1.` code, and the Grok Bot webhook key and Claude token stay on the relay, encrypted. Once connected (the /mobile page saves the webhook with `PUT /v1/config` and hands the code to the Shortcut in the `shortcuts://run-shortcut` link (`input=text`, never the clipboard); the Shortcut keeps it in `Shortcuts/Send to Grok Bot connect code.txt` (straight in the Shortcuts folder: Save File without asking fails if a subfolder does not exist yet) in iCloud Drive), the iPhone Shortcut posts to `/v1/send` with `format: "text"`; the relay adds the post's context, forwards it to the saved Grok Bot webhook, and answers in one line. Without one it uses `/v1/open`, which needs no code: it looks up the post and returns a link that opens Claude or ChatGPT, or text to paste into Grok Bot.
+
+```bash
+cd relay
+npm install
+npm test
+```
+
+Tests use Vitest with the Cloudflare Workers pool, plus Node's test runner for `test/node/unit.test.mjs`. The other files in `test/node/` run with `node --test test/node/`. Deploy steps, the database, and the encryption secret are in [relay/DEPLOY.md](relay/DEPLOY.md).
+
+### iPhone Shortcut
+
+`shortcuts/build.py` writes the unsigned source, `shortcuts/Send to Grok Bot.shortcut`. iOS only installs signed Shortcuts, so after any change, rebuild and re-sign on a Mac signed in to iCloud:
+
+```bash
+python3 shortcuts/build.py && plutil -convert binary1 -o /tmp/in.shortcut "shortcuts/Send to Grok Bot.shortcut" && shortcuts sign --mode anyone --input /tmp/in.shortcut --output "shortcuts/Send to Grok Bot (signed).shortcut"
+```
+
+The name must stay **Send to Grok Bot**, because that is the label in the share sheet. Details are in [shortcuts/BUILD.md](shortcuts/BUILD.md).
+
+### Deploys
+
+Website, after `bash scripts/build-site.sh`:
+
+```bash
 npx wrangler deploy --config site/wrangler.toml
 ```
 
-`scripts/build-site.sh` writes `dist/site`. That folder is the site root: `/` is a short landing page, `/install` is the install page, `/connect` is the connect page, `/setup`, `/setup/grok`, `/setup/claude`, `/mobile`, `/history`, and `/privacy` are the guides. The build copies `extension/connect.js` to `/connect.js` and `extension/prompts.js` to `/prompts.js` so the pages work without the rest of the repository. Attach the domain `sendtogrokbot.com` to the `sendtogrokbot` worker in the Cloudflare dashboard after the first deploy. `/mobile` tells an iPhone user to install the shortcut and paste one relay code. The iCloud link is not in the repository. Copy it from the Shortcuts app and paste it into `docs/mobile.html` where the page says the link is not published yet, then deploy again. The steps are in [shortcuts/BUILD.md](shortcuts/BUILD.md).
-
-The same folder can go to Cloudflare Pages:
+Relay, from `relay/`:
 
 ```bash
-npx wrangler pages deploy dist/site --project-name sendtogrokbot
+npx wrangler deploy
 ```
 
-[`docs/_redirects`](docs/_redirects) is the pretty-URL list for that root. [`_redirects`](_redirects) at the repository root is only for serving the same paths when the whole repository is the site root.
+A push to GitHub does not deploy either one.
 
-## Relay (optional)
+### What a webhook receives
 
-You can store the Grok Bot webhook and the Claude routine on a small relay, and paste one code into the extension instead of those secrets. Check **Relay** at the bottom of the options page and paste the code from the setup page. It starts with `stgbr1.`. Leave it off to keep sending directly. From the extension, ChatGPT and Codex open a tab.
-
-The relay is a Cloudflare Worker in [`relay/`](relay/). Setup, including the exact commands, is in [relay/DEPLOY.md](relay/DEPLOY.md). The iPhone shortcut posts the same `/v1/send` endpoint with the whole `stgbr1.` code. ChatGPT and Codex come back as a link the phone opens. `GET /v1/history` is the list on `/history`.
-
-## Marketplace plugin
-
-[`plugin/`](plugin/) is the Grok Bot and Cursor plugin. It creates the webhook routine, then sends one message telling you to copy POST to and header from the routine and paste them, one at a time, at sendtogrokbot.com/connect. The logo on the site is `/logo.svg`. The form answers are in [plugin/SUBMIT.md](plugin/SUBMIT.md). Submit them at https://x.ai/bot/marketplace/submit-a-plugin.
-
-When Relay is on, Grok Bot and Claude still receive the version 2 post, including `digest` and media fields. The relay forwards that object.
-
-## What gets sent
-
-Grok Bot, and any other webhook, receives `POST` with `Content-Type: application/json`:
+Grok Bot, and any other webhook, gets a `POST` with `Content-Type: application/json`. If a key is saved, it is sent as `Authorization: Bearer <key>` and as `X-Sender-Key: <key>`. Any 2xx response means the run started. Zapier, Make, or n8n work too.
 
 ```json
 {
@@ -148,108 +283,14 @@ Grok Bot, and any other webhook, receives `POST` with `Content-Type: application
   "prompt": "The reply instructions for the preset you picked"
 }
 ```
-`url`, `author`, `text` and `sentAt` are always present. The rest are best-effort and may be empty or `null`. `thread` and `inReplyTo` are filled only when you click from a post's own page (`/status/…`), where X renders the conversation. Text fields keep line breaks and are capped at 20,000 characters. Threads are capped at 25 posts, in a window that still contains the post you clicked; `digest` prints that post's text even when it falls outside the window. Photo `url`s and video/GIF `thumbnail`s on `pbs.twimg.com` use `name=large`. A thumbnail is the `<video poster>` or an `ext_tw_video_thumb` / `amplify_video_thumb` / `tweet_video_thumb` image. `captions` is the text visible in the player, not a downloaded transcript. If your receiver passes a single text field to an AI, forward `digest`.
 
-If a key is set, it is sent as `Authorization: Bearer <key>` and as `X-Sender-Key: <key>`.
+`url`, `author`, `text`, and `sentAt` are always present. The rest are best effort and may be empty or `null`. `thread` and `inReplyTo` come from the post's own page, or from the public mirrors when they answer, so they can be empty. More fields may appear, such as `context` (where the conversation came from) and `url` or `media` on `quoted`; see `extension/enrich.js`. Text fields are capped at 20,000 characters and threads at 25 posts. If your receiver passes a single text field to an AI, forward `digest`.
 
-`preset` is `general`, `research`, `job-hunt`, `buy-or-skip`, `learn-later`, `content-ideas`, or `custom`. `prompt` is the text for that choice. Grok Bot and a Claude routine should be created with the General prompt, which follows `prompt` when the post includes one. ChatGPT and Codex are prefilled with the same text. The files are in [prompts/](prompts/). General is [prompts/general.md](prompts/general.md), which is the same text as [prompts/default-routine-prompt.md](prompts/default-routine-prompt.md).
+`preset` is `general`, `research`, `job-hunt`, `buy-or-skip`, `learn-later`, `content-ideas`, or `custom`, and `prompt` is its text from [prompts/](prompts/). A Claude routine receives `{"text": "..."}` with the prompt in front of the post. Claude, ChatGPT, and Codex tab links are prefilled with the prompt and the post, trimmed to stay under about 8,000 characters for Claude and 6,000 for ChatGPT and Codex.
 
-On the options page, under Replies, pick a preset or edit the text. Editing switches the preset to Custom. What you see in the box is what gets sent.
+### Logos
 
-The menu sends this same object to the destination you pick. Grok Bot posts the JSON. Claude, ChatGPT, and Codex receive that object too, and use `digest` when the destination can only take a single text field. A Claude routine also receives the prompt as a `Prompt:` section before the post, because that API takes a single text field.
-
-## Privacy
-The extension sends only the posts you click (plus, on a post's page, the author's thread and the post it replies to), and only to the destination you pick. It does not track browsing, collect analytics, or sell data. Addresses, tokens, and keys are stored in `chrome.storage.local`. A webhook URL and key from an earlier version are copied out of `chrome.storage.sync` once, then removed there. Host access is optional and is limited to the webhook host, `api.anthropic.com`, `api.chatgpt.com`, or the relay host after you save that destination. The policy to publish at sendtogrokbot.com/privacy is [docs/privacy.html](docs/privacy.html), kept in step with [store/privacy-policy.md](store/privacy-policy.md). In relay mode, the extension stores the one relay code in `chrome.storage.local`. The webhook key and Claude token stay on the relay, encrypted, and are not written to its logs.
-
-## Chrome Web Store
-Listing text, promo images, and the upload steps are in [store/](store/). `scripts/package.sh` writes `dist/send-to-grok-bot-<version>.zip`. Screenshots of x.com are not in that zip. The shot list is in [store/listing.md](store/listing.md).
-
-## How each destination works
-
-### Replies
-
-General is the default. It classifies the post, then answers in that shape, and it always starts with a one-line takeaway.
-
-- Tool, repo, or app: what it does, whether it is worth installing, and how to try it.
-- Thread or long article: a 3-line summary, then the key takeaway.
-- News: what happened, why it matters, and what to watch.
-- Video: describe it from the captions, thumbnail, and text. Do not claim to have watched it. Fetches go to fxtwitter, then vxtwitter.
-- Tip, prompt, or how-to: one actionable step to save.
-- Job, company, or founder: who they are, the stage, and who to follow.
-- Product or deal: worth buying or not, and why.
-- Meme, opinion, or anything else: one line of context, then stop.
-
-Presets on the options page: General, Research, Job hunt, Buy or skip, Learn later, Content ideas. Edit the text to use your own. The files are under [prompts/](prompts/).
-
-### Grok Bot
-
-The automatic path is the one line at the top of this file. The bot cannot read the webhook key. After the routine exists it sends one message: install the extension first at sendtogrokbot.com/install, open the routine, and paste POST to and then header at sendtogrokbot.com/connect.
-
-To copy it yourself, on a computer: in the Grok Bot desktop app, click the bot's name at the top of the chat, or press Cmd+Shift+I. Under **Routines**, click **Send to Grok Bot**. Its When to run is When a webhook fires. Under **Webhook** are three copy fields: **POST to** (the webhook URL), **key**, and **header** (the Authorization header). Paste **POST to** on [the connect page](docs/connect.html). The page says: Webhook URL saved. Now paste the Authorization header. Paste **header** in the same box. Pasting **key** instead also works. The page says: Now open x.com and click the arrow. Do this on a computer. The extension is Chrome on a computer.
-
-Any webhook that accepts the JSON above will do, including Zapier, Make, or n8n. On the connect page, paste the URL and then the Authorization header. A response of 200 means the run started. The reply shows up in the bot's chat.
-
-There is no screenshot of that Routines screen yet. Take `docs/img/grok-routines-webhook.png` and blur the URL and the header.
-
-### Claude
-
-Check **Send to Claude**.
-
-Leave the box empty to open claude.ai in a new tab with the post filled in. You press Send. Very long posts are shortened. This uses the `claude.ai/new?q=` link. That path needs no Fire URL and no token.
-
-To run it for you, save the task's Fire URL and token. You need a Claude Pro, Max, Team, or Enterprise plan with Claude Code on the web. Claude cannot create this task from outside the site. The clicks below match the product.
-
-1. On claude.ai, in the left sidebar, click **Scheduled**. Click **New task**, then **Set up manually**.
-2. Name it Send to Claude. In the extension, click **Copy task prompt** and paste it into the instructions box. Set **Trigger** to **API**. Click **Create**.
-3. Claude shows the **API token** once. Click its copy button and paste it into https://sendtogrokbot.com/connect. Click **Done**.
-4. On the task page, under **Triggers**, click the copy button next to **API** (Copy fire URL). Paste it into the same box on a new line. Click Connect.
-
-![claude.ai, Scheduled in the sidebar, then New task and Set up manually](docs/img/claude-step1-new-task.png)
-
-![The new task form: name, instructions, Trigger set to API, Create](docs/img/claude-step1-form.png)
-
-![The API token box, covered, with its copy button and Done](docs/img/claude-step2-token.png)
-
-![The task page with Copy fire URL next to API](docs/img/claude-step2-fire-url.png)
-
-No allowed websites are needed. The extension sends the whole post and the reply preset with every run, and the task prompt tells Claude to use only that.
-
-A send shows up under **History**. Leave the task Active. Regenerating a token invalidates the previous one. Paste the new token into the same box and click Save.
-
-The API is experimental and may change. Limits are 30 sends an hour per routine and 100 an hour per account. Runs count against the Claude plan. The extension sends `{"text": "..."}` with the preset prompt in front of the post. The token only starts that one routine.
-
-The same steps, with copy buttons, are on [docs/setup/claude.html](docs/setup/claude.html).
-
-### ChatGPT
-
-No setup. Check **Send to ChatGPT** and click **Save**.
-
-Clicking a post opens `chatgpt.com/?q=…` with the preset prompt and the post filled in. You press Send. Long posts are trimmed so the link stays under about 6,000 characters. The post URL is always included. This is a normal chat. Custom GPT links ignore the prompt.
-
-A Workspace Agent (ChatGPT Business or Enterprise) is optional, under the disclosure on the settings page. It runs on its own when an `agtch_…` trigger id and an access token are both saved. Each send is `POST https://api.chatgpt.com/v1/workspace_agents/{id}/trigger`. ChatGPT replies `202 Accepted`.
-
-A Gmail-triggered task for Plus and Pro is not built. The relay in this repo does not send email. It forwards to a Grok Bot webhook or a Claude routine. That Gmail route would still need a worker that emails the post to you.
-
-### Codex
-
-No setup. Check **Send to Codex** and click **Save**.
-
-Codex Cloud does not offer a public webhook a normal ChatGPT account can call. **Send to Codex** opens `https://chatgpt.com/codex` with the preset prompt and the post filled in, and you press Send. An environment id and a branch are optional, under the disclosure. Long posts are shortened so the link stays under about 6,000 characters.
-
-## Logos
-
-Menu rows and the line at the bottom of the screen use small inline SVGs.
-
-- Grok: Grok mark from [@lobehub/icons](https://www.npmjs.com/package/@lobehub/icons) (MIT).
-- Claude: Claude starburst from @lobehub/icons, colored `#D97757`.
-- ChatGPT: OpenAI mark from [Simple Icons](https://simpleicons.org/) (CC0).
-- Codex: Codex mark from @lobehub/icons.
-
-Label text uses the brand color. Claude is `#D97757`. ChatGPT, Codex, and Grok Bot are black on a light surface and white on a dark one. The menu follows X's light and dark surfaces and X's font.
-
-## Roadmap
-
-- Submit the listing prepared in [store/](store/) so install is one click and Developer mode is not required.
+Menu marks are inline SVGs: Grok, Claude, and Codex from [@lobehub/icons](https://www.npmjs.com/package/@lobehub/icons) (MIT), and the OpenAI mark from [Simple Icons](https://simpleicons.org/) (CC0).
 
 ## License
 

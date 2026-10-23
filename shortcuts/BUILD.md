@@ -8,7 +8,10 @@ python3 shortcuts/build.py && plutil -convert binary1 -o /tmp/in.shortcut "short
 
 The name has to stay **Send to Grok Bot**. That is the label in the X share sheet.
 
-The shortcut needs no code and stores nothing. It posts the shared link and the chosen AI to `https://relay.sendtogrokbot.com/v1/open`. The relay looks up the post (fxtwitter, then vxtwitter) and returns `openUrl`, a link that opens Claude or ChatGPT with the post filled in. For Grok Bot it returns `copyText`, which the shortcut copies, and `grokbot://`, which opens the app.
+There is no import question (a blank one broke every run). Setup happens on sendtogrokbot.com/mobile: its Finish button opens `shortcuts://run-shortcut?name=Send%20to%20Grok%20Bot&input=text&text=<connect code>`, so the code (`stgbr1.…`) arrives in the link itself; iPhone browsers did not fill the clipboard reliably. When the input contains `stgbr1.`, the shortcut saves it to `Send to Grok Bot connect code.txt` in the Shortcuts folder of iCloud Drive, then posts `{"test": "setup"}` to `/v1/send`, which sends Grok Bot a test message and answers "Connected…". That brings up iOS's one-time permission questions during setup. Run with no input at all, the shortcut says "Nothing came through" instead of showing the menu. sendtogrokbot.com/iphone-test checks copy, paste and this handoff on a real iPhone.
+
+- **With a saved code:** the shortcut skips the menu and posts the shared text to `https://relay.sendtogrokbot.com/v1/send` with `format: "text"` and the code as the bearer. The relay finds the post link, adds the full context (fxtwitter, then vxtwitter), forwards it to the saved Grok Bot webhook, and answers with one line that the shortcut shows as a notification. The person never leaves X.
+- **Without a code:** it asks which AI and posts the link to `https://relay.sendtogrokbot.com/v1/open`, which stores nothing. Claude and ChatGPT get `openUrl`, a link that opens the app with the post filled in. Grok Bot gets `copyText`; the shortcut copies it and opens `grokbot://`, which only reaches Grok Bot's home screen (Grok Bot has no link into a chat), so the person pastes. The share sheet was tried and dropped: too many taps.
 
 The install link is the signed file, served from the site: https://sendtogrokbot.com/send-to-grok-bot.shortcut
 
@@ -17,4 +20,9 @@ The install link is the signed file, served from the site: https://sendtogrokbot
 1. On the iPhone, open https://sendtogrokbot.com/mobile and tap Install Send to Grok Bot.
 2. Tap Add Shortcut.
 3. In the X app, tap Share on a post, then Send to Grok Bot. Pick Grok Bot, Claude, or ChatGPT.
-4. Claude and ChatGPT open with the post filled in. Press Send. For Grok Bot, paste the copied message and send.
+4. Claude and ChatGPT open with the post filled in. Press Send. For Grok Bot without a code, open a chat in Grok Bot and paste.
+5. Connected: run steps 2 to 4 on sendtogrokbot.com/mobile, check "Connected to Grok Bot", share a post, and check the "Sent to Grok Bot" notice and the reply in the routine's Grok Bot chat.
+
+## The iCloud install link
+
+/mobile installs from an iCloud link (`https://www.icloud.com/shortcuts/…`), because it opens Shortcuts with Add Shortcut from Safari, Chrome and Firefox, while the file downloads first in every iPhone browser. The file stays as a fallback link. After any change to the Shortcut, install the new signed file on an iPhone, then in Shortcuts press and hold it, Share, Copy iCloud Link, and replace both links in `docs/mobile.html`. The old link keeps serving the old version. Delete the old shortcut on the iPhone first: if it is still there, the new one arrives as "Send to Grok Bot 2", and the shared link carries that name, which Finish cannot find. Check a link before using it: `https://www.icloud.com/shortcuts/api/records/<id>` shows its name, and its download should have the same actions as `shortcuts/Send to Grok Bot.shortcut`.

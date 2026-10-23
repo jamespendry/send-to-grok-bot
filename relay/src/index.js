@@ -1,9 +1,10 @@
 import { relayKeyFromToken } from "./connect-code.js";
 import { encryptSecret, decryptSecret, sha256Hex } from "./crypto.js";
-import { ensureSchema, findAccount, insertAccount, updateAccount, addSend, recentSends } from "./db.js";
+import { ensureSchema, findAccount, insertAccount, updateAccount, deleteAccount, addSend, recentSends } from "./db.js";
 import { safeLog } from "./log.js";
 import { prefilledOpenUrl } from "./open-link.js";
-import { buildOpen } from "./open.js";
+import { buildOpen, parsePostUrl } from "./open.js";
+import "../../extension/enrich.js";
 import { renderPage, setupJavaScript } from "./page.js";
 import { LIMITS, takeToken } from "./rate.js";
 import { claudeFireUrl, claudeText, parseSendBody, pointsAtRelay, publicError, webhookProblem } from "./validate.js";
@@ -26,6 +27,22 @@ const SITE_ORIGINS = new Set([
   "https://sendtogrokbot.com",
   "https://www.sendtogrokbot.com"
 ]);
+
+// What Grok Bot's webhook answered, in words a person can act on. They show on the iPhone
+// as "Not sent: ..." and in the extension's error line.
+const GROK_ERRORS = {
+  401: "Grok Bot didn't accept the key. The routine may have been deleted or changed. Set it up again at sendtogrokbot.com.",
+  403: "Grok Bot didn't accept the key. The routine may have been deleted or changed. Set it up again at sendtogrokbot.com.",
+  404: "Grok Bot can't find the routine. It may have been deleted. Set it up again at sendtogrokbot.com.",
+  410: "Grok Bot can't find the routine. It may have been deleted. Set it up again at sendtogrokbot.com.",
+  429: "Grok Bot is busy. Wait a minute, then share again."
+};
+
+function grokError(status) {
+  if (GROK_ERRORS[status]) return GROK_ERRORS[status];
+  if (status >= 500) return "Grok Bot had a problem on its side. Share again in a moment.";
+  return "Grok Bot turned the post away (error " + status + "). If it keeps happening, set it up again at sendtogrokbot.com.";
+}
 
 const CLAUDE_ERRORS = {
   400: "Bad request or routine paused",
@@ -70,13 +87,18 @@ function tooMany(limited, extra = {}) {
   );
 }
 
+function withHeaders(res, extra) {
+  for (const [k, v] of Object.entries(extra)) res.headers.set(k, v);
+  return res;
+}
+
 function corsHeaders(request) {
   const origin = request.headers.get("Origin") || "";
   if (!SITE_ORIGINS.has(origin)) return {};
   return {
     "access-control-allow-origin": origin,
     vary: "Origin",
-    "access-control-allow-methods": "GET, OPTIONS",
+    "access-control-allow-methods": "GET, PUT, DELETE, OPTIONS",
     "access-control-allow-headers": "Authorization, Content-Type",
     "access-control-max-age": "86400"
   };
@@ -261,7 +283,7 @@ async function forwardGrok(env, request, account, keyHash, payload) {
   }
   await discard(res);
   if (res.ok) return { ok: true, http: 200, error: "" };
-  return { ok: false, http: 502, error: "HTTP " + res.status };
+  return { ok: false, http: 502, error: grokError(res.status) };
 }
 
 async function forwardClaude(env, account, keyHash, payload) {
@@ -359,8 +381,32 @@ async function putConfig(request, env, who) {
   return json({ ok: true });
 }
 
+// The iPhone page's Start over: the old code stops working, even if someone saw it.
+async function deleteConfig(env, who) {
+  await ensureSchema(env.DB);
+  await deleteAccount(env.DB, who.keyHash);
+  safeLog({ method: "DELETE", path: "/v1/config", status: 200 });
+  return json({ ok: true });
+}
+
 function named(destination, fields) {
   return { destination, label: LABELS[destination] || destination, ...fields };
+}
+
+// The phone shortcut sends whatever the X app shared. Find the post link in it and add the
+// post's full context, the same way the extension does before it sends.
+async function phonePost(env, value) {
+  const ref = parsePostUrl(value.url);
+  if (!ref) return null;
+  let ctx = null;
+  try { ctx = await globalThis.STGB_ENRICH.fetchContext(ref.url, { fetch: contextFetch(env) }); } catch { ctx = null; }
+  const post = globalThis.STGB_ENRICH.mergePost({ url: ref.url, author: ref.user === "i" ? "" : ref.user, text: "" }, ctx);
+  return { ...post, destination: value.destination, source: "x", sentAt: new Date().toISOString() };
+}
+
+// A Shortcut shows a plain-text answer as it is, so the phone gets one line either way.
+function phoneAnswer(text) {
+  return new Response(text, { status: 200, headers: { ...SECURITY, "content-type": "text/plain; charset=utf-8" } });
 }
 
 async function send(request, env, who) {
@@ -368,8 +414,26 @@ async function send(request, env, who) {
   if (!limited.ok) return tooMany(limited);
   const body = await readJson(request);
   if (body.error) return json({ ok: false, error: body.error }, body.status || 400);
+  const phone = !!(body.value && typeof body.value === "object" && body.value.format === "text");
+  const setupTest = phone && body.value.test === "setup";
+  if (setupTest) {
+    // Run once by the Shortcut at the end of iPhone setup. It proves the code, the relay and the
+    // webhook all work, and it brings up iOS's one-time permission questions during setup.
+    body.value = {
+      destination: "grokbot",
+      source: "setup",
+      url: "https://sendtogrokbot.com/mobile",
+      author: "sendtogrokbot",
+      text: "Test from Send to Grok Bot: your iPhone is connected. Reply with one short line saying the connection works. From now on, posts you share from X arrive here.",
+      sentAt: new Date().toISOString()
+    };
+  } else if (phone) {
+    const post = await phonePost(env, body.value);
+    if (!post) return phoneAnswer("No post link came through. In the X app, tap Share on a post, then Share via, then Send to Grok Bot.");
+    body.value = post;
+  }
   const parsed = parseSendBody(body.value);
-  if (parsed.error) return json({ ok: false, error: parsed.error }, 400);
+  if (parsed.error) return phone ? phoneAnswer(parsed.error) : json({ ok: false, error: parsed.error }, 400);
   await ensureSchema(env.DB);
   const openOnly = parsed.destination === "chatgpt" || parsed.destination === "codex";
   let result;
@@ -379,6 +443,7 @@ async function send(request, env, who) {
   } else {
     const account = await findAccount(env.DB, who.keyHash);
     if (!account) {
+      if (phone) return phoneAnswer("Not connected yet: paste the URL and Header on sendtogrokbot.com/mobile, then tap Finish again.");
       return json(named(parsed.destination, {
         ok: false,
         error: "Nothing is saved for this code yet.",
@@ -409,13 +474,26 @@ async function send(request, env, who) {
     const notice = openOnly
       ? (parsed.destination === "chatgpt" ? "Opened ChatGPT" : "Opened Codex")
       : (parsed.destination === "grokbot" ? "Sent to Grok Bot" : "Sent to Claude");
+    if (setupTest) return phoneAnswer("Connected. Grok Bot got a test and will answer it in your Send to Grok Bot chat.");
+    if (phone) return phoneAnswer(notice + ". The reply will land in your Grok Bot chat.");
     const payload = named(parsed.destination, { ok: true, notice });
     if (result.sessionUrl) payload.sessionUrl = result.sessionUrl;
     if (result.openUrl) payload.openUrl = result.openUrl;
     return json(payload);
   }
   const error = publicError(result.error);
+  if (setupTest) return phoneAnswer("Saved, but Grok Bot did not accept the test: " + error + " Copy the URL and Header again and tap Finish again.");
+  if (phone) return phoneAnswer("Not sent: " + error);
   return json(named(parsed.destination, { ok: false, error, notice: error }), result.http || 502);
+}
+
+function contextFetch(env) {
+  return (u, init) => {
+    // Workers reject the credentials option, and fxtwitter asks callers to name themselves.
+    const { credentials, ...rest } = init || {};
+    const headers = { ...(rest.headers || {}), "User-Agent": "SendToGrokBot/1.0 (+https://sendtogrokbot.com)" };
+    return callOut(env, new Request(u, { ...rest, headers }));
+  };
 }
 
 // No code and nothing stored: the shortcut's open-with-the-post-filled-in path.
@@ -427,12 +505,7 @@ async function openPost(request, env) {
   const body = await readJson(request);
   if (body.error) return json({ ok: false, error: body.error, notice: body.error }, body.status || 400);
   const value = body.value || {};
-  const result = await buildOpen(String(value.destination || ""), value.url, (u, init) => {
-    // Workers reject the credentials option, and fxtwitter asks callers to name themselves.
-    const { credentials, ...rest } = init || {};
-    const headers = { ...(rest.headers || {}), "User-Agent": "SendToGrokBot/1.0 (+https://sendtogrokbot.com)" };
-    return callOut(env, new Request(u, { ...rest, headers }));
-  });
+  const result = await buildOpen(String(value.destination || ""), value.url, contextFetch(env));
   safeLog({ method: "POST", path: "/v1/open", status: result.ok ? 200 : 400, destination: result.ok ? result.destination : "", error: result.ok ? "" : "input" });
   // format "text" answers with just the link to open, and "copy" with just the text to paste.
   // A Shortcut uses a plain-text answer directly, with no dictionary to unpack.
@@ -462,7 +535,7 @@ export async function handle(request, env) {
   const url = new URL(request.url);
   const path = normalizePath(url.pathname);
   if (request.method === "OPTIONS") {
-    const extra = path === "/v1/history" ? corsHeaders(request) : {};
+    const extra = path === "/v1/history" || path === "/v1/config" ? corsHeaders(request) : {};
     return new Response(null, { status: 204, headers: { ...SECURITY, ...extra } });
   }
   if (path === "/" && request.method === "GET") {
@@ -480,16 +553,18 @@ export async function handle(request, env) {
   if (path === "/v1/open") return openPost(request, env);
   if (path !== "/v1/config" && path !== "/v1/send" && path !== "/v1/history") return json({ ok: false, error: "Nothing is here." }, 404);
   requireStorage(env);
-  const cors = path === "/v1/history" ? corsHeaders(request) : {};
+  // The site reads history and, from the iPhone setup page, saves the Grok Bot webhook.
+  const cors = path === "/v1/history" || path === "/v1/config" ? corsHeaders(request) : {};
   const ip = await takeToken(env.KV, await clientId(request, env), "ip", 300);
   if (!ip.ok) return tooMany(ip, cors);
   const who = await identify(request);
   if (who.error) return json({ ok: false, error: who.error }, who.status, cors);
   if (path === "/v1/history" && request.method === "GET") return getHistory(request, env, who, cors);
   if (path === "/v1/config" && request.method === "GET") return getConfig(request, env, who);
-  if (path === "/v1/config" && request.method === "PUT") return putConfig(request, env, who);
+  if (path === "/v1/config" && request.method === "PUT") return withHeaders(await putConfig(request, env, who), cors);
+  if (path === "/v1/config" && request.method === "DELETE") return withHeaders(await deleteConfig(env, who), cors);
   if (path === "/v1/send" && request.method === "POST") return send(request, env, who);
-  const allow = path === "/v1/send" ? "POST" : path === "/v1/history" ? "GET" : "GET, PUT";
+  const allow = path === "/v1/send" ? "POST" : path === "/v1/history" ? "GET" : "GET, PUT, DELETE";
   return json({ ok: false, error: "That method is not allowed." }, 405, { ...cors, allow });
 }
 
@@ -509,7 +584,8 @@ export default {
       catch { /* ignore */ }
       let extra = {};
       try {
-        if (normalizePath(new URL(request.url).pathname) === "/v1/history") extra = corsHeaders(request);
+        const failed = normalizePath(new URL(request.url).pathname);
+        if (failed === "/v1/history" || failed === "/v1/config") extra = corsHeaders(request);
       } catch { /* ignore */ }
       return json({ ok: false, error }, 500, extra);
     }

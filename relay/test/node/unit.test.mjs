@@ -475,7 +475,8 @@ test("a Grok webhook is tried once more when the network fails, and not on a ref
   const denied = await context.STGB_DESTINATIONS.grokbot.send({ text: "hi" }, settings);
   assert.equal(calls, 1);
   assert.equal(denied.ok, false);
-  assert.match(denied.error, /refused the key/);
+  assert.match(denied.error, /didn't accept the key/);
+  assert.match(denied.error, /sendtogrokbot\.com\/setup\/grok/);
 });
 
 test("one ready destination is sent on the click, and two destinations stay a menu", async () => {
@@ -543,12 +544,13 @@ test("one ready destination is sent on the click, and two destinations stay a me
   assert.match(read("../extension/content.js"), /showToast\(brand, title, ''\);\n\s*setState\(btn, 'ok'/);
 });
 
-test("the share sheet shortcut needs no code and opens the AI through /v1/open", () => {
+test("the shortcut saves the code from setup, sends in the background, and opens the AI without one", () => {
   const filePath = join(root, "../shortcuts/Send to Grok Bot.shortcut");
   const file = readFileSync(filePath, "utf8");
   assert.match(file, /^<\?xml version="1\.0"/);
   assert.doesNotMatch(file, /rk_[A-Za-z0-9_-]{20}/);
-  assert.doesNotMatch(file, /stgbr1|Authorization|Bearer/);
+  // It ships with no code in it; the person pastes their own when adding it.
+  assert.doesNotMatch(file, /stgbr1\.[A-Za-z0-9_-]{8}/);
   const parsed = JSON.parse(execFileSync("python3", ["-c", `
 import json, plistlib, sys
 pl = plistlib.loads(open(sys.argv[1], "rb").read())
@@ -557,7 +559,7 @@ def ident(a):
     return a.get("WFWorkflowActionIdentifier", "").rsplit(".", 1)[-1]
 def params(name):
     return [a["WFWorkflowActionParameters"] for a in actions if ident(a) == name]
-post = params("downloadurl")[0]
+posts = params("downloadurl")
 menu = [p for p in params("choosefrommenu") if p.get("WFControlFlowMode") == 0][0]
 print(json.dumps({
     "name": pl.get("WFWorkflowName"),
@@ -567,34 +569,48 @@ print(json.dumps({
     "actions": [ident(a) for a in actions],
     "texts": [p.get("WFTextActionText") for p in params("gettext")],
     "menu": menu.get("WFMenuItems"),
-    "url": post.get("WFURL"),
-    "method": post.get("WFHTTPMethod"),
-    "bodyType": post.get("WFHTTPBodyType"),
+    "urls": [p.get("WFURL") for p in posts],
+    "methods": sorted(set(p.get("WFHTTPMethod") for p in posts)),
+    "bodyTypes": sorted(set(p.get("WFHTTPBodyType") for p in posts)),
+    "auth": posts[0].get("WFHTTPHeaders", {}).get("Value", {}).get("WFDictionaryFieldValueItems", [{}])[0].get("WFValue", {}).get("Value", {}).get("attachmentsByRange", {}).get("{7, 1}", {}).get("Type"),
+    "saves": [(p.get("WFFileDestinationPath"), p.get("WFSaveFileOverwrite"), p.get("WFAskWhereToSave")) for p in params("save")],
+    "reads": [(p.get("WFGetFilePath"), p.get("WFFileErrorIfNotFound"), p.get("WFShowFilePicker")) for p in params("open")],
+    "condition": [(p.get("WFCondition"), p.get("WFConditionalActionString")) for p in params("conditional") if p.get("WFControlFlowMode") == 0],
     "keys": [p.get("WFDictionaryKey") for p in params("getvalueforkey")],
     "setvars": len(params("setvariable")),
     "opens": [p.get("WFInput", {}).get("Value", {}).get("Type") for p in params("openurl")],
+    "shares": [p.get("WFInput", {}).get("Value", {}).get("Type") for p in params("share")],
     "formats": [i["WFValue"]["Value"]["string"] for p in params("downloadurl") for i in p["WFJSONValues"]["Value"]["WFDictionaryFieldValueItems"] if i["WFKey"]["Value"]["string"] == "format"],
 }))
 `, filePath], { encoding: "utf8" }));
   assert.equal(parsed.name, "Send to Grok Bot");
   assert.deepEqual(parsed.types, ["ActionExtension"]);
   for (const kind of ["WFURLContentItem", "WFStringContentItem", "WFSafariWebPageContentItem"]) assert.ok(parsed.inputs.includes(kind), kind);
-  // An import question left blank broke every run ("Please choose a value for each parameter").
+  // No import question: a blank one broke every run. The setup page hands the code over instead.
   assert.deepEqual(parsed.questions, []);
-  // No link check and no If blocks: the X app's share did not pass one, so the relay finds the link.
-  assert.equal(parsed.actions[0], "choosefrommenu");
-  assert.ok(!parsed.actions.includes("conditional"));
+  assert.equal(parsed.actions[0], "text");
+  assert.deepEqual(parsed.condition, [[99, "stgbr1."], [100, null], [99, "stgbr1."]]);
+  // Setup sends a test right away, and an empty run says so instead of showing the menu.
+  assert.ok(parsed.actions.includes("exit"));
+  assert.deepEqual(parsed.saves, [["Send to Grok Bot connect code.txt", true, false]]);
+  assert.deepEqual(parsed.reads, [["Send to Grok Bot connect code.txt", false, false]]);
+  assert.equal(parsed.auth, "ActionOutput");
+  // No link check: the X app's share did not pass one, so the relay finds the link.
   assert.ok(!parsed.actions.includes("link"));
   assert.deepEqual(parsed.menu, ["Grok Bot", "Claude", "ChatGPT"]);
-  assert.equal(parsed.url, "https://relay.sendtogrokbot.com/v1/open");
-  assert.equal(parsed.method, "POST");
-  assert.equal(parsed.bodyType, "JSON");
+  assert.deepEqual(parsed.urls, ["https://relay.sendtogrokbot.com/v1/send", "https://relay.sendtogrokbot.com/v1/send", "https://relay.sendtogrokbot.com/v1/open", "https://relay.sendtogrokbot.com/v1/open", "https://relay.sendtogrokbot.com/v1/open"]);
+  assert.deepEqual(parsed.methods, ["POST"]);
+  assert.deepEqual(parsed.bodyTypes, ["JSON"]);
   // iOS left unwired variables empty, so every input names an earlier action's output.
   assert.deepEqual(parsed.keys, []);
   assert.equal(parsed.setvars, 0);
-  assert.deepEqual(parsed.opens, ["ActionOutput", "ActionOutput", "ActionOutput"]);
-  assert.deepEqual(parsed.formats, ["copy", "text", "text"]);
-  for (const step of ["setclipboard", "notification", "openurl"]) assert.ok(parsed.actions.includes(step), step);
+  // Setup ends by opening Grok Bot, where the test answer arrives; then one open per menu AI.
+  assert.deepEqual(parsed.opens, ["ActionOutput", "ActionOutput", "ActionOutput", "ActionOutput"]);
+  // The share sheet took too many taps, so without a code Grok Bot gets the message copied instead.
+  assert.deepEqual(parsed.shares, []);
+  assert.ok(parsed.texts.some(t => t.Value.string === "grokbot://"));
+  assert.deepEqual(parsed.formats, ["text", "text", "copy", "text", "text"]);
+  for (const step of ["setclipboard", "notification", "openurl", "conditional"]) assert.ok(parsed.actions.includes(step), step);
   const steps = read("../shortcuts/BUILD.md");
   assert.match(steps, /shortcuts sign --mode anyone/);
   assert.match(steps, /build\.py/);
@@ -689,7 +705,7 @@ test("the connect site is rooted at docs and hands the code to the extension", a
   assert.match(read("../docs/_redirects"), /\/\s+\/index\.html\s+200/);
   assert.match(read("../_redirects"), /\/\s+\/docs\/index\.html\s+200/);
   assert.match(read("../docs/_redirects"), /\/connect\s+\/connect\.html\s+200/);
-  assert.match(read("../extension/manifest.json"), /"version": "1\.2\.7"/);
+  assert.match(read("../extension/manifest.json"), /"version": "1\.2\.8"/);
   assert.match(read("../extension/options.html"), /id="more"/);
   assert.match(read("../extension/options.html"), /More options/);
   assert.match(read("../extension/options.html"), /id="cc"/);
@@ -705,12 +721,42 @@ test("the connect site is rooted at docs and hands the code to the extension", a
   assert.match(read("../README.md"), /npx wrangler deploy --config site\/wrangler\.toml/);
   const mobile = read("../docs/mobile.html");
   assert.match(mobile, /id="install-link"/);
-  assert.match(mobile, /https:\/\/sendtogrokbot\.com\/send-to-grok-bot\.shortcut/);
+  // The iCloud link opens Shortcuts from any iPhone browser; the file stays as a fallback.
+  assert.match(mobile, /href="https:\/\/www\.icloud\.com\/shortcuts\/[0-9a-f]{32}"/);
+  assert.match(mobile, /href="\/send-to-grok-bot\.shortcut"/);
   assert.match(mobile, /Add Shortcut/);
   assert.doesNotMatch(mobile, /not published yet/);
-  assert.doesNotMatch(mobile, /icloud\.com\/shortcuts\/[0-9a-f]{8}/);
   assert.match(read("../scripts/build-site.sh"), /send-to-grok-bot\.shortcut/);
   assert.doesNotMatch(mobile, /rk_[A-Za-z0-9_-]{20}/);
+  // Setup stays on the iPhone: the page saves the webhook on the relay, then hands the code to the Shortcut.
+  assert.match(mobile, /RELAY \+ '\/v1\/config'/);
+  assert.match(mobile, /shortcuts:\/\/run-shortcut\?name=/);
+  // The code rides in the link, not the clipboard, which iPhone browsers don't fill reliably.
+  assert.match(mobile, /&input=text&text=/);
+  assert.doesNotMatch(mobile, /input=clipboard/);
+  assert.doesNotMatch(mobile, /stgbCopy/);
+  // Chrome and Firefox work too: they get the download's extra taps spelled out.
+  // Grok Bot installs right before Finish, so the Shortcut is there when Finish runs it.
+  assert.ok(mobile.indexOf('id="pastebox"') < mobile.lastIndexOf("Install Send to Grok Bot"));
+  assert.ok(mobile.lastIndexOf("Install Send to Grok Bot") < mobile.indexOf('id="finish"'));
+  assert.match(mobile, /not <span class="ui">Allow Once<\/span>/);
+  assert.match(mobile, /id="startover"/);
+  // Shares stay in X; Grok Bot's own notification says when the reply is ready (decided 2026-10-22).
+  assert.match(mobile, /turn on <span class="ui">Notifications<\/span>/);
+  assert.match(read("../scripts/build-site.sh"), /site\.js\?v=|\/assets\/\{n\}\?v=/);
+  assert.match(mobile, /method: 'DELETE'/);
+  // A variable named show once replaced the page's show() and broke the page in Chrome.
+  assert.doesNotMatch(mobile, /var show\b/);
+  // Setup survives the page reloading while the person is in Grok Bot.
+  assert.match(mobile, /localStorage', 'stgb-mobile'/);
+  assert.doesNotMatch(mobile, /x-safari-https/);
+  assert.match(mobile, /text\/uri-list/);
+  assert.match(read("../docs/iphone-test.html"), /input=text&text=check/);
+  assert.match(read("../docs/_redirects"), /\/iphone-test\s+\/iphone-test\.html\s+200/);
+  // People pick their AI first; a single paste box takes the URL and the Header in either order.
+  assert.match(mobile, /data-pick="grokbot"/);
+  assert.match(mobile, /data-pick="claude"/);
+  assert.match(mobile, /id="pastebox"/);
   const history = read("../docs/history.html");
   assert.match(history, /https:\/\/relay\.sendtogrokbot\.com\/v1\/history/);
   assert.match(history, /Authorization/);
@@ -868,4 +914,54 @@ test("/v1/open fills in the post for each AI and needs no code", async () => {
   assert.equal(shared.ok, true);
   assert.equal(shared.context, "full");
   assert.equal((await buildOpen("gemini", "https://x.com/ada/status/123", fakeFetch)).ok, false);
+});
+
+test("setup pages add ChatGPT, Codex, or Claude to the Send menu in one click", async () => {
+  // The checkboxes sit at the top of the settings page, not inside More options.
+  const options = read("../extension/options.html");
+  const more = options.slice(options.indexOf('<details id="more">'), options.indexOf("</details>\n\n<button"));
+  for (const d of ["grokbot", "claude", "chatgpt", "codex"]) {
+    assert.match(options, new RegExp(`data-dest="${d}"`));
+    assert.doesNotMatch(more, new RegExp(`data-dest="${d}"`));
+  }
+  assert.ok(options.indexOf('id="s"') > options.indexOf("</details>"));
+  for (const [page, d] of [["chatgpt", "chatgpt"], ["codex", "codex"], ["claude", "claude"]]) {
+    assert.match(read(`../docs/setup/${page}.html`), new RegExp(`data-stgb-enable="${d}"`));
+  }
+  assert.doesNotMatch(read("../docs/setup/chatgpt.html"), /icon in Chrome's toolbar/);
+
+  // Drive site-ready.js with a stubbed page and chrome.storage.
+  const run = (stored, dest) => new Promise((resolve) => {
+    let onClick;
+    const btn = { dataset: {}, getAttribute: () => dest, closest: () => btn };
+    const ctx = vm.createContext({
+      document: {
+        documentElement: { dataset: {} },
+        addEventListener: (type, fn) => { if (type === "click") onClick = fn; },
+        dispatchEvent: () => resolve({ stored, btn })
+      },
+      CustomEvent: class { constructor(type, init) { this.type = type; this.detail = init.detail; } },
+      chrome: {
+        runtime: {},
+        storage: { local: {
+          get: (keys, cb) => cb({ ...stored }),
+          set: (patch, cb) => { Object.assign(stored, patch); cb(); }
+        } }
+      }
+    });
+    vm.runInContext(read("../extension/site-ready.js"), ctx);
+    onClick({ target: btn, preventDefault() {} });
+    if (dest === "evil") setTimeout(() => resolve({ stored, btn }), 20);
+  });
+  let r = await run({}, "chatgpt");
+  assert.deepEqual([...r.stored.enabled], ["chatgpt"]);
+  assert.equal(r.btn.dataset.stgbState, "on");
+  r = await run({ enabled: ["grokbot", "codex"] }, "codex");
+  assert.deepEqual([...r.stored.enabled], ["grokbot", "codex"]);
+  // Settings from before the checkboxes keep Grok Bot on.
+  r = await run({ webhookUrl: "https://hooks.example.com/h" }, "claude");
+  assert.deepEqual([...r.stored.enabled], ["grokbot", "claude"]);
+  // Nothing that needs a secret can be turned on from a page.
+  r = await run({}, "evil");
+  assert.equal(r.stored.enabled, undefined);
 });

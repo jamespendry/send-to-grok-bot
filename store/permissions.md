@@ -1,6 +1,6 @@
 # Chrome Web Store: Privacy practices tab and permissions review
 
-Reviewed against extension 1.2.7 (`extension/manifest.json`) and `store/privacy-policy.md`. Paste the quoted text into the dashboard. Everything below the quotes is for you and is not pasted.
+Reviewed against extension 1.2.8 (`extension/manifest.json`) and `store/privacy-policy.md`. Paste the quoted text into the dashboard. Everything below the quotes is for you and is not pasted.
 
 ## Single purpose
 
@@ -40,9 +40,9 @@ Verified: `site-connect.js` (reads only `location.hash` matching `stgb1.` or `st
 
 ### Content script: https://sendtogrokbot.com/* and https://www.sendtogrokbot.com/* (manifest.json:52-53, script site-ready.js)
 
-> The website shows "Installed" and moves you to the next setup step when the extension is present. The script is one line. It sets one attribute (data-stgb-ready="1") on the page's root element. It reads nothing from the page and sends nothing.
+> The website shows "Installed" and moves you to the next setup step when the extension is present: the script sets one attribute (data-stgb-ready="1") on the page's root element. On the setup pages, an Add button (for example "Add ChatGPT") turns that AI on in the extension in one click: the script adds "chatgpt", "codex", or "claude" to the list of enabled AIs in chrome.storage.local. It accepts only those three, none of which uses a secret. It reads nothing else from the page and sends nothing.
 
-Verified: `site-ready.js` is 3 lines, one assignment.
+Verified: `site-ready.js` sets the marker and handles `[data-stgb-enable]` clicks; it writes only `enabled`, only for chatgpt, codex, or claude.
 
 ### web_accessible_resources: grant.html (manifest.json:64-71)
 
