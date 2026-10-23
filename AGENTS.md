@@ -94,6 +94,8 @@ If their line says iPhone (for example "Set up Send to Grok Bot on my iPhone: ..
 
 Your Send to Grok Bot routine is ready. Switch back to sendtogrokbot.com/mobile. Then tap my name at the top, Routines, Send to Grok Bot, and copy the URL and Header rows into that page, one at a time.
 
+Do not offer to walk them through building a Shortcut by hand: the page installs a ready-made one. Do not delete or remake an existing Send to Grok Bot routine; its URL and Header would change and break their phone.
+
 Do not add a second message. Do not ask them to paste the key into this chat. If your message can include the links named Webhook URL and Authorization header, they open the same pane.
 
 What the person sees: clicking the bot's name at the top of the chat, or Cmd+Shift+I, opens its info pane. The routine is under Routines. Its detail pane shows three copyable fields under Webhook: POST to (the webhook URL, `https://api2.cursor.sh/automations/...`), key (`crsr_...`), and header (`Authorization: Bearer crsr_...`). It also has Pause, Edit, and a delete icon. Pasting key instead of header also works, and either order works. After POST to, the page says: Webhook URL saved. Now paste the Authorization header. After the second value it says: Now open x.com and click the arrow. The paste saves only when the extension is installed. The extension is Chrome on a computer. Install the extension first: sendtogrokbot.com/install. It is not in the Chrome Web Store yet.
