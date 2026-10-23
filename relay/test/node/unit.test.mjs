@@ -475,7 +475,8 @@ test("a Grok webhook is tried once more when the network fails, and not on a ref
   const denied = await context.STGB_DESTINATIONS.grokbot.send({ text: "hi" }, settings);
   assert.equal(calls, 1);
   assert.equal(denied.ok, false);
-  assert.match(denied.error, /refused the key/);
+  assert.match(denied.error, /didn't accept the key/);
+  assert.match(denied.error, /sendtogrokbot\.com\/setup\/grok/);
 });
 
 test("one ready destination is sent on the click, and two destinations stay a menu", async () => {
@@ -704,7 +705,7 @@ test("the connect site is rooted at docs and hands the code to the extension", a
   assert.match(read("../docs/_redirects"), /\/\s+\/index\.html\s+200/);
   assert.match(read("../_redirects"), /\/\s+\/docs\/index\.html\s+200/);
   assert.match(read("../docs/_redirects"), /\/connect\s+\/connect\.html\s+200/);
-  assert.match(read("../extension/manifest.json"), /"version": "1\.2\.7"/);
+  assert.match(read("../extension/manifest.json"), /"version": "1\.2\.8"/);
   assert.match(read("../extension/options.html"), /id="more"/);
   assert.match(read("../extension/options.html"), /More options/);
   assert.match(read("../extension/options.html"), /id="cc"/);
@@ -913,4 +914,54 @@ test("/v1/open fills in the post for each AI and needs no code", async () => {
   assert.equal(shared.ok, true);
   assert.equal(shared.context, "full");
   assert.equal((await buildOpen("gemini", "https://x.com/ada/status/123", fakeFetch)).ok, false);
+});
+
+test("setup pages add ChatGPT, Codex, or Claude to the Send menu in one click", async () => {
+  // The checkboxes sit at the top of the settings page, not inside More options.
+  const options = read("../extension/options.html");
+  const more = options.slice(options.indexOf('<details id="more">'), options.indexOf("</details>\n\n<button"));
+  for (const d of ["grokbot", "claude", "chatgpt", "codex"]) {
+    assert.match(options, new RegExp(`data-dest="${d}"`));
+    assert.doesNotMatch(more, new RegExp(`data-dest="${d}"`));
+  }
+  assert.ok(options.indexOf('id="s"') > options.indexOf("</details>"));
+  for (const [page, d] of [["chatgpt", "chatgpt"], ["codex", "codex"], ["claude", "claude"]]) {
+    assert.match(read(`../docs/setup/${page}.html`), new RegExp(`data-stgb-enable="${d}"`));
+  }
+  assert.doesNotMatch(read("../docs/setup/chatgpt.html"), /icon in Chrome's toolbar/);
+
+  // Drive site-ready.js with a stubbed page and chrome.storage.
+  const run = (stored, dest) => new Promise((resolve) => {
+    let onClick;
+    const btn = { dataset: {}, getAttribute: () => dest, closest: () => btn };
+    const ctx = vm.createContext({
+      document: {
+        documentElement: { dataset: {} },
+        addEventListener: (type, fn) => { if (type === "click") onClick = fn; },
+        dispatchEvent: () => resolve({ stored, btn })
+      },
+      CustomEvent: class { constructor(type, init) { this.type = type; this.detail = init.detail; } },
+      chrome: {
+        runtime: {},
+        storage: { local: {
+          get: (keys, cb) => cb({ ...stored }),
+          set: (patch, cb) => { Object.assign(stored, patch); cb(); }
+        } }
+      }
+    });
+    vm.runInContext(read("../extension/site-ready.js"), ctx);
+    onClick({ target: btn, preventDefault() {} });
+    if (dest === "evil") setTimeout(() => resolve({ stored, btn }), 20);
+  });
+  let r = await run({}, "chatgpt");
+  assert.deepEqual([...r.stored.enabled], ["chatgpt"]);
+  assert.equal(r.btn.dataset.stgbState, "on");
+  r = await run({ enabled: ["grokbot", "codex"] }, "codex");
+  assert.deepEqual([...r.stored.enabled], ["grokbot", "codex"]);
+  // Settings from before the checkboxes keep Grok Bot on.
+  r = await run({ webhookUrl: "https://hooks.example.com/h" }, "claude");
+  assert.deepEqual([...r.stored.enabled], ["grokbot", "claude"]);
+  // Nothing that needs a secret can be turned on from a page.
+  r = await run({}, "evil");
+  assert.equal(r.stored.enabled, undefined);
 });

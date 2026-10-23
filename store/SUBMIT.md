@@ -32,9 +32,9 @@ From the repo root:
 scripts/package.sh
 ```
 
-That writes `dist/send-to-grok-bot-1.2.7.zip`. The manifest is at the top of the zip. The script checks the manifest, the file list, the zip size, and that the package has no remote code. The zip does not contain `store/`, the README, or screenshots. Do not add a `.pem` key.
+That writes `dist/send-to-grok-bot-1.2.8.zip`. The manifest is at the top of the zip. The script checks the manifest, the file list, the zip size, and that the package has no remote code. The zip does not contain `store/`, the README, or screenshots. Do not add a `.pem` key.
 
-Version in this upload is `1.2.7`.
+Version in this upload is `1.2.8`.
 
 ## 4. Create the item and upload
 
