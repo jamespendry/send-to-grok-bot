@@ -148,6 +148,11 @@ test("rate limit counts inside one window", async () => {
   assert.equal(blocked.ok, false);
   assert.ok(blocked.retry > 0);
   assert.equal(LIMITS.send, 60);
+  // A KV outage or a used-up daily write allowance lets requests through.
+  const broken = { get: async () => 0, put: async () => { throw new Error("KV put() limit exceeded for the day."); } };
+  assert.equal((await takeToken(broken, "user", "send", 2, now)).ok, true);
+  const down = { get: async () => { throw new Error("KV unavailable"); }, put: async () => {} };
+  assert.equal((await takeToken(down, "user", "send", 2, now)).ok, true);
 });
 
 function refEncode(relay, key) {
