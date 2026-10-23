@@ -62,6 +62,32 @@
     }
     copyNow(text).then(function () { show('Copied'); }, function () { show('Select and copy'); });
   });
+  // Setup pages: <button data-stgb-enable="chatgpt"> is handled by the extension, which
+  // adds that AI to the Send menu and answers with a stgb-enabled event.
+  document.addEventListener('click', function (event) {
+    var btn = event.target.closest && event.target.closest('[data-stgb-enable]');
+    if (!btn) return;
+    var msg = document.querySelector('.stgb-enable-msg');
+    clearTimeout(btn._t);
+    btn._t = setTimeout(function () {
+      if (btn.dataset.stgbState === 'on' || !msg) return;
+      msg.className = 'stgb-enable-msg err';
+      msg.textContent = "The extension didn't answer. It may be an older version: add it in the extension's settings instead, as below.";
+    }, 1500);
+  });
+  document.addEventListener('stgb-enabled', function () {
+    var msg = document.querySelector('.stgb-enable-msg');
+    document.querySelectorAll('[data-stgb-enable]').forEach(function (btn) {
+      if (btn.dataset.stgbState !== 'on') return;
+      clearTimeout(btn._t);
+      btn.textContent = 'Added';
+      btn.setAttribute('aria-disabled', 'true');
+      if (msg) {
+        msg.className = 'stgb-enable-msg ok';
+        msg.textContent = 'Done. ' + (btn.dataset.name || 'It') + ' is in the Send menu on every post. Reload any x.com tab you already have open.';
+      }
+    });
+  });
   // The relay page's QR code opens /mobile#code=stgbr1.... Show that code ready to copy.
   // The #fragment never reaches a server, and it is removed from the address bar here.
   (function () {

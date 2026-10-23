@@ -85,7 +85,7 @@ There are two ways. Pick one.
 
 2. **Fill in the form.**
    - **Name:** type `Send to Claude`.
-   - **Instructions:** click the Send to Grok Bot icon in Chrome to open its settings. If you don't see the AI checkboxes, click **More options**. Check **Send to Claude**, then click **Copy task prompt**. Paste it into the big box.
+   - **Instructions:** click the Send to Grok Bot icon in Chrome to open its settings. Check **Send to Claude**, then click **Copy task prompt**. Paste it into the big box.
    - **Trigger:** click Schedule and choose **API**.
    - Click **Create**. Leave everything else as it is.
 
@@ -113,13 +113,13 @@ Set up Send to Grok Bot for me, with Claude: https://github.com/jamespendry/send
 
 Lost the token, or Claude says it's invalid? On the Scheduled page, open Send to Claude. Click the small arrow next to its name, then **Edit**. Under Trigger, click **Regenerate** and copy the new token. The old one stops working. Paste the new token on the [connect page](https://sendtogrokbot.com/connect).
 
-**Claude opens in a tab.** Works on any plan, including free. Open the extension settings and click **More options** if it's closed. Check **Send to Claude**, leave the box labeled Fire URL and token empty, and click **Save**. Clicking a post opens Claude in a new tab with the post filled in. You press Send.
+**Claude opens in a tab.** Works on any plan, including free. On sendtogrokbot.com/setup/claude, open **Rather skip all of this?** and click **Add Claude, opening in a tab**. Or open the extension settings, check **Send to Claude**, leave the box labeled Fire URL and token empty, and click **Save**. Clicking a post opens Claude in a new tab with the post filled in. You press Send.
 
 ### ChatGPT
 
 Nothing to set up.
 
-1. Click the Send to Grok Bot icon in Chrome to open its settings. If you don't see the checkboxes, click **More options**. Check **Send to ChatGPT** and click **Save**.
+1. On sendtogrokbot.com/setup/chatgpt, click **Add ChatGPT**. Or open the extension settings, check **Send to ChatGPT**, and click **Save**.
 2. On x.com, click the Send arrow on any post and choose Send to ChatGPT. ChatGPT opens in a new tab with the post and your reply style already filled in.
 3. Press Send in ChatGPT. Make sure you're signed in to ChatGPT in this browser.
 
@@ -129,7 +129,7 @@ On ChatGPT Business or Enterprise, posts can run on a workspace agent instead of
 
 Nothing to set up.
 
-1. Click the Send to Grok Bot icon in Chrome to open its settings. If you don't see the checkboxes, click **More options**. Check **Send to Codex** and click **Save**.
+1. On sendtogrokbot.com/setup/codex, click **Add Codex**. Or open the extension settings, check **Send to Codex**, and click **Save**.
 2. On x.com, click the Send arrow on any post and choose Send to Codex. Codex opens a new task with the post and your reply style already filled in. It works well for tools, repos, and how-tos.
 3. Press Send in Codex. Make sure you're signed in to Codex in this browser.
 

@@ -163,7 +163,7 @@ listing = (root / "store" / "listing.md").read_text()
 short = "Adds a native-looking button to X posts that sends the post to Grok Bot, Claude, ChatGPT, or Codex."
 if manifest.get("description") != short or short not in listing:
     raise SystemExit("listing description")
-if "1.2.7" not in (root / "store" / "SUBMIT.md").read_text():
+if "1.2.8" not in (root / "store" / "SUBMIT.md").read_text():
     raise SystemExit("SUBMIT version")
 for policy in (root / "store" / "privacy-policy.md", root / "docs" / "privacy.html"):
     text = policy.read_text()
