@@ -6,35 +6,61 @@ Paste these into the Store listing tab. There are no emoji in this copy. Do not 
 
 Send to Grok Bot
 
+The name matches `name` in manifest.json. It uses "Grok", which is another company's mark. See the trademark item in store/permissions.md.
+
 ## Short description
 
-132 characters is the limit. This is 99.
+132 characters is the limit. This is 101.
 
-Adds a native-looking button to X posts that sends the post to Grok Bot, Claude, ChatGPT, or Codex.
+Send any X post to Grok Bot, Claude, ChatGPT, or Codex in one click. Only the post you click is sent.
 
-Use the same sentence as the summary. It matches the `description` field in the manifest, which is what Chrome shows at install.
+Chrome Web Store shows the summary above in the store. Chrome shows the manifest `description` at install and on the extensions page. They can differ, but a close match avoids a "description mismatch" flag. The current manifest description is 99 characters:
+
+> Adds a native-looking button to X posts that sends the post to Grok Bot, Claude, ChatGPT, or Codex.
+
+It is accurate, so no change is required. If you want them identical, change the manifest `description` line to the 101-character summary above. This file does not edit the manifest.
 
 ## Detailed description
 
-Send to Grok Bot adds one button to the action bar of a post on X. It matches the size and place of Share.
+Tired of copying and pasting posts from X into every AI?
 
-Click it. If one destination is on, that click sends the post. If more than one is on, a menu opens and you pick one.
+Send to Grok Bot adds one Send arrow to the action bar of every post on X. It sits in the same row as reply, repost, like, and share.
 
-Send to Grok Bot posts the post to an https webhook you provide: text, link, author, and, when the page shows them, the thread, quote, links, and media. Any JSON webhook works, including your own server. Claude, ChatGPT, and Codex receive that same post.
+Click it. If one destination is turned on, the post goes there. If more than one is on, a menu opens and you pick one.
 
-Send to Claude opens Claude with a research prompt and the post filled in. If you save a Claude Code routine URL and token, it starts that routine instead.
+Destinations:
+- Grok Bot, or any https webhook you enter.
+- Claude. Opens Claude with the post filled in, or starts a Claude Code routine if you saved one.
+- ChatGPT. Opens ChatGPT with the post filled in, or starts a Workspace Agent if you saved one.
+- Codex. Opens the Codex cloud task composer with the post filled in.
 
-Send to ChatGPT needs no setup. It opens ChatGPT with the prompt filled in. You press Send. If you save a Workspace Agent trigger and token, it starts that agent instead.
+For Claude, ChatGPT, and Codex in a tab, you press Send yourself.
 
-Send to Codex needs no setup. It opens the Codex cloud task composer with the prompt filled in. You press Send there.
+Each send includes the post text, link, and author. When you send, the extension also fetches the full post, the posts it replies to, and any quoted post from the public mirrors api.fxtwitter.com and api.vxtwitter.com, so the AI gets the whole conversation. Links, media addresses, and alt text come along when the post has them.
 
-The reply starts with a one-line takeaway. General is the default. Research, Job hunt, Buy or skip, Learn later, and Content ideas are on the options page, and the one you pick is sent with the post.
+Reply presets. Pick General, Research, Job hunt, Buy or skip, Learn later, or Content ideas on the options page. The preset you pick is sent with the post. You can also write your own prompt.
 
-Only the post you click is sent, and only to the destination you have on, or the one you pick when more than one is on. Webhook keys and API tokens stay in this browser. The extension has no analytics and does not sell data.
+On iPhone. A free Shortcut, set up at sendtogrokbot.com/mobile, adds Send to Grok Bot to the share sheet in the X app. Share a post and pick Claude, ChatGPT, or Grok Bot. The AI opens with the post filled in. Codex is Chrome only.
 
-You choose which destinations appear. If none are set up, the options page opens. Pasting a webhook on sendtogrokbot.com/connect asks Chrome for that one host.
+Privacy.
+- Only the post you click is sent. The extension does not read direct messages or browse your history.
+- Only the destination you turn on, or pick from the menu, receives it.
+- Webhook keys and API tokens are stored in this browser. They are not synced to your Google account.
+- No analytics, no advertising, and no data sold.
+- Access to your webhook host, api.anthropic.com, or api.chatgpt.com is optional. Chrome asks only when you save that destination.
+- The privacy policy is at sendtogrokbot.com/privacy.
 
-Not affiliated with X, xAI, Anthropic, or OpenAI.
+Free. Open source at github.com/jamespendry/send-to-grok-bot.
+
+Send to Grok Bot is not affiliated with, endorsed by, or sponsored by X, xAI, Anthropic, or OpenAI. Grok, Claude, ChatGPT, Codex, and X are trademarks of their owners.
+
+## What is new (1.2.8)
+
+Safe to leave blank. If you want text:
+
+> Send to Grok Bot is now in the Chrome Web Store. One Send arrow on every X post, to Grok Bot, Claude, ChatGPT, or Codex.
+
+For later updates, use one plain sentence about what changed, for example: "Fixed the menu position on the post page."
 
 ## Category
 
@@ -62,16 +88,12 @@ Upload `store/promo/marquee-1400x560.png`.
 
 ## Screenshots
 
-You still need to take these. Real x.com screenshots are not in this folder. The store requires at least one and allows five. Take all five, in this order. The first image is the one people see in search.
+Five files in `store/screenshots/`, each exactly 1280 by 800, RGB PNG, light mode, in a framed card with a one-line caption. Upload in this order. The first is the one people see in search.
 
-Each file must be exactly 1280 by 800 pixels, PNG or JPEG, no transparency, square corners, and full bleed. Do not add a caption, border, or emoji. Do not include direct messages, drafts, a real API token, or an account menu that shows a private email. Use a post you are allowed to show. Keep text large enough to read when the store shrinks the image to 640 by 400.
+1. `01-send-button.png`: the Send arrow in the action bar of a public post on x.com.
+2. `02-destination-menu.png`: the menu open with Send to Grok Bot, Claude, ChatGPT, and Codex.
+3. `03-reply-in-claude.png`: a reply arriving in Claude.
+4. `04-options.png`: the options page with the disclosure and the four destinations. Sample webhook only.
+5. `05-connected.png`: the sendtogrokbot.com connect page saying Connected.
 
-1. **Action bar, light.** A public post on x.com in light theme. The Send button is in the action bar, in the same row as reply, repost, like, and share, and it is the same size as Share. The menu is closed. Show enough of the post that the button clearly belongs to it.
-2. **Destination menu, light.** The same kind of post, menu open. All four rows are fully inside the frame: Send to Grok Bot, Send to Claude, Send to ChatGPT, Send to Codex. Light theme.
-3. **Success toast, light.** After a successful send. The action-bar icon is green, and the toast at the bottom center is fully visible, including the destination name, for example "Sent to Claude".
-4. **Options.** The extension options page in a Chrome window. The disclosure at the top is visible, and all four destinations are visible. Expand Send to Grok Bot. Use a fake webhook such as `https://example.com/hook`. Leave token fields empty. The options page is narrow; center it and let the page background fill the frame. Do not stretch the page.
-5. **Destination menu, dark.** x.com in dark theme, menu open, all four rows fully inside the frame.
-
-Suggested filenames, in that order: `01-action-bar-light.png`, `02-menu-light.png`, `03-sent-toast-light.png`, `04-options.png`, `05-menu-dark.png`.
-
-Screenshots are uploaded on the Store listing tab. They do not go in the extension zip.
+Screenshots are uploaded on the Store listing tab. They do not go in the extension zip. `store/screenshots/README.md` says how each was made.

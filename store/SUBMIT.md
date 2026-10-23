@@ -1,90 +1,141 @@
 # Submit Send to Grok Bot to the Chrome Web Store
 
-This is the path from this repo to a public listing. The extension code and the zip can be prepared here. The account, the payment, the live privacy page, the x.com screenshots, and the submit click have to be you.
+Click-by-click for the developer dashboard. Every value is ready to paste. Nothing here submits for you. Version in this upload: **1.2.8**.
 
-This package is built on the extension in pull request #1 (Claude, ChatGPT, and Codex), plus the store files in `store/`.
+Before you start:
 
-## 1. Register a developer account
+1. The upload zip is `dist/send-to-grok-bot-1.2.8.zip` (67,684 bytes, 25 files). Rebuild with `scripts/package.sh` if the extension changes. The script checks the manifest, file list, size, icons, and that there is no remote code.
+2. This branch edits the privacy policy (new disclosure sentences, see `store/permissions.md`, "Policy additions"). Merge this PR and deploy the site first, so https://sendtogrokbot.com/privacy matches what you tell the dashboard. Reviewers read that page.
+3. Sign in to https://chrome.google.com/webstore/devconsole with the Google account that holds the developer registration. Review mail goes to that account's contact email.
 
-1. Open https://chrome.google.com/webstore/devconsole while signed in to the Google account you want as the publisher.
-2. The first visit shows the registration screen. Read the developer agreement and accept it.
-3. Pay the one-time registration fee of $5. You do not pay it again for later updates.
-4. Use an email you will keep and actually read. Review results, takedown warnings, and policy mail go there. The publisher email cannot be changed later. Changing it means a new account and a transfer.
-5. Registration is only offered in some countries. If yours is not on the list, the dashboard will not let you finish.
+## 1. Upload the package
 
-A new publisher can only have a small number of public extensions. Google's current default is two. One listing is inside that limit.
+1. Items, then **Add new item**.
+2. Choose `dist/send-to-grok-bot-1.2.8.zip` and upload. Chrome runs an install check. If it fails, stop and fix the package.
+3. The item opens as a draft. Fill in the tabs below.
 
-## 2. Publish the privacy policy
+## 2. Store listing tab
 
-Host the policy at the top of `store/privacy-policy.md` at:
+1. **Description**: paste.
 
-https://sendtogrokbot.com/privacy
+```
+Tired of copying and pasting posts from X into every AI?
 
-Publish the policy only. Stop before the heading "Chrome Web Store dashboard — Privacy practices tab". That section is for the form, not the website.
+Send to Grok Bot adds one Send arrow to the action bar of every post on X. It sits in the same row as reply, repost, like, and share.
 
-The URL has to be public before you submit. The dashboard checks it. If you have a support email you will actually read, add it to the Contact section before you publish the page.
+Click it. If one destination is turned on, the post goes there. If more than one is on, a menu opens and you pick one.
 
-## 3. Build the zip
+Destinations:
+- Grok Bot, or any https webhook you enter.
+- Claude. Opens Claude with the post filled in, or starts a Claude Code routine if you saved one.
+- ChatGPT. Opens ChatGPT with the post filled in, or starts a Workspace Agent if you saved one.
+- Codex. Opens the Codex cloud task composer with the post filled in.
 
-From the repo root:
+For Claude, ChatGPT, and Codex in a tab, you press Send yourself.
 
-```bash
-scripts/package.sh
+Each send includes the post text, link, and author. When you send, the extension also fetches the full post, the posts it replies to, and any quoted post from the public mirrors api.fxtwitter.com and api.vxtwitter.com, so the AI gets the whole conversation. Links, media addresses, and alt text come along when the post has them.
+
+Reply presets. Pick General, Research, Job hunt, Buy or skip, Learn later, or Content ideas on the options page. The preset you pick is sent with the post. You can also write your own prompt.
+
+On iPhone. A free Shortcut, set up at sendtogrokbot.com/mobile, adds Send to Grok Bot to the share sheet in the X app. Share a post and pick Claude, ChatGPT, or Grok Bot. The AI opens with the post filled in. Codex is Chrome only.
+
+Privacy.
+- Only the post you click is sent. The extension does not read direct messages or browse your history.
+- Only the destination you turn on, or pick from the menu, receives it.
+- Webhook keys and API tokens are stored in this browser. They are not synced to your Google account.
+- No analytics, no advertising, and no data sold.
+- Access to your webhook host, api.anthropic.com, or api.chatgpt.com is optional. Chrome asks only when you save that destination.
+- The privacy policy is at sendtogrokbot.com/privacy.
+
+Free. Open source at github.com/jamespendry/send-to-grok-bot.
+
+Send to Grok Bot is not affiliated with, endorsed by, or sponsored by X, xAI, Anthropic, or OpenAI. Grok, Claude, ChatGPT, Codex, and X are trademarks of their owners.
 ```
 
-That writes `dist/send-to-grok-bot-1.2.8.zip`. The manifest is at the top of the zip. The script checks the manifest, the file list, the zip size, and that the package has no remote code. The zip does not contain `store/`, the README, or screenshots. Do not add a `.pem` key.
+2. **Category**: Productivity.
+3. **Language**: English.
+4. **Store icon**: from the package (`extension/icons/icon128.png`). If asked, upload that file.
+5. **Screenshots**, in this order (1280x800), from `store/screenshots/`:
+   1. `01-send-button.png`
+   2. `02-destination-menu.png`
+   3. `03-reply-in-claude.png`
+   4. `04-options.png`
+   5. `05-connected.png`
+6. **Small promo tile** (required): `store/promo/tile-440x280.png`.
+7. **Marquee promo tile**: `store/promo/marquee-1400x560.png`.
+8. **Official URL / Homepage**: `https://sendtogrokbot.com`
+9. **Support URL**: `https://github.com/jamespendry/send-to-grok-bot`
+10. **Summary** (short description, 101 characters). The dashboard may fill this from the manifest; if so, replace it with:
 
-Version in this upload is `1.2.8`.
+```
+Send any X post to Grok Bot, Claude, ChatGPT, or Codex in one click. Only the post you click is sent.
+```
 
-## 4. Create the item and upload
+    The manifest description (shown at install) is "Adds a native-looking button to X posts that sends the post to Grok Bot, Claude, ChatGPT, or Codex." Both are accurate. See "Decisions" below.
 
-1. In the developer dashboard, choose **Add new item** and upload the zip.
-2. Chrome runs an install check as soon as the zip is uploaded. If that check fails, fix the package and upload again before you submit for review.
-3. Leave the item as a draft until the tabs below are filled in.
+## 3. Privacy practices tab
 
-## 5. Store listing tab
+1. **Single purpose description**:
 
-Copy from `store/listing.md`:
+```
+Adds a Send arrow to posts on X. When you click it, the extension sends that post to the destination you turned on: Grok Bot (or your own webhook), Claude, ChatGPT, or Codex. If more than one is on, you pick one. That is its only purpose.
+```
 
-- Name: Send to Grok Bot
-- Summary: the short description (99 characters)
-- Description: the detailed description
-- Category: Productivity
-- Language: English
+2. **storage justification**:
 
-Then upload:
+```
+Saves your settings in this browser: which destinations are on, your webhook URL, optional keys and tokens, your reply preset or custom prompt, and an optional Relay connect code. It uses chrome.storage.local, so nothing is synced to a Google account. An older install may have a webhook URL and key in chrome.storage.sync; those are copied to local storage once and then deleted from sync. chrome.storage.session holds one short setup message while the options page opens. The extension has no other use for storage.
+```
 
-- Small promo tile: `store/promo/tile-440x280.png` (required)
-- Marquee: `store/promo/marquee-1400x560.png`
-- The five screenshots listed in `store/listing.md`, in that order, once you have taken them
+3. **Host permission justification** (the form lists the hosts together; paste both blocks):
 
-You cannot submit with zero screenshots. The promo tile is also required. The marquee is what the store needs in order to feature the item.
+```
+When you click Send, the extension asks these public X mirror services for the full text of that post, the posts it replies to, and any post it quotes, so the destination gets the whole conversation instead of a shortened or cut-off timeline view. The request is a GET with no cookies or account details (credentials are omitted). It sends only the post's public handle and status ID in the address. api.fxtwitter.com is tried first; api.vxtwitter.com is the fallback. It runs only after you click Send, and it times out after about 2.5 seconds, after which the send continues with what the page already showed. These hosts are not contacted at any other time.
+```
 
-Leave the homepage and support URL as pages you control. The GitHub repository is a fine support URL until you have another. Do not point support at an inbox you do not read.
+```
+The Send arrow has to be placed inside the action bar of each post on x.com, so the script runs on x.com. twitter.com is included because it still serves X. It does not run on other sites. The script reads a post only when you click Send on it: its text, link, author, and, when shown, the quoted post, links, and media addresses. On a post's own page it also reads that author's thread and the post being replied to. It does not read direct messages and does not send anything until you click.
+```
 
-## 6. Privacy practices tab
+4. **Optional host permission `https://*/*`** (if the form asks):
 
-Copy from the dashboard section of `store/privacy-policy.md`:
+```
+This permission is optional and is not granted at install. The extension never asks for all sites. It exists only so Chrome can let the extension request one host that you type. When you save or paste a destination, the extension calls chrome.permissions.request for exactly the origin that destination needs: the origin of the https webhook you entered; https://api.anthropic.com/* if you saved a Claude routine; https://api.chatgpt.com/* if you saved a ChatGPT Workspace Agent; or your Relay host if you turned on Relay. Chrome shows its Allow prompt for that one site. When you clear a destination and save, the extension removes the host it no longer needs. Opening Claude, ChatGPT, or Codex in a new tab needs no host permission.
+```
 
-- Single purpose
-- A justification for each permission the form lists (`storage`, the x.com and twitter.com content-script hosts, and the optional `https://*/*` host permission)
-- Remote code: **No, I am not using remote code**
-- Data usage: check **Website content** and **Authentication information** only, then check all three certification statements
-- Privacy policy: `https://sendtogrokbot.com/privacy`
+5. **sendtogrokbot.com content scripts** (if the form asks, or for the reviewer notes):
 
-The form will not submit if a justification box is empty.
+```
+This is the extension's own setup page. When you paste a webhook URL or key into the box on sendtogrokbot.com/connect, or open a /connect#code link, the script saves it to chrome.storage.local so you do not have to paste it again in the options page. It shows an extension-owned paste box (grant.html) inside the page and shows a Connected message. It does not read any other page on sendtogrokbot.com, and it does not send the pasted value anywhere. Chrome's Allow prompt for the destination host is shown during your paste or your click on Finish.
+```
 
-## 7. Distribution tab
+```
+The website shows "Installed" and moves you to the next setup step when the extension is present. The script is one line. It sets one attribute (data-stgb-ready="1") on the page's root element. It reads nothing from the page and sends nothing.
+```
 
-- Visibility: Public, unless you want a trusted-testers draft first
-- Pricing: Free
-- Countries: all, unless you have a reason to limit them
+```
+grant.html is the small paste box that the extension inserts into sendtogrokbot.com/connect. It has to be loadable as a frame there, so it is listed for https://sendtogrokbot.com/* and https://www.sendtogrokbot.com/* only. Chrome allows an extension to ask for host access only from an extension page, and a content script cannot ask, so the paste box has to be an extension page. The page contains no secrets, only a text box. Other sites cannot load it.
+```
 
-This extension is not for sale. Do not turn on payments.
+6. **Remote code**: select **No, I am not using remote code**. If a text box appears:
 
-## 8. Test instructions tab
+```
+All scripts are in the extension package. The extension does not load or run remote scripts, does not use eval or new Function, and does not import code from the network. Responses from webhooks, APIs, and the post mirrors are read only as data.
+```
 
-Paste this so the reviewer can try the extension without your tokens:
+7. **Data usage**: check **Website content** and **Authentication information** only. Leave the other seven unchecked.
+8. Check all three certifications: not sold to third parties, not used for unrelated purposes, not used for creditworthiness or lending.
+9. **Privacy policy URL**: `https://sendtogrokbot.com/privacy`
+
+## 4. Distribution tab
+
+1. Visibility: **Public**.
+2. Pricing: **Free**.
+3. Regions: **All regions**.
+
+## 5. Test instructions tab
+
+The reviewer needs no account or token. Paste:
 
 ```
 Load the extension. Open https://sendtogrokbot.com/connect if you are trying Grok Bot.
@@ -104,29 +155,28 @@ Codex opens https://chatgpt.com/codex with the prompt filled in.
 Do not use a real API token. The tab paths are enough to see the extension work.
 ```
 
-## 9. Submit
+## 6. Submit
 
 1. Click **Submit for review**.
-2. On the confirm dialog, decide whether the item should publish as soon as review passes. If you clear that checkbox, you have 30 days after approval to publish it yourself. After 30 days the approval expires and you submit again.
-3. Watch the publisher email. That is where a rejection or a question arrives.
+2. In the confirm dialog, leave "publish automatically after review" checked unless you want to time the launch. If you clear it, you have 30 days after approval to publish.
+3. Watch the contact email for a rejection or a question. Appeal from the item page. Do not upload a new zip to get around a rejection unless the email says to.
 
-## How long review takes
+## What could cause a rejection or delay
 
-Most extensions are reviewed within a few days. Some take up to a few weeks. There is no paid faster queue.
+Full list with evidence and fixes: `store/permissions.md`. In short:
 
-This submission is a new item from a new publisher, and the manifest still contains the optional pattern `https://*/*`. Google's review notes say broad host patterns take longer to review, because the same pattern can be used to read every site. The code does not do that: pasting a webhook on the connect page, or clicking Save, asks only for the one host you typed, or for `api.anthropic.com` or `api.chatgpt.com` when those destinations need a request. That justification is in the Privacy practices tab. Expect a person to read it.
+- **Optional `https://*/*`** (medium). Slows review. Needed so a user-typed webhook host can be requested at runtime. The code never requests the wildcard. Keep it; the justification above is the answer.
+- **Content scripts on sendtogrokbot.com** (medium). Both are justified above. Dropping the one-line `site-ready.js` block would shrink the footprint but stops "Installed" detection on the site.
+- **Mirrors api.fxtwitter.com and api.vxtwitter.com** (medium). Receive the post handle and status ID. Now disclosed in the policy and justified above.
+- **Trademarks in the name, menu labels, and logos** (medium). "Grok" is in the name. Keep the not-affiliated line. Your call.
+- **Policy not deployed** (high if skipped). The dashboard answers assume the updated policy text from this PR is live.
+- Low: manifest `description` differs from the store summary; unused match `https://sendtogrokbot.com/docs/connect*`; `grant.js` posts a status message with target origin `*`.
 
-If the item is still pending after three weeks, contact Chrome Web Store developer support from the dashboard and ask them to look.
+Review usually takes a few days, sometimes weeks for a new publisher with a broad optional host pattern. If it is still pending after three weeks, contact developer support from the dashboard.
 
-Promo images are reviewed on their own, often within a week. A rejected image does not by itself unpublish the extension. The dashboard shows the image status on the listing. Fix the image and upload it again if it is rejected.
+## Decisions for James
 
-A rejection email names the policy and how to appeal. Appeal from the item page in the dashboard. Do not upload a new zip as a way around a rejection unless the email tells you to fix the item and resubmit.
-
-## What can slow permission review
-
-- **Optional `https://*/*`.** This is the one permission that can add days. It has to stay. Chrome only allows a runtime request for a webhook host you type if that pattern is declared. The extension requests a single origin, never the wildcard. Removing the pattern would break webhooks on Zapier, Make, n8n, and your own server. Replacing it with a required `https://*/*` would be worse: every install would warn "Read and change all your data on all websites," and review would still be slow.
-- **Content scripts on x.com and twitter.com.** These show an install warning limited to those two sites. That matches the button. It should not be controversial. Do not add more sites.
-- **`storage`.** No install warning. It holds settings and tokens locally.
-- Nothing else is requested. There is no `tabs`, `scripting`, `history`, `cookies`, `webRequest`, or `<all_urls>` grant at install. Do not add them to get a review through faster.
-
-The in-product notice on the options page is there because the store requires a disclosure inside the extension, not only in this policy. Leave it in place.
+1. **Manifest description.** Keep "Adds a native-looking button..." (no code change), or change `extension/manifest.json` line 5 to the summary above and bump the version. Recommended: leave it for this first upload.
+2. **Delete the dead match** `https://sendtogrokbot.com/docs/connect*` at the next release (needs a version bump).
+3. **Trademark risk.** Decide whether to keep the four brand marks in the menu as they are.
+4. **Screenshots 03, 04, 05.** 03 is a crop of a real Claude reply with a stray text cursor. 04 hides parts of the options page to fit. 05's Connected box is injected with the extension's own markup, since a real connect needs a secret. See `store/screenshots/README.md`. Retake with a real connect if you want them untouched.

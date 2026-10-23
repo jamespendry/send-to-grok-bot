@@ -41,7 +41,7 @@
 <li>a plain-text digest of those fields</li>
 <li>the reply preset you picked (General, Research, Job hunt, Buy or skip, Learn later, Content ideas, or Custom) and the prompt text for that preset</li>
 </ul>
-<p>When you send a post, the extension requests that post, the posts it replies to, and any post it quotes from the public mirrors api.fxtwitter.com and api.vxtwitter.com, without cookies or account details, so the destination receives the full text and conversation. Only the post's public URL is sent to them.</p>
+<p>When you send a post, the extension requests that post, the posts it replies to, and any post it quotes from the public mirrors api.fxtwitter.com and api.vxtwitter.com, without cookies or account details, so the destination receives the full text and conversation. The address of each request holds only the public handle and status ID of the post, and of each post it replies to or quotes. No cookies, account details, or settings are sent.</p>
 <p>That data is sent only to a destination you configured. If one destination is on, the click sends it there. If more than one is on, it goes to the one you pick. The preset and prompt travel with the post so the destination follows them. Destinations are:</p>
 <ul>
 <li><strong>Grok Bot, or any other webhook you enter.</strong> The extension POSTs the post as JSON to the https URL you saved. If you saved a key, it is sent on that request as <code>Authorization: Bearer</code> and <code>X-Sender-Key</code>.</li>
@@ -50,6 +50,7 @@
 <li><strong>Codex.</strong> The extension opens a chatgpt.com/codex tab with the post in the address. You press Send there.</li>
 </ul>
 <p>It reads a post when you click Send on it, and on a post's own page it also reads the author's thread and the reply parent shown there. It does not read direct messages. On sendtogrokbot.com/connect, pasting into the box reads that paste and saves it in the extension. It does not read other pages on that site.</p>
+<p>On every page of sendtogrokbot.com, a short script sets a single marker on the page so the site can show that the extension is installed. When you click an Add button on a setup page, such as Add ChatGPT, it adds that AI (ChatGPT, Codex, or Claude in a tab) to the Send menu in the extension. That changes only the list of AIs in your settings. It reads nothing else from the page and sends nothing. On /connect, the extension places its own paste box (an extension page, grant.html) in the page. That box is the only place the extension accepts a pasted code from the site, and only from sendtogrokbot.com.</p>
 <h2>Tokens and keys</h2>
 <p>Webhook keys and API tokens are stored in <code>chrome.storage.local</code> on this device. They are not synced to a Google account. If an older version of the extension still has a webhook URL and key in <code>chrome.storage.sync</code>, those two values are copied to local storage once and then deleted from sync.</p>
 <p>A token is sent only to the destination it belongs to, and only as the credential on that request. With Relay left off, the publisher does not receive tokens, keys, or posts. The extension has no account system of its own.</p>
@@ -63,14 +64,14 @@
 <li>It does not keep a browsing history. The post URL is sent only as part of the post you chose.</li>
 <li>It does not keep a copy of the post after the request is made or the tab is opened.</li>
 </ul>
-<p>Sites you send to (your webhook, Anthropic, OpenAI, or X) keep data under their own policies. The publisher does not control that.</p>
+<p>Sites you send to (your webhook, Anthropic, OpenAI, or X) keep data under their own policies. The public mirrors api.fxtwitter.com and api.vxtwitter.com also keep data under their own policies. The publisher does not control that.</p>
 <h2>How long data stays</h2>
 <p>The post is held in memory only long enough to send it or to open the tab. Tokens, the webhook URL, the reply preset and prompt, and which destinations are checked stay in local storage until you change them, clear them and click Save, or remove the extension. Removing the extension deletes its local storage. Clicking Save after you clear a destination also drops Chrome's permission for that site.</p>
 <h2>Limited use</h2>
 <p>The extension complies with the Chrome Web Store User Data Policy, including Limited Use:</p>
 <ul>
 <li>Data is used only to send the post you chose to the destination you chose.</li>
-<li>Data is transferred only when that transfer is the feature you asked for: the request to your webhook, Anthropic, or OpenAI, or the tab opened on Claude, ChatGPT, or Codex. It is also transferred if the law requires it, or to protect security. There is no other transfer.</li>
+<li>Data is transferred only when that transfer is the feature you asked for: the request to your webhook, Anthropic, or OpenAI, the lookup of the post's public text from api.fxtwitter.com or api.vxtwitter.com, or the tab opened on Claude, ChatGPT, or Codex. It is also transferred if the law requires it, or to protect security. There is no other transfer.</li>
 <li>Data is not used or transferred for personalized, re-targeted, or interest-based ads.</li>
 <li>With Relay left off, the publisher does not have a server that receives this data, and no person at the publisher reads the posts you send. With Relay on, the post goes to the relay address in your connect code, which forwards it and does not keep the post text.</li>
 </ul>
