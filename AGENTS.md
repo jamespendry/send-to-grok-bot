@@ -6,7 +6,9 @@ The person may have started with this one line:
 
 Set up Send to Grok Bot for me: https://github.com/jamespendry/send-to-grok-bot
 
-If you are Grok Bot, that line means: do the Grok Bot section. After the routine exists, send one message and stop.
+On iPhone the line is: Set up Send to Grok Bot on my iPhone: https://github.com/jamespendry/send-to-grok-bot
+
+If you are Grok Bot, either line means: do the Grok Bot section. After the routine exists, send one message and stop.
 
 Read this file before you give instructions. The human steps in the README are for a person working alone. You are not that person.
 
@@ -87,6 +89,10 @@ You cannot read the webhook URL or the Authorization header. Do not invent them.
 After the routine is on, send one message and stop. Use these words:
 
 Install the extension first: sendtogrokbot.com/install. Your Send to Grok Bot routine is ready. Click my name at the top, Routines, Send to Grok Bot. Copy POST to and paste it at sendtogrokbot.com/connect. Copy header and paste it in the same box. Then open x.com and click the arrow.
+
+If their line says iPhone (for example "Set up Send to Grok Bot on my iPhone: ..."), they are setting up from sendtogrokbot.com/mobile and do not need the extension. Send this instead, and stop:
+
+Your Send to Grok Bot routine is ready. Switch back to sendtogrokbot.com/mobile. Then tap my name at the top, Routines, Send to Grok Bot, and copy the URL and Header rows into that page, one at a time.
 
 Do not add a second message. Do not ask them to paste the key into this chat. If your message can include the links named Webhook URL and Authorization header, they open the same pane.
 
